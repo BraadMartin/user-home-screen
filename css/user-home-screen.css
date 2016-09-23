@@ -2,6 +2,27 @@
  * User Home Screen CSS.
  */
 
+.user-home-screen-main-tab,
+.user-home-screen-setup-tab {
+	display: none;
+}
+
+#user-home-screen-wrap[data-active-tab="main"] .user-home-screen-main-tab,
+#user-home-screen-wrap[data-active-tab="setup"] .user-home-screen-setup-tab {
+	display: block;
+}
+
+#user-home-screen-wrap .nav-tab {
+	cursor: pointer;
+}
+
+/**
+ * "Main" tab.
+ */
+.user-home-screen-main-tab {
+	padding-top: 20px;
+}
+
 .user-home-screen-widget-grid {
 	margin-right: 20px;
 	display: -webkit-box;
@@ -21,4 +42,11 @@
 
 .user-home-screen-widget-action-links a {
 	margin-right: 10px;
+}
+
+/**
+ * "Setup" tab.
+ */
+.user-home-screen-setup-tab {
+	padding-top: 20px;
 }
