@@ -41,7 +41,7 @@ class User_Home_Screen {
 		wp_enqueue_script(
 			'user-home-screen',
 			USER_HOME_SCREEN_URL . 'js/user-home-screen.js',
-			array( 'jquery' ),
+			array( 'featherlight', 'jquery', 'wp-util', 'underscore' ),
 			USER_HOME_SCREEN_VERSION,
 			true
 		);
@@ -49,9 +49,107 @@ class User_Home_Screen {
 		wp_enqueue_style(
 			'user-home-screen-css',
 			USER_HOME_SCREEN_URL . 'css/user-home-screen.css',
-			array(),
+			array( 'featherlight' ),
 			USER_HOME_SCREEN_VERSION
 		);
+
+		$uhs_data = $this->get_js_data();
+
+		wp_localize_script(
+			'user-home-screen',
+			'uhsData',
+			$uhs_data
+		);
+	}
+
+	/**
+	 * Build and return the array of data we'll pass to our JS.
+	 *
+	 * @return  array  The array of JS data.
+	 */
+	public function get_js_data() {
+
+		$data = array();
+
+		// Define labels.
+		$data['labels'] = array(
+			'add_widget'         => __( 'Add Widget', 'user-home-screen' ),
+			'edit_widget'        => __( 'Edit Widget', 'user-home-screen' ),
+			'select_widget_type' => __( 'Select widget type', 'user-home-screen' ),
+			'select_default'     => __( 'Select', 'user-home-screen' ),
+		);
+
+		$data['widget_types'] = $this->get_widget_type_data();
+
+		/**
+		 * Allow the JS data to be customized.
+		 *
+		 * @param  array  $data  The default JS data.
+		 */
+		return apply_filters( 'user_home_screen_js_data', $data );
+	}
+
+	/**
+	 * Return the array of widget type data.
+	 *
+	 * @return  array  The array of widget type data.
+	 */
+	public function get_widget_type_data() {
+
+		$widget_types = array(
+			'post-list' => array(
+				'label'  => __( 'Post List', 'user-home-screen' ),
+				'fields' => array(
+					array(
+						'key'    => 'post_types',
+						'label'  => __( 'Post Types', 'user-home-screen' ),
+						'type'   => 'select',
+						'values' => array(
+							'all'  => __( 'All', 'user-home-screen' ),
+							'post' => __( 'Post', 'user-home-screen' ),
+							'page' => __( 'Page', 'user-home-screen' ),
+						),
+					),
+					array(
+						'key'    => 'post_statuses',
+						'label'  => __( 'Post Statuses', 'user-home-screen' ),
+						'type'   => 'select',
+						'values' => array(
+							'all'     => __( 'All', 'user-home-screen' ),
+							'publish' => __( 'Published', 'user-home-screen' ),
+							'draft'   => __( 'Draft', 'user-home-screen' ),
+						),
+					),
+					array(
+						'key'    => 'authors',
+						'label'  => __( 'Authors', 'user-home-screen' ),
+						'type'   => 'select',
+						'values' => array(
+							'all'   => __( 'All', 'user-home-screen' ),
+							'braad' => __( 'Braad', 'user-home-screen' ),
+							'amy'   => __( 'Amy', 'user-home-screen' ),
+						),
+					),
+				),
+			),
+			'rss-feed' => array(
+				'label' => __( 'RSS Feed', 'user-home-screen' ),
+				'fields' => array(
+					array(
+						'key'   => 'feed_url',
+						'label' => __( 'Feed URL', 'user-home-screen' ),
+						'type'  => 'text',
+					),
+				),
+			),
+		);
+
+		/**
+		 * Allow the widget types data to be customized.
+		 *
+		 * @param  array  $widget_types  The default array of widget types data.
+		 */
+		return apply_filters( 'user_home_screen_widget_types', $widget_types );
 	}
 
 	/**
@@ -178,17 +276,20 @@ class User_Home_Screen {
 
 		?>
 		<div id="user-home-screen-wrap" class="wrap" data-active-tab="main">
-			<h1><?php echo esc_html( $page_title ); ?></h1>
-			<h2 class="nav-tab-wrapper">
-				<a class="nav-tab nav-tab-active" data-tab-id="main">
-					<?php esc_html_e( 'Main', 'user-home-screen' ); ?>
-				</a>
-				<a class="nav-tab" data-tab-id="setup">
-					<?php esc_html_e( 'Setup', 'user-home-screen' ); ?>
-				</a>
-			</h2>
-			<?php echo $this->output_main_tab( $user, $user_widgets ); ?>
-			<?php echo $this->output_setup_tab( $user, $user_widgets ); ?>
+			<div class="user-home-screen-inner-wrap">
+				<h1><?php echo esc_html( $page_title ); ?></h1>
+				<h2 class="nav-tab-wrapper">
+					<a class="nav-tab nav-tab-active" data-tab-id="main">
+						<?php esc_html_e( 'Main', 'user-home-screen' ); ?>
+					</a>
+					<a class="nav-tab" data-tab-id="setup">
+						<?php esc_html_e( 'Setup', 'user-home-screen' ); ?>
+					</a>
+				</h2>
+				<?php echo $this->output_main_tab( $user, $user_widgets ); ?>
+				<?php echo $this->output_setup_tab( $user, $user_widgets ); ?>
+			</div>
+			<?php echo $this->output_widget_edit_templates(); ?>
 		</div>
 		<?php
 
@@ -379,16 +480,18 @@ class User_Home_Screen {
 	 * @param   WP_User  $user          The current user object.
 	 * @param   array    $user_widgets  The current user's widgets.
 	 *
-	 * @return  string                  The "Main" tab HTML.
+	 * @return  string                  The "Setup" tab HTML.
 	 */
 	public function output_setup_tab( $user, $user_widgets ) {
+
+		$add_widget_text = $this->get_js_data()['labels']['add_widget'];
 
 		ob_start();
 
 		?>
-		<form class="user-home-screen-setup-form">
-			YOLO
-		</form>
+		<div class="user-home-screen-setup-form">
+			<a class="button button-primary user-home-screen-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
+		</div>
 		<?php
 
 		$tab_html = ob_get_clean();
@@ -407,5 +510,35 @@ class User_Home_Screen {
 		);
 
 		return $tab_html;
+	}
+
+	/**
+	 * Output our widget edit templates.
+	 *
+	 * @return  string  The widget templates HTML.
+	 */
+	public function output_widget_edit_templates() {
+
+		// Templates.
+		$templates = array(
+			USER_HOME_SCREEN_PATH . 'templates/widget-edit.php',
+			USER_HOME_SCREEN_PATH . 'templates/field-select.php',
+			USER_HOME_SCREEN_PATH . 'templates/field-text.php',
+		);
+
+		// Loop over each template and include it.
+		foreach ( $templates as $template ) {
+
+			/**
+			 * Allow the template paths to be filtered.
+			 *
+			 * This filter makes it possible for outside code to swap our templates
+			 * for custom templates, and as long as the template ID and data object
+			 * keys are kept the same everything should still work.
+			 *
+			 * @param  string   $template  The template path.
+			 */
+			include_once apply_filters( 'user_home_screen_js_templates', $template);
+		}
 	}
 }

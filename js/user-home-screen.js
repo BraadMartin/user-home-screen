@@ -2,22 +2,33 @@
  * User Home Screen JS.
  */
 
-var userHomeScreen = ( function( $ ) {
+var userHomeScreen = ( function( $, data ) {
 
 	/**
 	 * Store key DOM references.
 	 */
-	var $wrap    = $();
-	var $navTabs = $();
+	var $wrap      = $();
+	var $navTabs   = $();
+	var $addWidget = $();
+
+	/**
+	 * Modal config options.
+	 */
+	var modalConfig = {
+		variant: 'user-home-screen-modal',
+	};
 
 	/**
 	 * Initialize.
 	 */
 	var init = function() {
 
+		console.log( data );
+
 		// Setup key DOM references.
-		$wrap    = $( '#user-home-screen-wrap' );
-		$navTabs = $( 'h2.nav-tab-wrapper .nav-tab' );
+		$wrap      = $( '#user-home-screen-wrap' );
+		$navTabs   = $( 'h2.nav-tab-wrapper .nav-tab' );
+		$addWidget = $( '.user-home-screen-add-widget' );
 
 		// Setup events.
 		setupEvents();
@@ -47,13 +58,103 @@ var userHomeScreen = ( function( $ ) {
 			// Set an attribute on the wrapper indicating which tab is active.
 			$wrap.attr( 'data-active-tab', $this.attr( 'data-tab-id' ) );
 		});
+
+		// When the Add Widget button is clicked, open the Add Widget modal.
+		$addWidget.on( 'click', function() {
+			openAddWidgetModal();
+		});
+	};
+
+	/**
+	 * Open the Add Widget modal.
+	 */
+	var openAddWidgetModal = function() {
+
+		var editWidget  = wp.template( 'uhs-widget-edit' );
+		var fieldSelect = wp.template( 'uhs-field-select' );
+
+		// Set up the object containing the widget type data for the type select.
+		var widgetTypes = {
+			placeholder: data.labels.select_default,
+		};
+		_.each( data.widget_types, function( value, key, list ) {
+			widgetTypes[ key ] = value.label;
+		});
+		var typeSelect = {
+			label:   data.labels.select_widget_type,
+			classes: 'uhs-widget-type-select',
+			values:  widgetTypes,
+		};
+
+		$.featherlight(
+			editWidget({
+				label:      data.labels.add_widget,
+				typeSelect: fieldSelect( typeSelect ),
+				addButton:  data.labels.add_widget,
+			}),
+			modalConfig
+		);
+
+		// Prevent the modal form from being submitted.
+		$( '#uhs-modal-widget-fields' ).on( 'submit', function( e ) {
+			e.preventDefault;
+		});
+
+		// Update the displayed fields when the type select is changed.
+		$( '.uhs-widget-type-select' ).on( 'change', function( e ) {
+			var type          = $( this ).val();
+			var $widgetFields = $( '#uhs-modal-widget-fields' );
+
+			// Clear the current fields.
+			$widgetFields.empty();
+
+			// If the placeholder option was selected, bail.
+			if ( type === 'placeholder' ) {
+				return;
+			}
+
+			// Grab the HTML for the selected widget's fields.
+			var fieldsHTML = getWidgetFieldsHTML( type );
+
+			// Inject the right fields for the selected widget type.
+			$widgetFields.append( fieldsHTML );
+		});
+
+		// Save the form data when the save button is clicked.
+		$( '#uhs-save-widget' ).on( 'click', function() {
+			// Grab data from the form and save here.
+			console.log( $( '#uhs-modal-widget-fields' ).val() );
+		});
+	};
+
+	/**
+	 * Given a widget type, return the HTML for the widget's fields.
+	 */
+	var getWidgetFieldsHTML = function( type ) {
+
+		var widgetData = data.widget_types[ type ];
+		var fields     = '';
+
+		// Loop over each field and render it.
+		_.each( widgetData.fields, function( field ) {
+			var type     = field.type;
+			var template = wp.template( 'uhs-field-' + type );
+
+			// Add a unique and shared class to each field.
+			field.classes = 'uhs-' + field.key.replace( '_', '-' ) + '-' + type;
+			field.classes += ' uhs-input';
+
+			fields += template( field );
+		});
+
+		return fields;
 	};
 
 	return {
 		init: init,
 	};
 
-})( jQuery );
+})( jQuery, uhsData );
 
 // Start the party.
 jQuery( document ).ready( function() {

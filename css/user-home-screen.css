@@ -2,6 +2,9 @@
  * User Home Screen CSS.
  */
 
+/**
+ * Tab setup.
+ */
 .user-home-screen-main-tab,
 .user-home-screen-setup-tab {
 	display: none;
@@ -50,3 +53,58 @@
 .user-home-screen-setup-tab {
 	padding-top: 20px;
 }
+
+/**
+ * Add/Edit Modal.
+ */
+.user-home-screen-modal .featherlight-content {
+	width: 600px;
+	max-width: 90%;
+}
+
+.uhs-modal-label {
+	margin: 20px 0 40px;
+}
+
+#uhs-modal-widget-fields {
+	margin: 15px 0 20px;
+	background-color: #f1f1f1;
+	padding: 10px;
+}
+
+#uhs-modal-widget-fields:empty {
+	margin: 0;
+	padding: 0;
+}
+
+.uhs-modal-bottom {
+	clear: both;
+	margin: 20px 0 10px !important;
+}
+
+/**
+ * Fields.
+ */
+.uhs-field::after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
+.uhs-field {
+	margin-bottom: 15px;
+}
+
+.uhs-field .uhs-field-label {
+	float: left;
+	width: 30%;
+	text-align: left;
+	margin: 0;
+	font-size: 16px;
+}
+
+.uhs-field .uhs-field-input-wrap {
+	width: 70%;
+	float: left;
+}
+
