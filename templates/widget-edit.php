@@ -5,6 +5,7 @@
 		<form id="uhs-modal-widget-fields"></form>
 		<div class="uhs-modal-bottom">
 			<a id="uhs-save-widget" class="button button-primary">{{ data.addButton }}</a>
+			<span id="uhs-spinner" class="spinner"></span>
 		</div>
 	</div>
 </script>

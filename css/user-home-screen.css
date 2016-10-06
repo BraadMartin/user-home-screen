@@ -2,6 +2,14 @@
  * User Home Screen CSS.
  */
 
+.uhs-hidden {
+	visibility: none !important;
+}
+
+.uhs-visible {
+	visibility: visible !important;
+}
+
 .user-home-screen-add-widget {
 	float: right;
 }
@@ -84,6 +92,10 @@
 .uhs-modal-bottom {
 	clear: both;
 	margin: 20px 0 10px !important;
+}
+
+#uhs-save-widget {
+	visibility: hidden;
 }
 
 /**

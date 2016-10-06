@@ -96,6 +96,9 @@ var userHomeScreen = ( function( $, data ) {
 			modalConfig
 		);
 
+		var $spinner = $( '#uhs-spinner' );
+		var $save    = $( '#uhs-save-widget' );
+
 		// Prevent the modal form from being submitted.
 		$( '#uhs-modal-widget-fields' ).on( 'submit', function( e ) {
 			e.preventDefault;
@@ -111,6 +114,7 @@ var userHomeScreen = ( function( $, data ) {
 
 			// If the placeholder option was selected, bail.
 			if ( type === 'placeholder' ) {
+				$save.removeClass( 'uhs-visible' );
 				return;
 			}
 
@@ -122,12 +126,16 @@ var userHomeScreen = ( function( $, data ) {
 
 			// Add a data attribute to the form indicating the widget type.
 			$widgetFields.attr( 'data-widget-type', type );
+
+			// Make the Save Widget button visible.
+			$save.addClass( 'uhs-visible' );
 		});
 
 		// Save the form data when the save button is clicked.
-		$( '#uhs-save-widget' ).on( 'click', function() {
+		$save.on( 'click', function() {
 
-			// Grab the form.
+			// Grab the modal and form.
+			var $modal        = $( '.featherlight-content .uhs-widget-edit' );
 			var $widgetFields = $( '#uhs-modal-widget-fields' );
 
 			// Grab data from the form.
@@ -141,15 +149,23 @@ var userHomeScreen = ( function( $, data ) {
 				'widget_data': widgetData,
 			};
 
-			//$spinner.show();
+			$spinner.css( 'visibility', 'visible' );
 
 			var request = $.post( ajaxurl, ajaxData );
 
 			request.done( function( response ) {
+				$modal.empty();
+				$modal.append( '<h1>Thank you!</h1>' );
+
+				setTimeout( function() {
+					location.reload();
+				}, 1200 );
+
 				console.log( response );
 			});
 
 			request.fail( function( response ) {
+				$spinner.css( 'visibility', 'none' );
 				console.log( 'Something went wrong when trying to save a widget.' );
 			});
 		});
