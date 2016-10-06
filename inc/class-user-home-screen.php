@@ -8,6 +8,11 @@
 class User_Home_Screen {
 
 	/**
+	 * The meta key we store all user widget data under.
+	 */
+	public static $user_widgets_meta_key = '_uhs_user_widgets';
+
+	/**
 	 * The constructor.
 	 */
 	public function __construct() {
@@ -24,6 +29,9 @@ class User_Home_Screen {
 
 		// Register our admin page.
 		add_action( 'admin_menu', array( $this, 'register_admin_page' ) );
+
+		// Ajax handler for adding a widget.
+		add_action( 'wp_ajax_uhs_add_widget', array( $this, 'ajax_add_widget' ) );
 	}
 
 	/**
@@ -79,7 +87,11 @@ class User_Home_Screen {
 			'select_default'     => __( 'Select', 'user-home-screen' ),
 		);
 
+		// Add widget type data.
 		$data['widget_types'] = $this->get_widget_type_data();
+
+		// Add a nonce.
+		$data['nonce'] = wp_create_nonce( 'user-home-screen' );
 
 		/**
 		 * Allow the JS data to be customized.
@@ -602,5 +614,172 @@ class User_Home_Screen {
 			 */
 			include_once apply_filters( 'user_home_screen_js_templates', $template);
 		}
+	}
+
+	/**
+	 * Ajax handler for adding a widget.
+	 */
+	public function ajax_add_widget() {
+
+		error_log( print_r( $_POST, true ) );
+
+		// Bail if our nonce is not valid.
+		check_ajax_referer( 'user-home-screen', 'nonce', true );
+
+		$user = wp_get_current_user();
+
+		// Bail if we don't have a user.
+		if ( empty( $user ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, you are missing a user.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		error_log( print_r( $user, true ) );
+
+		// Bail if we don't have a widget type.
+		if ( empty( $_POST['widget_type'] ) || empty( $_POST['widget_data'] ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, you are missing a widget_type or widget_data.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		// Extract clean arguments from the form data.
+		$widget_type = sanitize_text_field( $_POST['widget_type'] );
+		$widget_args = array();
+
+		foreach ( $_POST['widget_data'] as $field ) {
+			$widget_args[ $field['name'] ] = sanitize_text_field( $field['value'] );
+		}
+
+		$widget_data = array(
+			'type' => $widget_type,
+			'args' => $widget_args,
+		);
+
+		// Validate the widget data.
+		$widget_data = $this->validate_widget_data( $widget_data );
+
+		// Add the widget for the user.
+		$this->add_widget_for_user( $widget_data, $user );
+
+		$response          = new stdClass();
+		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
+
+		wp_send_json( $response );
+
+		error_log( 'about to die' );
+
+		wp_die();
+	}
+
+	/**
+	 * Add a new widget to a user's home screen.
+	 *
+	 * @param  array    $widget_data  The array of widget data.
+	 * @param  WP_User  $user         The user object to update.
+	 */
+	public function add_widget_for_user( $widget_data, $user ) {
+
+		// Get existing widget data for the user.
+		$existing_data = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
+
+		error_log( 'existing data' );
+		error_log( print_r( $existing_data, true ) );
+
+		if ( empty( $existing_data ) || ! is_array( $existing_data ) ) {
+			$existing_data = array();
+		}
+
+		/**
+		 * Allow the widget data to be customized as it's being added.
+		 *
+		 * @param  array    $widget_data  The array of widget data.
+		 * @param  WP_User  $user         The user object being updated.
+		 */
+		$existing_data[] = apply_filters( 'user_home_screen_add_widget_data', $widget_data, $user );
+
+		$updated_data = $existing_data;
+
+		$this->update_widgets_for_user( $updated_data, $user );
+	}
+
+	/**
+	 * Remove a widget from a user's home screen.
+	 *
+	 * @param  int      $widget_index  The index for the widget to remove.
+	 * @param  WP_User  $user          The user object to update.
+	 */
+	public function remove_widget_for_user( $widget_index, $user ) {
+
+		$existing_data = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
+
+		if ( empty( $existing_data ) || ! is_array( $existing_data ) ) {
+			$existing_data = array();
+		}
+
+		if ( isset( $existing_data[ $widget_index ] ) ) {
+			unset( $existing_data[ $widget_index ] );
+		}
+
+		$updated_data = $existing_data;
+
+		$this->update_widgets_for_user( $updated_data, $user );
+	}
+
+	/**
+	 * Update widgets for a user.
+	 *
+	 * @param  array    $widgets_data  The array of widgets data.
+	 * @param  WP_User  $user          The user object to update.
+	 */
+	public function update_widgets_for_user( $widgets_data, $user ) {
+
+		error_log( 'about to save user meta' );
+		error_log( print_r( $widgets_data, true ) );
+
+		/**
+		 * Allow the widget data to be customized as it's being saved.
+		 *
+		 * @param  array    $widget_data  The array of widget data.
+		 * @param  WP_User  $user         The user object being updated.
+		 */
+		$widgets_data = apply_filters( 'user_home_screen_update_widgets_data', $widgets_data, $user );
+
+		// Ensure the array is sorted properly.
+		$widgets_data = array_values( $widgets_data );
+
+		update_user_meta( $user->ID, self::$user_widgets_meta_key, $widgets_data );
+	}
+
+	/**
+	 * Validate widget data.
+	 *
+	 * @param   array  $widget_data  The raw widget data.
+	 *
+	 * @return  array                The validated widget data.
+	 */
+	public function validate_widget_data( $widget_data ) {
+
+		switch ( $widget_data['type'] ) {
+			case 'post-list':
+
+				// @todo This transform is temporary and should be removed
+				// after multi-select fields are introduced.
+				foreach ( $widget_data['args'] as $arg => $value ) {
+					if ( ! is_array( $value ) ) {
+						$widget_data['args'][ $arg ] = array( $value );
+					}
+				}
+
+				break;
+			case 'rss-feed':
+
+				break;
+		}
+
+		return $widget_data;
 	}
 }

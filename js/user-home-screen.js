@@ -82,6 +82,7 @@ var userHomeScreen = ( function( $, data ) {
 		});
 		var typeSelect = {
 			label:   data.labels.select_widget_type,
+			name:    'widget_type',
 			classes: 'uhs-widget-type-select',
 			values:  widgetTypes,
 		};
@@ -118,12 +119,39 @@ var userHomeScreen = ( function( $, data ) {
 
 			// Inject the right fields for the selected widget type.
 			$widgetFields.append( fieldsHTML );
+
+			// Add a data attribute to the form indicating the widget type.
+			$widgetFields.attr( 'data-widget-type', type );
 		});
 
 		// Save the form data when the save button is clicked.
 		$( '#uhs-save-widget' ).on( 'click', function() {
-			// Grab data from the form and save here.
-			console.log( $( '#uhs-modal-widget-fields' ).val() );
+
+			// Grab the form.
+			var $widgetFields = $( '#uhs-modal-widget-fields' );
+
+			// Grab data from the form.
+			var widgetData = $widgetFields.serializeArray();
+
+			// Prepare data to save via ajax.
+			var ajaxData = {
+				'action'     : 'uhs_add_widget',
+				'nonce'      : data.nonce,
+				'widget_type': $widgetFields.attr( 'data-widget-type' ),
+				'widget_data': widgetData,
+			};
+
+			//$spinner.show();
+
+			var request = $.post( ajaxurl, ajaxData );
+
+			request.done( function( response ) {
+				console.log( response );
+			});
+
+			request.fail( function( response ) {
+				console.log( 'Something went wrong when trying to save a widget.' );
+			});
 		});
 	};
 
