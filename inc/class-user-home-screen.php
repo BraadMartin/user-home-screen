@@ -96,6 +96,10 @@ class User_Home_Screen {
 	 */
 	public function get_widget_type_data() {
 
+		$post_types    = $this->get_post_types();
+		$post_statuses = $this->get_post_statuses();
+		$authors       = $this->get_authors();
+
 		$widget_types = array(
 			'post-list' => array(
 				'label'  => __( 'Post List', 'user-home-screen' ),
@@ -104,32 +108,19 @@ class User_Home_Screen {
 						'key'    => 'post_types',
 						'label'  => __( 'Post Types', 'user-home-screen' ),
 						'type'   => 'select',
-						'values' => array(
-							'all'  => __( 'All', 'user-home-screen' ),
-							'post' => __( 'Post', 'user-home-screen' ),
-							'page' => __( 'Page', 'user-home-screen' ),
-						),
+						'values' => $post_types,
 					),
 					array(
 						'key'    => 'post_statuses',
 						'label'  => __( 'Post Statuses', 'user-home-screen' ),
 						'type'   => 'select',
-						'values' => array(
-							'all'     => __( 'All', 'user-home-screen' ),
-							'publish' => __( 'Published', 'user-home-screen' ),
-							'draft'   => __( 'Draft', 'user-home-screen' ),
-						),
+						'values' => $post_statuses,
 					),
 					array(
 						'key'    => 'authors',
 						'label'  => __( 'Authors', 'user-home-screen' ),
 						'type'   => 'select',
-						'values' => array(
-							'all'   => __( 'All', 'user-home-screen' ),
-							'braad' => __( 'Braad', 'user-home-screen' ),
-							'amy'   => __( 'Amy', 'user-home-screen' ),
-						),
-					),
+						'values' => $authors,					),
 				),
 			),
 			'rss-feed' => array(
@@ -150,6 +141,77 @@ class User_Home_Screen {
 		 * @param  array  $widget_types  The default array of widget types data.
 		 */
 		return apply_filters( 'user_home_screen_widget_types', $widget_types );
+	}
+
+	/**
+	 * Return an array of post types that should be selectable in widgets.
+	 *
+	 * @return  array  The array of post types.
+	 */
+	public function get_post_types() {
+
+		$full_post_types = get_post_types( array( 'public' => true ), 'objects' );
+		$post_types      = array();
+
+		// Transform into a simple array of post_type => Display Name.
+		foreach ( $full_post_types as $post_type => $config ) {
+			$post_types[ $post_type ] = $config->labels->name;
+		}
+
+		/**
+		 * Allow the selectable post types to be customized.
+		 *
+		 * @param  array  $post_types  The default array of selectable post types.
+		 */
+		return apply_filters( 'user_home_screen_selectable_post_types', $post_types );
+	}
+
+	/**
+	 * Return an array of post statuses that should be selectable in widgets.
+	 *
+	 * @return  array  The array of post statuses.
+	 */
+	public function get_post_statuses() {
+
+		$full_post_statuses = get_post_stati( array( 'show_in_admin_status_list' => 1 ), 'objects' );
+		$post_statuses      = array();
+
+		// Transform into a simple array of post_status => Display name.
+		foreach ( $full_post_statuses as $post_status => $config ) {
+			$post_statuses[ $post_status ] = $config->label;
+		}
+
+		/**
+		 * Allow the selectable post statuses to be filtered.
+		 *
+		 * @param  array  $post_statuses  The default array of selectable post statuses.
+		 */
+		return apply_filters( 'user_home_screen_selectable_post_statuses', $post_statuses );
+	}
+
+	/**
+	 * Return an array of authors that should be selectable in widgets.
+	 *
+	 * @return  array  The array of authors.
+	 */
+	public function get_authors() {
+
+		$full_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
+		$authors    = array();
+
+		// Transform into a simple array of user ID => Display name.
+		// Here we have to store user_logins instead of the ID because if we key
+		// this array by IDs it won't be ordered by display_name.
+		foreach ( $full_users as $user ) {
+			$authors[ $user->data->user_login ] = $user->data->display_name;
+		}
+
+		/**
+		 * Allow the selectable authors to be filtered.
+		 *
+		 * @param  array  $authors  The default array of selectable authors.
+		 */
+		return apply_filters( 'user_home_screen_selectable_authors', $authors );
 	}
 
 	/**
