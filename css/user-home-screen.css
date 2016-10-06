@@ -2,6 +2,10 @@
  * User Home Screen CSS.
  */
 
+.user-home-screen-add-widget {
+	float: right;
+}
+
 /**
  * Tab setup.
  */

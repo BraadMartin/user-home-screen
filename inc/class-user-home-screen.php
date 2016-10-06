@@ -117,6 +117,11 @@ class User_Home_Screen {
 				'label'  => __( 'Post List', 'user-home-screen' ),
 				'fields' => array(
 					array(
+						'key'   => 'title',
+						'label' => __( 'Widget Title', 'user-home-screen' ),
+						'type'  => 'text',
+					),
+					array(
 						'key'    => 'post_types',
 						'label'  => __( 'Post Types', 'user-home-screen' ),
 						'type'   => 'select',
@@ -132,12 +137,18 @@ class User_Home_Screen {
 						'key'    => 'authors',
 						'label'  => __( 'Authors', 'user-home-screen' ),
 						'type'   => 'select',
-						'values' => $authors,					),
+						'values' => $authors,
+					),
 				),
 			),
 			'rss-feed' => array(
 				'label' => __( 'RSS Feed', 'user-home-screen' ),
 				'fields' => array(
+					array(
+						'key'   => 'title',
+						'label' => __( 'Widget Title', 'user-home-screen' ),
+						'type'  => 'text',
+					),
 					array(
 						'key'   => 'feed_url',
 						'label' => __( 'Feed URL', 'user-home-screen' ),
@@ -266,10 +277,10 @@ class User_Home_Screen {
 	 */
 	public function get_user_widgets( $user ) {
 
-		//$user_widgets = get_user_meta( $user->ID, '_user_home_screen_widgets', true );
+		$user_widgets = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
 
 		// Mock this for now.
-		$user_widgets = array(
+		/*$user_widgets = array(
 			array(
 				'type' => 'post-list',
 				'args' => array(
@@ -316,7 +327,7 @@ class User_Home_Screen {
 					),
 				),
 			),
-		);
+		);*/
 
 		/**
 		 * Allow the user widgets config to be customized.
@@ -346,12 +357,15 @@ class User_Home_Screen {
 		 */
 		$page_title = apply_filters( 'user_home_screen_page_title', $page_title, $user );
 
+		$add_widget_text = $this->get_js_data()['labels']['add_widget'];
+
 		ob_start();
 
 		?>
 		<div id="user-home-screen-wrap" class="wrap" data-active-tab="main">
 			<div class="user-home-screen-inner-wrap">
 				<h1><?php echo esc_html( $page_title ); ?></h1>
+				<a class="button button-primary user-home-screen-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
 				<h2 class="nav-tab-wrapper">
 					<a class="nav-tab nav-tab-active" data-tab-id="main">
 						<?php esc_html_e( 'Main', 'user-home-screen' ); ?>
@@ -558,13 +572,10 @@ class User_Home_Screen {
 	 */
 	public function output_setup_tab( $user, $user_widgets ) {
 
-		$add_widget_text = $this->get_js_data()['labels']['add_widget'];
-
 		ob_start();
 
 		?>
 		<div class="user-home-screen-setup-form">
-			<a class="button button-primary user-home-screen-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
 		</div>
 		<?php
 
@@ -766,13 +777,49 @@ class User_Home_Screen {
 		switch ( $widget_data['type'] ) {
 			case 'post-list':
 
-				// @todo This transform is temporary and should be removed
-				// after multi-select fields are introduced.
-				foreach ( $widget_data['args'] as $arg => $value ) {
-					if ( ! is_array( $value ) ) {
-						$widget_data['args'][ $arg ] = array( $value );
-					}
+				$original_args = $widget_data['args'];
+				$updated_args  = array();
+
+				$updated_args['title'] = ( ! empty( $original_args['title'] ) ) ? esc_html( $original_args['title'] ) : '';
+
+				$updated_args['query_args'] = array();
+				$updated_args['parts']      = array();
+
+				if ( ! empty( $original_args['post_types'] ) ) {
+					$updated_args['query_args']['post_type'] = $original_args['post_types'];
 				}
+
+				if ( ! empty( $original_args['post_statuses'] ) ) {
+					$updated_args['query_args']['post_status'] = $original_args['post_statuses'];
+				}
+
+				if ( ! empty( $original_args['authors'] ) ) {
+					$author_ids = array();
+					if ( is_array( $original_args['authors'] ) ) {
+						foreach ( $original_args['authors'] as $user_login ) {
+							$user = get_user_by( 'login', $user_login );
+							if ( ! empty( $user->ID ) ) {
+								$author_ids[] = (int)$user->ID;
+							}
+						}
+					} else {
+						$user = get_user_by( 'login', $original_args['authors'] );
+						$author_ids[] = (int)$user->ID;
+					}
+					$updated_args['query_args']['author__in'] = $author_ids;
+				}
+
+				if ( ! empty( $original_args['parts'] ) ) {
+					$updated_args['parts'] = $original_args['parts'];
+				} else {
+					$updated_args['parts'] = array(
+						'publish_date',
+						'status',
+						'author',
+					);
+				}
+
+				$widget_data['args'] = $updated_args;
 
 				break;
 			case 'rss-feed':
