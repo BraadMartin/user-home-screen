@@ -131,6 +131,8 @@ var userHomeScreen = ( function( $, data ) {
 					multiple: true,
 					placeholder: $this.attr( 'data-placeholder' ),
 				});
+				$this.val( '' );
+				$this.trigger( 'change' );
 			});
 
 			// Add a data attribute to the form indicating the widget type.
@@ -148,7 +150,7 @@ var userHomeScreen = ( function( $, data ) {
 			var $widgetFields = $( '#uhs-modal-widget-fields' );
 
 			// Grab data from the form.
-			var widgetData = $widgetFields.serializeArray();
+			var widgetData = $widgetFields.serialize();
 
 			// Prepare data to save via ajax.
 			var ajaxData = {

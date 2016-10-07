@@ -134,28 +134,28 @@ class User_Home_Screen {
 					array(
 						'key'         => 'post_types',
 						'label'       => __( 'Post Types', 'user-home-screen' ),
-						'type'        => 'select',
+						'type'        => 'select-multiple',
 						'placeholder' => __( 'Select a Post Type', 'user-home-screen' ),
 						'values'      => $post_types,
 					),
 					array(
 						'key'         => 'categories',
 						'label'       => __( 'Categories', 'user-home-screen' ),
-						'type'        => 'select',
+						'type'        => 'select-multiple',
 						'placeholder' => __( 'Select a Category', 'user-home-screen' ),
 						'values'      => $categories,
 					),
 					array(
 						'key'         => 'post_statuses',
 						'label'       => __( 'Post Statuses', 'user-home-screen' ),
-						'type'        => 'select',
+						'type'        => 'select-multiple',
 						'placeholder' => __( 'Select a Post Status', 'user-home-screen' ),
 						'values'      => $post_statuses,
 					),
 					array(
 						'key'         => 'authors',
 						'label'       => __( 'Authors', 'user-home-screen' ),
-						'type'        => 'select',
+						'type'        => 'select-multiple',
 						'placeholder' => __( 'Select an Author', 'user-home-screen' ),
 						'values'      => $authors,
 					),
@@ -194,7 +194,7 @@ class User_Home_Screen {
 	public function get_post_types() {
 
 		$full_post_types = get_post_types( array( 'public' => true ), 'objects' );
-		$post_types      = array();
+		$post_types      = array( 'any' => __( 'Any', 'user-home-screen' ) );
 
 		// Transform into a simple array of post_type => Display Name.
 		foreach ( $full_post_types as $post_type => $config ) {
@@ -527,6 +527,8 @@ class User_Home_Screen {
 
 		$html = '';
 
+		error_log( print_r( $args, true ) );
+
 		// Bail if we don't have query args.
 		if ( empty( $args['query_args'] ) ) {
 			return $html;
@@ -557,6 +559,11 @@ class User_Home_Screen {
 				?>
 				<h3><?php echo esc_html( the_title() ); ?></h3>
 				<div class="user-home-screen-widget-extra-data">
+					<?php if ( in_array( 'post_type', $parts ) ) : ?>
+					<div class="user-home-screen-post-type">
+						<?php echo esc_html( $query->post->post_type ); ?>
+					</div>
+					<?php endif; ?>
 					<?php if ( in_array( 'category', $parts ) ) : ?>
 					<div class="user-home-screen-widget-category">
 						<?php echo get_the_category_list(); ?>
@@ -655,8 +662,9 @@ class User_Home_Screen {
 		// Templates.
 		$templates = array(
 			USER_HOME_SCREEN_PATH . 'templates/widget-edit.php',
-			USER_HOME_SCREEN_PATH . 'templates/field-select.php',
 			USER_HOME_SCREEN_PATH . 'templates/field-text.php',
+			USER_HOME_SCREEN_PATH . 'templates/field-select.php',
+			USER_HOME_SCREEN_PATH . 'templates/field-select-multiple.php',
 		);
 
 		// Loop over each template and include it.
@@ -680,8 +688,6 @@ class User_Home_Screen {
 	 */
 	public function ajax_add_widget() {
 
-		error_log( print_r( $_POST, true ) );
-
 		// Bail if our nonce is not valid.
 		check_ajax_referer( 'user-home-screen', 'nonce', true );
 
@@ -695,8 +701,6 @@ class User_Home_Screen {
 			wp_die();
 		}
 
-		error_log( print_r( $user, true ) );
-
 		// Bail if we don't have a widget type.
 		if ( empty( $_POST['widget_type'] ) || empty( $_POST['widget_data'] ) ) {
 			$response          = new stdClass();
@@ -706,16 +710,28 @@ class User_Home_Screen {
 		}
 
 		// Extract clean arguments from the form data.
-		$widget_type = sanitize_text_field( $_POST['widget_type'] );
+		$clean_type  = sanitize_text_field( $_POST['widget_type'] );
+		$args_input  = urldecode( $_POST['widget_data'] );
 		$widget_args = array();
+		$clean_args  = array();
 
-		foreach ( $_POST['widget_data'] as $field ) {
-			$widget_args[ $field['name'] ] = sanitize_text_field( $field['value'] );
+		parse_str( $args_input, $widget_args );
+
+		foreach ( $widget_args as $name => $value ) {
+			if ( is_array( $value ) ) {
+				$values = array();
+				foreach ( $value as $value_item ) {
+					$values[] = sanitize_text_field( $value_item );
+				}
+				$clean_args[ $name ] = $values;
+			} else {
+				$clean_args[ $name ] = sanitize_text_field( $value );
+			}
 		}
 
 		$widget_data = array(
-			'type' => $widget_type,
-			'args' => $widget_args,
+			'type' => $clean_type,
+			'args' => $clean_args,
 		);
 
 		// Validate the widget data.
@@ -728,8 +744,6 @@ class User_Home_Screen {
 		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
 
 		wp_send_json( $response );
-
-		error_log( 'about to die' );
 
 		wp_die();
 	}
@@ -833,8 +847,15 @@ class User_Home_Screen {
 				$updated_args['query_args'] = array();
 				$updated_args['parts']      = array();
 
+				error_log( 'validating' );
+				error_log( print_r( $original_args, true ) );
+
 				if ( ! empty( $original_args['post_types'] ) ) {
-					$updated_args['query_args']['post_type'] = $original_args['post_types'];
+					if ( in_array( 'any', $original_args['post_types'] ) ) {
+						$updated_args['query_args']['post_type'] = 'any';
+					} else {
+						$updated_args['query_args']['post_type'] = $original_args['post_types'];
+					}
 				}
 
 				if ( ! empty( $original_args['categories'] ) ) {
@@ -873,6 +894,7 @@ class User_Home_Screen {
 					$updated_args['parts'] = $original_args['parts'];
 				} else {
 					$updated_args['parts'] = array(
+						'post_type',
 						'category',
 						'publish_date',
 						'status',
