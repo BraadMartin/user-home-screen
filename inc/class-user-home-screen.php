@@ -109,6 +109,7 @@ class User_Home_Screen {
 	public function get_widget_type_data() {
 
 		$post_types    = $this->get_post_types();
+		$categories    = $this->get_categories();
 		$post_statuses = $this->get_post_statuses();
 		$authors       = $this->get_authors();
 
@@ -126,6 +127,12 @@ class User_Home_Screen {
 						'label'  => __( 'Post Types', 'user-home-screen' ),
 						'type'   => 'select',
 						'values' => $post_types,
+					),
+					array(
+						'key'    => 'categories',
+						'label'  => __( 'Categories', 'user-home-screen' ),
+						'type'   => 'select',
+						'values' => $categories,
 					),
 					array(
 						'key'    => 'post_statuses',
@@ -226,7 +233,7 @@ class User_Home_Screen {
 		// Here we have to store user_logins instead of the ID because if we key
 		// this array by IDs it won't be ordered by display_name.
 		foreach ( $full_users as $user ) {
-			$authors[ $user->data->user_login ] = $user->data->display_name;
+			$authors[ 'user_' . $user->ID ] = $user->data->display_name;
 		}
 
 		/**
@@ -235,6 +242,29 @@ class User_Home_Screen {
 		 * @param  array  $authors  The default array of selectable authors.
 		 */
 		return apply_filters( 'user_home_screen_selectable_authors', $authors );
+	}
+
+	/**
+	 * Return an array of categories that should be selectable in widgets.
+	 *
+	 * @return  array  The array of categories.
+	 */
+	public function get_categories() {
+
+		$full_categories = get_terms( array( 'taxonomy' => 'category' ) );
+		$categories      = array();
+
+		// Transform into a simple array of user ID => Display name.
+		foreach ( $full_categories as $category ) {
+			$categories[ 'term_' . $category->term_id ] = $category->name;
+		}
+
+		/**
+		 * Allow the selectable authors to be filtered.
+		 *
+		 * @param  array  $authors  The default array of selectable categories.
+		 */
+		return apply_filters( 'user_home_screen_selectable_categories', $categories );
 	}
 
 	/**
@@ -514,6 +544,11 @@ class User_Home_Screen {
 				?>
 				<h3><?php echo esc_html( the_title() ); ?></h3>
 				<div class="user-home-screen-widget-extra-data">
+					<?php if ( in_array( 'category', $parts ) ) : ?>
+					<div class="user-home-screen-widget-category">
+						<?php echo get_the_category_list(); ?>
+					</div>
+					<?php endif; ?>
 					<?php if ( in_array( 'publish_date', $parts ) ) : ?>
 					<div class="user-home-screen-widget-post-date">
 						<?php the_date(); ?>
@@ -789,6 +824,20 @@ class User_Home_Screen {
 					$updated_args['query_args']['post_type'] = $original_args['post_types'];
 				}
 
+				if ( ! empty( $original_args['categories'] ) ) {
+					$term_ids = array();
+					if ( is_array( $original_args['categories'] ) ) {
+						foreach ( $original_args['categories'] as $term_key ) {
+							$term_id = str_replace( 'term_', '', $term_key );
+							$term_ids[] = (int)$term_id;
+						}
+					} else {
+						$term_id = str_replace( 'term_', '', $original_args['categories'] );
+						$term_ids[] = (int)$term_id;
+					}
+					$updated_args['query_args']['category__in'] = $term_ids;
+				}
+
 				if ( ! empty( $original_args['post_statuses'] ) ) {
 					$updated_args['query_args']['post_status'] = $original_args['post_statuses'];
 				}
@@ -796,15 +845,13 @@ class User_Home_Screen {
 				if ( ! empty( $original_args['authors'] ) ) {
 					$author_ids = array();
 					if ( is_array( $original_args['authors'] ) ) {
-						foreach ( $original_args['authors'] as $user_login ) {
-							$user = get_user_by( 'login', $user_login );
-							if ( ! empty( $user->ID ) ) {
-								$author_ids[] = (int)$user->ID;
-							}
+						foreach ( $original_args['authors'] as $user_key ) {
+							$user_id = str_replace( 'user_', '', $user_key );
+							$author_ids[] = (int)$user_id;
 						}
 					} else {
-						$user = get_user_by( 'login', $original_args['authors'] );
-						$author_ids[] = (int)$user->ID;
+						$user_id = str_replace( 'user_', '', $original_args['authors'] );
+						$author_ids[] = (int)$user_id;
 					}
 					$updated_args['query_args']['author__in'] = $author_ids;
 				}
@@ -813,6 +860,7 @@ class User_Home_Screen {
 					$updated_args['parts'] = $original_args['parts'];
 				} else {
 					$updated_args['parts'] = array(
+						'category',
 						'publish_date',
 						'status',
 						'author',
