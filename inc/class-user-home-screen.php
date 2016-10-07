@@ -49,7 +49,13 @@ class User_Home_Screen {
 		wp_enqueue_script(
 			'user-home-screen',
 			USER_HOME_SCREEN_URL . 'js/user-home-screen.js',
-			array( 'featherlight', 'jquery', 'wp-util', 'underscore' ),
+			array(
+				'featherlight',
+				'jquery',
+				'wp-util',
+				'underscore',
+				'select2'
+			),
 			USER_HOME_SCREEN_VERSION,
 			true
 		);
@@ -57,7 +63,10 @@ class User_Home_Screen {
 		wp_enqueue_style(
 			'user-home-screen-css',
 			USER_HOME_SCREEN_URL . 'css/user-home-screen.css',
-			array( 'featherlight' ),
+			array(
+				'featherlight',
+				'select2'
+			),
 			USER_HOME_SCREEN_VERSION
 		);
 
@@ -123,28 +132,32 @@ class User_Home_Screen {
 						'type'  => 'text',
 					),
 					array(
-						'key'    => 'post_types',
-						'label'  => __( 'Post Types', 'user-home-screen' ),
-						'type'   => 'select',
-						'values' => $post_types,
+						'key'         => 'post_types',
+						'label'       => __( 'Post Types', 'user-home-screen' ),
+						'type'        => 'select',
+						'placeholder' => __( 'Select a Post Type', 'user-home-screen' ),
+						'values'      => $post_types,
 					),
 					array(
-						'key'    => 'categories',
-						'label'  => __( 'Categories', 'user-home-screen' ),
-						'type'   => 'select',
-						'values' => $categories,
+						'key'         => 'categories',
+						'label'       => __( 'Categories', 'user-home-screen' ),
+						'type'        => 'select',
+						'placeholder' => __( 'Select a Category', 'user-home-screen' ),
+						'values'      => $categories,
 					),
 					array(
-						'key'    => 'post_statuses',
-						'label'  => __( 'Post Statuses', 'user-home-screen' ),
-						'type'   => 'select',
-						'values' => $post_statuses,
+						'key'         => 'post_statuses',
+						'label'       => __( 'Post Statuses', 'user-home-screen' ),
+						'type'        => 'select',
+						'placeholder' => __( 'Select a Post Status', 'user-home-screen' ),
+						'values'      => $post_statuses,
 					),
 					array(
-						'key'    => 'authors',
-						'label'  => __( 'Authors', 'user-home-screen' ),
-						'type'   => 'select',
-						'values' => $authors,
+						'key'         => 'authors',
+						'label'       => __( 'Authors', 'user-home-screen' ),
+						'type'        => 'select',
+						'placeholder' => __( 'Select an Author', 'user-home-screen' ),
+						'values'      => $authors,
 					),
 				),
 			),

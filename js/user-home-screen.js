@@ -124,6 +124,15 @@ var userHomeScreen = ( function( $, data ) {
 			// Inject the right fields for the selected widget type.
 			$widgetFields.append( fieldsHTML );
 
+			// Initialize Select2 on the selects.
+			$widgetFields.find( 'select' ).each( function() {
+				var $this = $( this );
+				$this.select2({
+					multiple: true,
+					placeholder: $this.attr( 'data-placeholder' ),
+				});
+			});
+
 			// Add a data attribute to the form indicating the widget type.
 			$widgetFields.attr( 'data-widget-type', type );
 
