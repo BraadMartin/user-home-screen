@@ -557,41 +557,48 @@ class User_Home_Screen {
 				$query->the_post();
 
 				?>
-				<h3><?php echo esc_html( the_title() ); ?></h3>
-				<div class="user-home-screen-widget-extra-data">
-					<?php if ( in_array( 'post_type', $parts ) ) : ?>
-					<div class="user-home-screen-post-type">
-						<?php echo esc_html( $query->post->post_type ); ?>
+				<div class="user-home-screen-widget-post">
+					<h3 class="user-home-screen-widget-post-title"><?php echo esc_html( the_title() ); ?></h3>
+					<div class="user-home-screen-widget-post-meta">
+						<?php if ( in_array( 'author', $parts ) ) : ?>
+						<div class="user-home-screen-widget-post-author">
+							<?php echo esc_html__( 'By', 'user-home-screen' ) . ': ' . get_the_author(); ?>
+						</div>
+						<?php endif; ?>
+						<?php if ( in_array( 'publish_date', $parts ) ) : ?>
+						<div class="user-home-screen-widget-post-date">
+							<?php the_date(); ?>
+						</div>
+						<?php endif; ?>
 					</div>
-					<?php endif; ?>
-					<?php if ( in_array( 'category', $parts ) ) : ?>
-					<div class="user-home-screen-widget-category">
-						<?php echo get_the_category_list(); ?>
+					<div class="user-home-screen-widget-extra-data">
+						<?php if ( in_array( 'post_type', $parts ) ) : ?>
+						<div class="user-home-screen-post-type">
+							<?php echo esc_html( $query->post->post_type ); ?>
+						</div>
+						<?php endif; ?>
+						<?php if ( in_array( 'category', $parts ) ) : ?>
+						<div class="user-home-screen-widget-category">
+							<?php echo get_the_category_list(); ?>
+						</div>
+						<?php endif; ?>
+						<?php if ( in_array( 'status', $parts ) ) : ?>
+						<div class="user-home-screen-widget-post-status">
+							<?php
+								$post_status = get_post_status_object( $query->post->post_status );
+								echo esc_html( $post_status->label );
+							?>
+						</div>
+						<?php endif; ?>
 					</div>
-					<?php endif; ?>
-					<?php if ( in_array( 'publish_date', $parts ) ) : ?>
-					<div class="user-home-screen-widget-post-date">
-						<?php the_date(); ?>
+					<div class="user-home-screen-widget-action-links">
+						<a href="<?php echo esc_url( get_edit_post_link( get_the_ID(), false ) ); ?>" target="_blank">
+							<?php esc_html_e( 'Edit', 'user-home-screen' ); ?>
+						</a>
+						<a href="<?php the_permalink(); ?>" target="_blank">
+							<?php esc_html_e( 'View', 'user-home-screen' ); ?>
+						</a>
 					</div>
-					<?php endif; ?>
-					<?php if ( in_array( 'status', $parts ) ) : ?>
-					<div class="user-home-screen-widget-post-status">
-						<?php echo esc_html( $query->post->post_status ); ?>
-					</div>
-					<?php endif; ?>
-					<?php if ( in_array( 'author', $parts ) ) : ?>
-					<div class="user-home-screen-widget-post-author">
-						<?php the_author(); ?>
-					</div>
-					<?php endif; ?>
-				</div>
-				<div class="user-home-screen-widget-action-links">
-					<a href="<?php echo esc_url( get_edit_post_link( get_the_ID(), false ) ); ?>" target="_blank">
-						<?php esc_html_e( 'Edit', 'user-home-screen' ); ?>
-					</a>
-					<a href="<?php the_permalink(); ?>" target="_blank">
-						<?php esc_html_e( 'View', 'user-home-screen' ); ?>
-					</a>
 				</div>
 				<?php
 			}

@@ -67,6 +67,38 @@
 }
 
 /**
+ * Widgets.
+ */
+
+.user-home-screen-widget-title {
+	padding: 0 0 6px;
+	display: block;
+	margin: 0;
+}
+
+.user-home-screen-widget-post-title {
+	margin: 10px 0;
+}
+
+.user-home-screen-widget-post-meta {
+	margin-bottom: 10px;
+}
+
+.user-home-screen-widget-post-meta::after {
+	clear: both;
+	content: '';
+	display: block;
+}
+
+.user-home-screen-widget-post-author {
+	float: left;
+}
+
+.user-home-screen-widget-post-date {
+	float: right;
+}
+
+/**
  * Add/Edit Modal.
  */
 .user-home-screen-modal .featherlight-content {
