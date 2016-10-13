@@ -534,7 +534,7 @@ class User_Home_Screen {
 						<?php endif; ?>
 						<?php if ( in_array( 'publish_date', $parts ) ) : ?>
 						<div class="uhs-post-list-widget-post-date">
-							<?php the_date(); ?>
+							<?php echo get_the_date(); ?>
 						</div>
 						<?php endif; ?>
 					</div>
@@ -881,13 +881,54 @@ class User_Home_Screen {
 		if ( ! empty( $args['parts'] ) ) {
 			$updated_args['parts'] = $args['parts'];
 		} else {
-			$updated_args['parts'] = array(
-				'post_type',
-				'category',
-				'publish_date',
-				'status',
-				'author',
-			);
+			$parts = array();
+			$query_args = $updated_args['query_args'];
+
+			// Show the post type if no post type, post_type is 'any',
+			// or multiple post types.
+			if (
+				empty( $query_args['post_type'] ) ||
+				( ! empty( $query_args['post_type'] ) && 'any' === $query_args['post_type'] ) ||
+				! empty( $query_args['post_type'][1] )
+			) {
+				$parts[] = 'post_type';
+			}
+
+			// Show the categories if no category or multiple categories.
+			if (
+				empty( $query_args['category__in'] ) ||
+				! empty( $query_args['category__in'][1] )
+			) {
+				$parts[] = 'category';
+			}
+
+			// Show the publish date if post_status includes publish or schedule.
+			if (
+				! empty( $query_args['post_status'] ) &&
+				is_array( $query_args['post_status'] ) &&
+				( in_array( 'publish', $query_args['post_status'] ) || in_array( 'schedule', $query_args['post_status'] ) )
+			) {
+				$parts[] = 'publish_date';
+			}
+
+			// Show the post status if no post_status or multiple post statuses.
+			if (
+				empty( $query_args['post_status'] ) ||
+				! empty( $query_args['post_status'][1] )
+			) {
+				$parts[] = 'status';
+			}
+
+			// Always show the author.
+			$parts[] = 'author';
+
+			/**
+			 * Allow the parts to be customized.
+			 *
+			 * @param  array  $parts         The default array of parts.
+			 * @param  array  $updated_args  The full args array.
+			 */
+			$updated_args['parts'] = apply_filters( 'user_home_screen_post_list_parts', $parts, $updated_args );
 		}
 
 		return $updated_args;
