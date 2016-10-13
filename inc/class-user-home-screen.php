@@ -322,56 +322,6 @@ class User_Home_Screen {
 
 		$user_widgets = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
 
-		// Mock this for now.
-		/*$user_widgets = array(
-			array(
-				'type' => 'post-list',
-				'args' => array(
-					'title' => "Banking Posts",
-					'query_args' => array(
-						'cat' => 1575,
-					),
-					'parts' => array(
-						'publish_date',
-						'status',
-					),
-				),
-			),
-			array(
-				'type' => 'post-list',
-				'args' => array(
-					'title' => "Posts by Braad",
-					'query_args' => array(
-						'author' => 306,
-					),
-					'parts' => array(
-						'status',
-					),
-				),
-			),
-			array(
-				'type' => 'post-list',
-				'args' => array(
-					'title' => "Credit Card Posts",
-					'query_args' => array(
-						'cat' => 5,
-					),
-					'parts' => array(
-						'author',
-					),
-				),
-			),
-			array(
-				'type' => 'post-list',
-				'args' => array(
-					'title' => "Posts that are Ready for CE",
-					'query_args' => array(
-						'post_status' => 'ready-for-ce',
-					),
-				),
-			),
-		);*/
-
 		/**
 		 * Allow the user widgets config to be customized.
 		 *
@@ -405,10 +355,10 @@ class User_Home_Screen {
 		ob_start();
 
 		?>
-		<div id="user-home-screen-wrap" class="wrap" data-active-tab="main">
-			<div class="user-home-screen-inner-wrap">
+		<div id="uhs-wrap" class="wrap" data-active-tab="main">
+			<div class="uhs-inner-wrap">
 				<h1><?php echo esc_html( $page_title ); ?></h1>
-				<a class="button button-primary user-home-screen-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
+				<a class="button button-primary uhs-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
 				<h2 class="nav-tab-wrapper">
 					<a class="nav-tab nav-tab-active" data-tab-id="main">
 						<?php esc_html_e( 'Main', 'user-home-screen' ); ?>
@@ -450,7 +400,7 @@ class User_Home_Screen {
 			echo 'YOLO No Widgets';
 		}
 		?>
-		<div class="user-home-screen-widget-grid">
+		<div class="uhs-widget-grid">
 			<?php
 				// If the user has widgets, output them one by one.
 				if ( ! empty( $user_widgets ) ) {
@@ -473,7 +423,7 @@ class User_Home_Screen {
 		// Wrap the HTML in a standard wrapper.
 		$tab_html = sprintf(
 			'<div class="%s">%s</div>',
-			'user-home-screen-main-tab',
+			'uhs-main-tab',
 			$tab_html
 		);
 
@@ -527,8 +477,6 @@ class User_Home_Screen {
 
 		$html = '';
 
-		error_log( print_r( $args, true ) );
-
 		// Bail if we don't have query args.
 		if ( empty( $args['query_args'] ) ) {
 			return $html;
@@ -542,9 +490,9 @@ class User_Home_Screen {
 		ob_start();
 
 		?>
-		<div class="user-home-screen-widget-top-bar">
+		<div class="uhs-widget-top-bar">
 			<button type="button" class="handlediv button-link"><span class="toggle-indicator" aria-hidden="true"></span></button>
-			<h2 class="user-home-screen-widget-title hndle ui-sortable-handle">
+			<h2 class="uhs-widget-title hndle ui-sortable-handle">
 				<span><?php echo esc_html( $args['title'] ); ?></span>
 			</h2>
 		</div>
@@ -557,33 +505,33 @@ class User_Home_Screen {
 				$query->the_post();
 
 				?>
-				<div class="user-home-screen-widget-post">
-					<h3 class="user-home-screen-widget-post-title"><?php echo esc_html( the_title() ); ?></h3>
-					<div class="user-home-screen-widget-post-meta">
+				<div class="uhs-post-list-widget-post">
+					<h3 class="uhs-post-list-widget-post-title"><?php echo esc_html( the_title() ); ?></h3>
+					<div class="uhs-post-list-widget-post-meta">
 						<?php if ( in_array( 'author', $parts ) ) : ?>
-						<div class="user-home-screen-widget-post-author">
+						<div class="uhs-post-list-widget-post-author">
 							<?php echo esc_html__( 'By', 'user-home-screen' ) . ': ' . get_the_author(); ?>
 						</div>
 						<?php endif; ?>
 						<?php if ( in_array( 'publish_date', $parts ) ) : ?>
-						<div class="user-home-screen-widget-post-date">
+						<div class="uhs-post-list-widget-post-date">
 							<?php the_date(); ?>
 						</div>
 						<?php endif; ?>
 					</div>
-					<div class="user-home-screen-widget-extra-data">
+					<div class="uhs-post-list-widget-extra-data">
 						<?php if ( in_array( 'post_type', $parts ) ) : ?>
-						<div class="user-home-screen-post-type">
+						<div class="uhs-post-list-widget-post-type">
 							<?php echo esc_html( $query->post->post_type ); ?>
 						</div>
 						<?php endif; ?>
 						<?php if ( in_array( 'category', $parts ) ) : ?>
-						<div class="user-home-screen-widget-category">
+						<div class="uhs-post-list-widget-category">
 							<?php echo get_the_category_list(); ?>
 						</div>
 						<?php endif; ?>
 						<?php if ( in_array( 'status', $parts ) ) : ?>
-						<div class="user-home-screen-widget-post-status">
+						<div class="uhs-post-list-widget-post-status">
 							<?php
 								$post_status = get_post_status_object( $query->post->post_status );
 								echo esc_html( $post_status->label );
@@ -591,11 +539,11 @@ class User_Home_Screen {
 						</div>
 						<?php endif; ?>
 					</div>
-					<div class="user-home-screen-widget-action-links">
+					<div class="uhs-post-list-widget-action-links">
 						<a href="<?php echo esc_url( get_edit_post_link( get_the_ID(), false ) ); ?>" target="_blank">
 							<?php esc_html_e( 'Edit', 'user-home-screen' ); ?>
 						</a>
-						<a href="<?php the_permalink(); ?>" target="_blank">
+						<a href="<?php esc_url( the_permalink() ); ?>" target="_blank">
 							<?php esc_html_e( 'View', 'user-home-screen' ); ?>
 						</a>
 					</div>
@@ -617,7 +565,7 @@ class User_Home_Screen {
 		// Wrap the HTML in a standard wrapper.
 		$html = sprintf(
 			'<div class="%s">%s</div>',
-			'user-home-screen-widget type-post-list postbox',
+			'uhs-widget type-post-list postbox',
 			$html
 		);
 
@@ -637,7 +585,7 @@ class User_Home_Screen {
 		ob_start();
 
 		?>
-		<div class="user-home-screen-setup-form">
+		<div class="uhs-setup-form">
 		</div>
 		<?php
 
@@ -652,7 +600,7 @@ class User_Home_Screen {
 		// Wrap the HTML in a standard wrapper.
 		$tab_html = sprintf(
 			'<div class="%s">%s</div>',
-			'user-home-screen-setup-tab',
+			'uhs-setup-tab',
 			$tab_html
 		);
 

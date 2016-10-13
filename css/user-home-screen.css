@@ -10,35 +10,35 @@
 	visibility: visible !important;
 }
 
-.user-home-screen-add-widget {
+.uhs-add-widget {
 	float: right;
 }
 
 /**
  * Tab setup.
  */
-.user-home-screen-main-tab,
-.user-home-screen-setup-tab {
+.uhs-main-tab,
+.uhs-setup-tab {
 	display: none;
 }
 
-#user-home-screen-wrap[data-active-tab="main"] .user-home-screen-main-tab,
-#user-home-screen-wrap[data-active-tab="setup"] .user-home-screen-setup-tab {
+#uhs-wrap[data-active-tab="main"] .uhs-main-tab,
+#uhs-wrap[data-active-tab="setup"] .uhs-setup-tab {
 	display: block;
 }
 
-#user-home-screen-wrap .nav-tab {
+#uhs-wrap .nav-tab {
 	cursor: pointer;
 }
 
 /**
  * "Main" tab.
  */
-.user-home-screen-main-tab {
+.uhs-main-tab {
 	padding-top: 20px;
 }
 
-.user-home-screen-widget-grid {
+.uhs-widget-grid {
 	margin-right: 20px;
 	display: -webkit-box;
 	display: -moz-box;
@@ -49,20 +49,20 @@
 	justify-content: center;
 }
 
-.user-home-screen-widget {
+.uhs-widget {
 	padding: 10px;
 	margin: 0 10px 20px;
 	width: 360px;
 }
 
-.user-home-screen-widget-action-links a {
+.uhs-widget-action-links a {
 	margin-right: 10px;
 }
 
 /**
  * "Setup" tab.
  */
-.user-home-screen-setup-tab {
+.uhs-setup-tab {
 	padding-top: 20px;
 }
 
@@ -70,38 +70,54 @@
  * Widgets.
  */
 
-.user-home-screen-widget-title {
+.uhs-widget-title {
 	padding: 0 0 6px;
 	display: block;
 	margin: 0;
 }
 
-.user-home-screen-widget-post-title {
+/**
+ * Post List Widget.
+ */
+.uhs-post-list-widget-post-title {
 	margin: 10px 0;
 }
 
-.user-home-screen-widget-post-meta {
+.uhs-post-list-widget-post-meta {
 	margin-bottom: 10px;
 }
 
-.user-home-screen-widget-post-meta::after {
+.uhs-post-list-widget-post-meta::after {
 	clear: both;
 	content: '';
 	display: block;
 }
 
-.user-home-screen-widget-post-author {
+.uhs-post-list-widget-post-author {
 	float: left;
 }
 
-.user-home-screen-widget-post-date {
+.uhs-post-list-widget-post-date {
 	float: right;
+}
+
+.uhs-post-list-widget-extra-data::after {
+	clear: both;
+	display: block;
+	content: '';
+}
+
+.uhs-post-list-widget-post-type,
+.uhs-post-list-widget-category,
+.uhs-post-list-widget-post-status {
+	float: left;
+	width: 50%;
 }
 
 /**
  * Add/Edit Modal.
  */
-.user-home-screen-modal .featherlight-content {
+.uhs-modal .featherlight-content {
 	width: 600px;
 	max-width: 90%;
 }

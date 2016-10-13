@@ -15,7 +15,7 @@ var userHomeScreen = ( function( $, data ) {
 	 * Modal config options.
 	 */
 	var modalConfig = {
-		variant: 'user-home-screen-modal',
+		variant: 'uhs-modal',
 	};
 
 	/**
@@ -26,9 +26,9 @@ var userHomeScreen = ( function( $, data ) {
 		console.log( data );
 
 		// Setup key DOM references.
-		$wrap      = $( '#user-home-screen-wrap' );
+		$wrap      = $( '#uhs-wrap' );
 		$navTabs   = $( 'h2.nav-tab-wrapper .nav-tab' );
-		$addWidget = $( '.user-home-screen-add-widget' );
+		$addWidget = $( '.uhs-add-widget' );
 
 		// Setup events.
 		setupEvents();
