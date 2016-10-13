@@ -504,13 +504,32 @@ class User_Home_Screen {
 
 				$query->the_post();
 
+				$post_type   = get_post_type_object( $query->post->post_type );
+				$post_status = get_post_status_object( $query->post->post_status );
+
 				?>
 				<div class="uhs-post-list-widget-post">
-					<h3 class="uhs-post-list-widget-post-title"><?php echo esc_html( the_title() ); ?></h3>
-					<div class="uhs-post-list-widget-post-meta">
+					<div class="uhs-post-list-widget-left">
+						<h3 class="uhs-post-list-widget-post-title">
+							<a href="<?php echo esc_url( get_edit_post_link( get_the_ID(), false ) ); ?>">
+								<?php echo esc_html( the_title() ); ?>
+							</a>
+						</h3>
 						<?php if ( in_array( 'author', $parts ) ) : ?>
 						<div class="uhs-post-list-widget-post-author">
 							<?php echo esc_html__( 'By', 'user-home-screen' ) . ': ' . get_the_author(); ?>
+						</div>
+						<?php endif; ?>
+					</div>
+					<div class="uhs-post-list-widget-right">
+						<?php if ( in_array( 'post_type', $parts ) ) : ?>
+						<div class="uhs-post-list-widget-post-type">
+							<?php echo esc_html( $post_type->labels->singular_name ); ?>
+						</div>
+						<?php endif; ?>
+						<?php if ( in_array( 'status', $parts ) ) : ?>
+						<div class="uhs-post-list-widget-post-status">
+							<?php echo esc_html( $post_status->label ); ?>
 						</div>
 						<?php endif; ?>
 						<?php if ( in_array( 'publish_date', $parts ) ) : ?>
@@ -519,33 +538,18 @@ class User_Home_Screen {
 						</div>
 						<?php endif; ?>
 					</div>
-					<div class="uhs-post-list-widget-extra-data">
-						<?php if ( in_array( 'post_type', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-post-type">
-							<?php echo esc_html( $query->post->post_type ); ?>
-						</div>
-						<?php endif; ?>
+					<div class="uhs-post-list-widget-bottom">
+						<?php /* Hiding this for now.
+						<div class="uhs-post-list-widget-action-links">
+							<a href="<?php esc_url( the_permalink() ); ?>" target="_blank">
+								<?php esc_html_e( 'View', 'user-home-screen' ); ?>
+							</a>
+						</div>*/ ?>
 						<?php if ( in_array( 'category', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-category">
+						<div class="uhs-post-list-widget-categories">
 							<?php echo get_the_category_list(); ?>
 						</div>
 						<?php endif; ?>
-						<?php if ( in_array( 'status', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-post-status">
-							<?php
-								$post_status = get_post_status_object( $query->post->post_status );
-								echo esc_html( $post_status->label );
-							?>
-						</div>
-						<?php endif; ?>
-					</div>
-					<div class="uhs-post-list-widget-action-links">
-						<a href="<?php echo esc_url( get_edit_post_link( get_the_ID(), false ) ); ?>" target="_blank">
-							<?php esc_html_e( 'Edit', 'user-home-screen' ); ?>
-						</a>
-						<a href="<?php esc_url( the_permalink() ); ?>" target="_blank">
-							<?php esc_html_e( 'View', 'user-home-screen' ); ?>
-						</a>
 					</div>
 				</div>
 				<?php
@@ -792,79 +796,115 @@ class User_Home_Screen {
 	public function validate_widget_data( $widget_data ) {
 
 		switch ( $widget_data['type'] ) {
+
 			case 'post-list':
 
-				$original_args = $widget_data['args'];
-				$updated_args  = array();
-
-				$updated_args['title'] = ( ! empty( $original_args['title'] ) ) ? esc_html( $original_args['title'] ) : '';
-
-				$updated_args['query_args'] = array();
-				$updated_args['parts']      = array();
-
-				error_log( 'validating' );
-				error_log( print_r( $original_args, true ) );
-
-				if ( ! empty( $original_args['post_types'] ) ) {
-					if ( in_array( 'any', $original_args['post_types'] ) ) {
-						$updated_args['query_args']['post_type'] = 'any';
-					} else {
-						$updated_args['query_args']['post_type'] = $original_args['post_types'];
-					}
-				}
-
-				if ( ! empty( $original_args['categories'] ) ) {
-					$term_ids = array();
-					if ( is_array( $original_args['categories'] ) ) {
-						foreach ( $original_args['categories'] as $term_key ) {
-							$term_id = str_replace( 'term_', '', $term_key );
-							$term_ids[] = (int)$term_id;
-						}
-					} else {
-						$term_id = str_replace( 'term_', '', $original_args['categories'] );
-						$term_ids[] = (int)$term_id;
-					}
-					$updated_args['query_args']['category__in'] = $term_ids;
-				}
-
-				if ( ! empty( $original_args['post_statuses'] ) ) {
-					$updated_args['query_args']['post_status'] = $original_args['post_statuses'];
-				}
-
-				if ( ! empty( $original_args['authors'] ) ) {
-					$author_ids = array();
-					if ( is_array( $original_args['authors'] ) ) {
-						foreach ( $original_args['authors'] as $user_key ) {
-							$user_id = str_replace( 'user_', '', $user_key );
-							$author_ids[] = (int)$user_id;
-						}
-					} else {
-						$user_id = str_replace( 'user_', '', $original_args['authors'] );
-						$author_ids[] = (int)$user_id;
-					}
-					$updated_args['query_args']['author__in'] = $author_ids;
-				}
-
-				if ( ! empty( $original_args['parts'] ) ) {
-					$updated_args['parts'] = $original_args['parts'];
-				} else {
-					$updated_args['parts'] = array(
-						'post_type',
-						'category',
-						'publish_date',
-						'status',
-						'author',
-					);
-				}
-
-				$widget_data['args'] = $updated_args;
+				$widget_data['args'] = $this->validate_post_list_widget_args( $widget_data['args'] );
 
 				break;
+
 			case 'rss-feed':
+
+				$widget_data['args'] = $this->validate_rss_feed_widget_args( $widget_data['args'] );
 
 				break;
 		}
 
 		return $widget_data;
 	}
+
+	/**
+	 * Validate args for the Post List widget.
+	 *
+	 * @param   array  $args  The unvalidated widget args.
+	 *
+	 * @return  array         The validated widget args.
+	 */
+	public function validate_post_list_widget_args( $args ) {
+
+		error_log( 'validating' );
+		error_log( print_r( $args, true ) );
+
+		// Defaults.
+		$updated_args               = array();
+		$updated_args['query_args'] = array();
+		$updated_args['parts']      = array();
+
+		// Title.
+		$updated_args['title'] = ( ! empty( $args['title'] ) ) ? esc_html( $args['title'] ) : '';
+
+		// Post Types.
+		if ( ! empty( $args['post_types'] ) ) {
+			if ( in_array( 'any', $args['post_types'] ) ) {
+				$updated_args['query_args']['post_type'] = 'any';
+			} else {
+				$updated_args['query_args']['post_type'] = $args['post_types'];
+			}
+		}
+
+		// Categories.
+		if ( ! empty( $args['categories'] ) ) {
+			$term_ids = array();
+			if ( is_array( $args['categories'] ) ) {
+				foreach ( $args['categories'] as $term_key ) {
+					$term_id    = str_replace( 'term_', '', $term_key );
+					$term_ids[] = (int)$term_id;
+				}
+			} else {
+				$term_id    = str_replace( 'term_', '', $args['categories'] );
+				$term_ids[] = (int)$term_id;
+			}
+			$updated_args['query_args']['category__in'] = $term_ids;
+		}
+
+		// Post Statuses.
+		if ( ! empty( $args['post_statuses'] ) ) {
+			$updated_args['query_args']['post_status'] = $args['post_statuses'];
+		}
+
+		// Authors.
+		if ( ! empty( $args['authors'] ) ) {
+			$author_ids = array();
+			if ( is_array( $args['authors'] ) ) {
+				foreach ( $args['authors'] as $user_key ) {
+					$user_id      = str_replace( 'user_', '', $user_key );
+					$author_ids[] = (int)$user_id;
+				}
+			} else {
+				$user_id      = str_replace( 'user_', '', $args['authors'] );
+				$author_ids[] = (int)$user_id;
+			}
+			$updated_args['query_args']['author__in'] = $author_ids;
+		}
+
+		// Parts.
+		if ( ! empty( $args['parts'] ) ) {
+			$updated_args['parts'] = $args['parts'];
+		} else {
+			$updated_args['parts'] = array(
+				'post_type',
+				'category',
+				'publish_date',
+				'status',
+				'author',
+			);
+		}
+
+		return $updated_args;
+	}
+
+	/**
+	 * Validate args for the RSS Feed widget.
+	 *
+	 * @param   array  $args  The unvalidated widget args.
+	 *
+	 * @return  array         The validated widget args.
+	 */
+	public function validate_rss_feed_widget_args( $args ) {
+
+		$updated_args = $args;
+
+		return $updated_args;
+	}
+
 }
