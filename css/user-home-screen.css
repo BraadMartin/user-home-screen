@@ -50,7 +50,7 @@
 }
 
 .uhs-widget {
-	padding: 10px;
+	padding: 0 10px 10px;
 	margin: 0 10px 20px;
 	width: 360px;
 }
@@ -71,7 +71,7 @@
  */
 
 .uhs-widget-title {
-	padding: 0 0 6px;
+	padding: 10px 0 6px;
 	display: block;
 	margin: 0;
 }
@@ -117,11 +117,9 @@
 	padding-top: 7px;
 }
 
-.uhs-post-list-widget-post-type {
-	margin-bottom: 10px;
-}
-
-.uhs-post-list-widget-post-status {
+.uhs-post-list-widget-post-type,
+.uhs-post-list-widget-post-status,
+.uhs-post-list-widget-post-date {
 	margin-bottom: 10px;
 }
 
@@ -142,7 +140,7 @@
 	line-height: 1.4;
 }
 
-.uhs-post-list-widget-categories a {
+.uhs-post-list-widget-categories li {
 	margin-left: 4px;
 }
 

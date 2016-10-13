@@ -537,6 +537,11 @@ class User_Home_Screen {
 							<?php echo get_the_date(); ?>
 						</div>
 						<?php endif; ?>
+						<?php if ( in_array( 'category', $parts ) ) : ?>
+						<div class="uhs-post-list-widget-categories">
+							<?php echo self::get_taxonomy_term_list( $query->post->ID, 'category', '', ', ', false ); ?>
+						</div>
+						<?php endif; ?>
 					</div>
 					<div class="uhs-post-list-widget-bottom">
 						<?php /* Hiding this for now.
@@ -545,11 +550,6 @@ class User_Home_Screen {
 								<?php esc_html_e( 'View', 'user-home-screen' ); ?>
 							</a>
 						</div>*/ ?>
-						<?php if ( in_array( 'category', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-categories">
-							<?php echo get_the_category_list(); ?>
-						</div>
-						<?php endif; ?>
 					</div>
 				</div>
 				<?php
@@ -948,4 +948,71 @@ class User_Home_Screen {
 		return $updated_args;
 	}
 
+	/**
+	 * Build and return the HTML for a taxonomy term list.
+	 *
+	 * @param   int     $post_id    The post ID to use.
+	 * @param   string  $taxonomy   The taxonomy slug to output terms from.
+	 * @param   string  $label      The label to use.
+	 * @param   string  $separator  The separation string.
+	 * @param   bool    $link       Whether to link the terms.
+	 *
+	 * @return  string              The term list HTML.
+	 */
+	public static function get_taxonomy_term_list( $post_id = 0, $taxonomy = '', $label = '', $separator = ', ', $link = true ) {
+
+		// Taxonomy is required.
+		if ( ! $taxonomy ) {
+			return '';
+		}
+
+		if ( ! $post_id ) {
+			$post_id = get_the_ID();
+		}
+
+		$terms_args = array(
+			'orderby' => 'name',
+			'order'   => 'ASC',
+			'fields'  => 'all',
+		);
+
+		$terms = wp_get_post_terms( $post_id, $taxonomy, $terms_args );
+
+		if ( empty( $terms ) || is_wp_error( $terms ) ) {
+			return '';
+		}
+
+		$output = sprintf(
+			'<div class="%s %s">%s',
+			'entry-tax-term-list',
+			esc_attr( $taxonomy ) . '-tax-term-list',
+			$label
+		);
+
+		$i = 0;
+
+		foreach ( $terms as $term_slug => $term_obj ) {
+
+			if ( $link ) {
+				$output .= sprintf(
+					'<a href="%s" rel="%s %s">%s</a>',
+					get_term_link( $term_obj->term_id ),
+					esc_attr( $term_obj->slug ),
+					esc_attr( $term_obj->taxonomy ),
+					esc_html( $term_obj->name )
+				);
+			} else {
+				$output .= esc_html( $term_obj->name );
+			}
+
+			$i++;
+
+			if ( count( $terms ) > $i ) {
+				$output .= $separator;
+			}
+		}
+		$output .= '</div>';
+
+		return $output;
+	}
 }
