@@ -13,6 +13,11 @@ class User_Home_Screen {
 	public static $user_widgets_meta_key = '_uhs_user_widgets';
 
 	/**
+	 * The meta key we store all user tabs under.
+	 */
+	public static $user_tabs_meta_key = '_uhs_user_tabs';
+
+	/**
 	 * The constructor.
 	 */
 	public function __construct() {
@@ -332,6 +337,30 @@ class User_Home_Screen {
 	}
 
 	/**
+	 * Return the user tabs config for the passed in user.
+	 *
+	 * @param  WP_User  $user  The current user object.
+	 */
+	public function get_user_tabs( $user ) {
+
+		//$user_tabs = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
+
+		// Mock this for now.
+		$user_tabs = array(
+			'braad_tab_one' => 'Braad Tab',
+			'braad_tab_two' => 'Other Braad Tab',
+		);
+
+		/**
+		 * Allow the user tabs config to be customized.
+		 *
+		 * @param  array    $user_widgets  The user tabs config.
+		 * @param  WP_User  $user          The current user object.
+		 */
+		return apply_filters( 'user_home_screen_user_tabs', $user_tabs, $user );
+	}
+
+	/**
 	 * Output the user home screen.
 	 */
 	public function output_user_home_screen() {
@@ -339,6 +368,7 @@ class User_Home_Screen {
 		// Set up the user data.
 		$user         = wp_get_current_user();
 		$user_name    = ( ! empty( $user->data->display_name ) ) ? $user->data->display_name : '';
+		$user_tabs    = $this->get_user_tabs( $user );
 		$user_widgets = $this->get_user_widgets( $user );
 
 		$page_title = __( 'Welcome', 'user-home-screen' ) . ' ' . $user_name;
@@ -360,12 +390,13 @@ class User_Home_Screen {
 				<h1><?php echo esc_html( $page_title ); ?></h1>
 				<a class="button button-primary uhs-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
 				<h2 class="nav-tab-wrapper">
-					<a class="nav-tab nav-tab-active" data-tab-id="main">
-						<?php esc_html_e( 'Main', 'user-home-screen' ); ?>
-					</a>
-					<a class="nav-tab" data-tab-id="setup">
-						<?php esc_html_e( 'Setup', 'user-home-screen' ); ?>
-					</a>
+					<?php if ( is_array( $user_tabs ) ) : ?>
+						<?php foreach ( $user_tabs as $tab_key => $tab_name ) : ?>
+							<a class="nav-tab nav-tab-active" data-tab-id="<?php echo esc_attr( $tab_key ); ?>">
+								<?php echo esc_html( $tab_name ); ?>
+							</a>
+						<?php endforeach; ?>
+					<?php endif; ?>
 				</h2>
 				<?php echo $this->output_main_tab( $user, $user_widgets ); ?>
 				<?php echo $this->output_setup_tab( $user, $user_widgets ); ?>
@@ -491,7 +522,8 @@ class User_Home_Screen {
 
 		?>
 		<div class="uhs-widget-top-bar">
-			<button type="button" class="handlediv button-link"><span class="toggle-indicator" aria-hidden="true"></span></button>
+			<?php /*<button type="button" class="handlediv button-link"><span class="toggle-indicator" aria-hidden="true"></span></button> */ ?>
+			<button type="button" class="uhs-remove-widget"><span class="dashicons dashicons-no-alt"></span></button>
 			<h2 class="uhs-widget-title hndle ui-sortable-handle">
 				<span><?php echo esc_html( $args['title'] ); ?></span>
 			</h2>
@@ -542,14 +574,6 @@ class User_Home_Screen {
 							<?php echo self::get_taxonomy_term_list( $query->post->ID, 'category', '', ', ', false ); ?>
 						</div>
 						<?php endif; ?>
-					</div>
-					<div class="uhs-post-list-widget-bottom">
-						<?php /* Hiding this for now.
-						<div class="uhs-post-list-widget-action-links">
-							<a href="<?php esc_url( the_permalink() ); ?>" target="_blank">
-								<?php esc_html_e( 'View', 'user-home-screen' ); ?>
-							</a>
-						</div>*/ ?>
 					</div>
 				</div>
 				<?php

@@ -7,9 +7,10 @@ var userHomeScreen = ( function( $, data ) {
 	/**
 	 * Store key DOM references.
 	 */
-	var $wrap      = $();
-	var $navTabs   = $();
-	var $addWidget = $();
+	var $wrap         = $();
+	var $navTabs      = $();
+	var $addWidget    = $();
+	var $removeWidget = $();
 
 	/**
 	 * Modal config options.
@@ -26,9 +27,10 @@ var userHomeScreen = ( function( $, data ) {
 		console.log( data );
 
 		// Setup key DOM references.
-		$wrap      = $( '#uhs-wrap' );
-		$navTabs   = $( 'h2.nav-tab-wrapper .nav-tab' );
-		$addWidget = $( '.uhs-add-widget' );
+		$wrap         = $( '#uhs-wrap' );
+		$navTabs      = $( 'h2.nav-tab-wrapper .nav-tab' );
+		$addWidget    = $( '.uhs-add-widget' );
+		$removeWidget = $( '.uhs-remove-widget' );
 
 		// Setup events.
 		setupEvents();
@@ -62,6 +64,11 @@ var userHomeScreen = ( function( $, data ) {
 		// When the Add Widget button is clicked, open the Add Widget modal.
 		$addWidget.on( 'click', function() {
 			openAddWidgetModal();
+		});
+
+		// When the Remove Widget button is clicked, remove the widget.
+		$removeWidget.on( 'click', function() {
+
 		});
 	};
 
