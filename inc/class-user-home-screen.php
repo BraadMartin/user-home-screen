@@ -343,13 +343,13 @@ class User_Home_Screen {
 	 */
 	public function get_user_tabs( $user ) {
 
-		//$user_tabs = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
+		$user_tabs = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
 
 		// Mock this for now.
-		$user_tabs = array(
+		/*$user_tabs = array(
 			'braad_tab_one' => 'Braad Tab',
 			'braad_tab_two' => 'Other Braad Tab',
-		);
+		);*/
 
 		/**
 		 * Allow the user tabs config to be customized.
@@ -390,13 +390,27 @@ class User_Home_Screen {
 				<h1><?php echo esc_html( $page_title ); ?></h1>
 				<a class="button button-primary uhs-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
 				<h2 class="nav-tab-wrapper">
-					<?php if ( is_array( $user_tabs ) ) : ?>
-						<?php foreach ( $user_tabs as $tab_key => $tab_name ) : ?>
-							<a class="nav-tab nav-tab-active" data-tab-id="<?php echo esc_attr( $tab_key ); ?>">
-								<?php echo esc_html( $tab_name ); ?>
-							</a>
-						<?php endforeach; ?>
-					<?php endif; ?>
+					<?php
+
+					// Handle initial empty tabs and ensure our add new tab is always present.
+					if ( ! is_array( $user_tabs ) ) {
+						$user_tabs = array( 'add-new' => '+' );
+					} else {
+						$user_tabs = array_merge( $user_tabs, array( 'add-new' => '+' ) );
+					}
+
+					foreach ( $user_tabs as $tab_key => $tab_name ) {
+
+						$active_class = ( $user_tabs[0] === $tab_key ) ? 'nav-tab-active' : '';
+
+						printf(
+							'<a class="nav-tab %s" data-tab-id="%s">%s</a>',
+							esc_attr( $active_class ),
+							esc_attr( $tab_key ),
+							esc_html( $tab_name )
+						);
+					}
+					?>
 				</h2>
 				<?php echo $this->output_main_tab( $user, $user_widgets ); ?>
 				<?php echo $this->output_setup_tab( $user, $user_widgets ); ?>
