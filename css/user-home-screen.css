@@ -59,6 +59,7 @@
 	display: block;
 	margin: 0;
 	padding-right: 30px;
+	min-height: 23px;
 }
 
 .uhs-remove-widget {
@@ -164,6 +165,12 @@
 
 #uhs-save-widget {
 	visibility: hidden;
+}
+
+.uhs-thank-you {
+	text-align: center;
+	line-height: 1;
+	padding: 10px 0 20px;
 }
 
 /**

@@ -150,7 +150,7 @@ var userHomeScreen = ( function( $, data ) {
 
 			request.done( function( response ) {
 				$modal.empty();
-				$modal.append( '<h1>Thank you!</h1>' );
+				$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
 
 				setTimeout( function() {
 					location.reload();
@@ -259,7 +259,7 @@ var userHomeScreen = ( function( $, data ) {
 
 			request.done( function( response ) {
 				$modal.empty();
-				$modal.append( '<h1>Thank you!</h1>' );
+				$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
 
 				setTimeout( function() {
 					location.reload();
