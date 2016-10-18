@@ -399,17 +399,17 @@ class User_Home_Screen {
 
 					// Handle initial empty tabs and ensure our add new tab is always present.
 					if ( ! is_array( $user_tabs ) ) {
-						$user_tabs = array(
+						$user_nav_tabs = array(
 							'main'    => __( 'Main', 'user-home-screen' ),
 							'add-new' => '+',
 						);
 					} else {
-						$user_tabs = array_merge( $user_tabs, array( 'add-new' => '+' ) );
+						$user_nav_tabs = array_merge( $user_tabs, array( 'add-new' => '+' ) );
 					}
 
-					foreach ( $user_tabs as $tab_key => $tab_name ) {
+					foreach ( $user_nav_tabs as $tab_key => $tab_name ) {
 
-						$active_class = ( $user_tabs[0] === $tab_key ) ? 'nav-tab-active' : '';
+						$active_class = ( array_key_exists( $tab_key, array_slice( $user_nav_tabs, 0, 1 ) ) ) ? 'nav-tab-active' : '';
 
 						// If $active_class is still empty no tabs have been set up yet by the
 						// user, so make the default 'main' tab active.
@@ -426,8 +426,7 @@ class User_Home_Screen {
 					}
 					?>
 				</h2>
-				<?php echo $this->output_main_tab( $user, $user_widgets ); ?>
-				<?php echo $this->output_setup_tab( $user, $user_widgets ); ?>
+				<?php echo $this->output_tab_widgets( $user, $user_tabs, $user_widgets ); ?>
 			</div>
 			<?php echo $this->output_widget_edit_templates(); ?>
 		</div>
@@ -443,50 +442,57 @@ class User_Home_Screen {
 	}
 
 	/**
-	 * Output the "Main" tab contents.
+	 * Output all of the user's widgets for each of the user's tabs.
 	 *
 	 * @param   WP_User  $user          The current user object.
+	 * @param   array    $user_tabs     The current user's tabs.
 	 * @param   array    $user_widgets  The current user's widgets.
 	 *
-	 * @return  string                  The "Main" tab HTML.
+	 * @return  string                  The HTML for each tab's widgets.
 	 */
-	public function output_main_tab( $user, $user_widgets ) {
+	public function output_tab_widgets( $user, $user_tabs, $user_widgets ) {
 
-		ob_start();
+		$tabs_html = '';
 
-		// If the user doesn't have widgets set up, output an initial setup prompt.
-		if ( empty( $user_widgets ) ) {
-			echo 'YOLO No Widgets';
-		}
-		?>
-		<div class="uhs-widget-grid">
-			<?php
-				// If the user has widgets, output them one by one.
-				if ( ! empty( $user_widgets ) ) {
-					foreach ( $user_widgets as $widget ) {
-						echo self::render_widget( $widget );
-					}
+		// Loop over each tab.
+		foreach ( $user_tabs as $tab_key => $tab_name ) {
+
+			$widgets_html = '';
+
+			// Output user widgets for the current tab, or a prompt to add widgets.
+			if ( ! empty( $user_widgets[ $tab_key ] ) ) {
+
+				$widgets_html .= sprintf(
+					'<div class="%s" data-for-tab="%s">',
+					'uhs-widget-grid uhs-tab-content-wrap',
+					esc_attr( $tab_key )
+				);
+
+				foreach ( $user_widgets[ $tab_key ] as $widget ) {
+					$widgets_html .= self::render_widget( $widget );
 				}
-			?>
-		</div>
-		<?php
 
-		$tab_html = ob_get_clean();
+				$widgets_html .= '</div>';
+
+			} else {
+
+				$widgets_html .= sprintf(
+					'<div class="%s" data-for-tab="%s">%s</div>',
+					'uhs-tab-content-wrap',
+					esc_attr( $tab_key ),
+					esc_html__( "Looks like you haven't yet added widgets to this tab. Click the \"Add Widget\" button on the top right of your screen to get started.", 'user-home-screen' )
+				);
+			}
+
+			$tabs_html .= $widgets_html;
+		}
+
 		/**
-		 * Allow the HTML for the "Main" tab to be customized.
+		 * Allow the HTML for each tab's widgets to be customized.
 		 *
-		 * @param  string  $tab_html  The HTML for the "Main" tab.
+		 * @param  string  $tab_html  The HTML for each tab's widgets.
 		 */
-		$tab_html = apply_filters( 'user_home_screen_main_tab', $tab_html );
-
-		// Wrap the HTML in a standard wrapper.
-		$tab_html = sprintf(
-			'<div class="%s">%s</div>',
-			'uhs-main-tab',
-			$tab_html
-		);
-
-		return $tab_html;
+		return apply_filters( 'user_home_screen_tabs_html', $tabs_html );
 	}
 
 	/**

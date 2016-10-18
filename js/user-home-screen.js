@@ -9,6 +9,7 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var $wrap         = $();
 	var $navTabs      = $();
+	var $tabContent   = $();
 	var $addWidget    = $();
 	var $removeWidget = $();
 
@@ -29,12 +30,24 @@ var userHomeScreen = ( function( $, data ) {
 		// Setup key DOM references.
 		$wrap         = $( '#uhs-wrap' );
 		$navTabs      = $( 'h2.nav-tab-wrapper .nav-tab' );
+		$tabContent   = $( '.uhs-tab-content-wrap' );
 		$addWidget    = $( '.uhs-add-widget' );
 		$removeWidget = $( '.uhs-remove-widget' );
 
 		// Setup events.
 		setupEvents();
+
+		// Show initial active tab.
+		showInitialActiveTab();
 	};
+
+	/**
+	 * Show initial active tab.
+	 */
+	var showInitialActiveTab = function() {
+		var tabID = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
+		$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
+	}
 
 	/**
 	 * Setup events.
@@ -43,32 +56,7 @@ var userHomeScreen = ( function( $, data ) {
 
 		// When a nav tab is clicked, toggle classes.
 		$navTabs.on( 'click', function() {
-
-			var $this = $( this );
-
-			// If the clicked tab was already active, do nothing.
-			if ( $this.hasClass( 'nav-tab-active' ) ) {
-				return;
-			}
-
-			// Store the tab-id.
-			var tabID = $this.attr( 'data-tab-id' );
-
-			// If the clicked tab was our add-new tab, trigger the add-tab modal,
-			// otherwise toggle to the tab as usual.
-			if ( tabID === 'add-new' ) {
-				openAddTabModal();
-			} else {
-
-				// Remove the active class from all tabs.
-				$navTabs.removeClass( 'nav-tab-active' );
-
-				// Set the active class on the clicked tab.
-				$this.addClass( 'nav-tab-active' );
-
-				// Set an attribute on the wrapper indicating which tab is active.
-				$wrap.attr( 'data-active-tab', tabID );
-			}
+			handleTabClick( this );
 		});
 
 		// When the Add Widget button is clicked, open the Add Widget modal.
@@ -81,6 +69,35 @@ var userHomeScreen = ( function( $, data ) {
 			
 		});
 	};
+
+	/**
+	 * Handle the click on a tab.
+	 *
+	 * @param {object} tab - A DOM reference to the clicked tab.
+	 */
+	var handleTabClick = function( tab ) {
+
+		var $tab = $( tab );
+
+		// If the clicked tab was already active, do nothing.
+		if ( $tab.hasClass( 'nav-tab-active' ) ) {
+			return;
+		}
+
+		var tabID = $tab.attr( 'data-tab-id' );
+
+		// If the clicked tab was our add-new tab, trigger the add-tab modal,
+		// otherwise toggle to the tab as usual.
+		if ( tabID === 'add-new' ) {
+			openAddTabModal();
+		} else {
+			$navTabs.removeClass( 'nav-tab-active' );
+			$tab.addClass( 'nav-tab-active' );
+			$wrap.attr( 'data-active-tab', tabID );
+			$tabContent.removeClass( 'uhs-visible' );
+			$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
+		}
+	}
 
 	/**
 	 * Open the Add Widget modal.

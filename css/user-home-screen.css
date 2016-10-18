@@ -17,25 +17,17 @@
 /**
  * Tab setup.
  */
-.uhs-main-tab,
-.uhs-setup-tab {
-	display: none;
-}
-
-#uhs-wrap[data-active-tab="main"] .uhs-main-tab,
-#uhs-wrap[data-active-tab="setup"] .uhs-setup-tab {
-	display: block;
-}
-
 #uhs-wrap .nav-tab {
 	cursor: pointer;
 }
 
-/**
- * "Main" tab.
- */
-.uhs-main-tab {
+.uhs-tab-content-wrap {
+	display: none;
 	padding-top: 20px;
+}
+
+.uhs-tab-content-wrap.uhs-visible {
+	display: block;
 }
 
 .uhs-widget-grid {
@@ -60,16 +52,8 @@
 }
 
 /**
- * "Setup" tab.
- */
-.uhs-setup-tab {
-	padding-top: 20px;
-}
-
-/**
  * Widgets.
  */
-
 .uhs-widget-title {
 	padding: 10px 0 6px;
 	display: block;
@@ -216,7 +200,6 @@
 /**
  * Select2
  */
-
 .select2-container .select2-selection--single,
 .select2-container .select2-selection--multiple {
 	border: 1px solid #ddd;
