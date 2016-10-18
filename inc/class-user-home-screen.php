@@ -464,7 +464,7 @@ class User_Home_Screen {
 				// If the user has widgets, output them one by one.
 				if ( ! empty( $user_widgets ) ) {
 					foreach ( $user_widgets as $widget ) {
-						echo User_Home_Screen::render_widget( $widget );
+						echo self::render_widget( $widget );
 					}
 				}
 			?>
@@ -512,7 +512,7 @@ class User_Home_Screen {
 
 		switch ( $widget['type'] ) {
 			case 'post-list':
-				$html = User_Home_Screen::render_post_list_widget( $widget['args'] );
+				$html = self::render_post_list_widget( $widget['args'] );
 				break;
 		}
 
@@ -626,41 +626,6 @@ class User_Home_Screen {
 		);
 
 		return $html;
-	}
-
-	/**
-	 * Output the "Setup" tab contents.
-	 *
-	 * @param   WP_User  $user          The current user object.
-	 * @param   array    $user_widgets  The current user's widgets.
-	 *
-	 * @return  string                  The "Setup" tab HTML.
-	 */
-	public function output_setup_tab( $user, $user_widgets ) {
-
-		ob_start();
-
-		?>
-		<div class="uhs-setup-form">
-		</div>
-		<?php
-
-		$tab_html = ob_get_clean();
-		/**
-		 * Allow the HTML for the "Setup" tab to be customized.
-		 *
-		 * @param  string  $tab_html  The HTML for the "Setup" tab.
-		 */
-		$tab_html = apply_filters( 'user_home_screen_setup_tab', $tab_html );
-
-		// Wrap the HTML in a standard wrapper.
-		$tab_html = sprintf(
-			'<div class="%s">%s</div>',
-			'uhs-setup-tab',
-			$tab_html
-		);
-
-		return $tab_html;
 	}
 
 	/**
