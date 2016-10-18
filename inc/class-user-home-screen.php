@@ -40,6 +40,9 @@ class User_Home_Screen {
 
 		// Ajax handler for adding a widget.
 		add_action( 'wp_ajax_uhs_add_widget', array( $this, 'ajax_add_widget' ) );
+
+		// Ajax handler for removing a widget.
+		add_action( 'wp_ajax_uhs_remove_widget', array( $this, 'ajax_remove_widget' ) );
 	}
 
 	/**
@@ -463,16 +466,17 @@ class User_Home_Screen {
 			if ( ! empty( $user_widgets[ $tab_key ] ) ) {
 
 				$widgets_html .= sprintf(
-					'<div class="%s" data-for-tab="%s">',
-					'uhs-widget-grid uhs-tab-content-wrap',
-					esc_attr( $tab_key )
+					'<div class="%s" data-for-tab="%s"><div class="%s">',
+					'uhs-tab-content-wrap',
+					esc_attr( $tab_key ),
+					'uhs-widget-grid'
 				);
 
 				foreach ( $user_widgets[ $tab_key ] as $widget ) {
 					$widgets_html .= self::render_widget( $widget );
 				}
 
-				$widgets_html .= '</div>';
+				$widgets_html .= '</div></div>';
 
 			} else {
 
@@ -812,6 +816,7 @@ class User_Home_Screen {
 		}
 
 		// Extract clean arguments from the form data.
+		$clean_tab   = sanitize_text_field( $_POST['tab_id'] );
 		$clean_type  = sanitize_text_field( $_POST['widget_type'] );
 		$args_input  = urldecode( $_POST['widget_data'] );
 		$widget_args = array();
@@ -832,15 +837,45 @@ class User_Home_Screen {
 		}
 
 		$widget_data = array(
+			'tab'  => $clean_tab,
 			'type' => $clean_type,
 			'args' => $clean_args,
 		);
 
-		// Validate the widget data.
 		$widget_data = $this->validate_widget_data( $widget_data );
 
-		// Add the widget for the user.
 		$this->add_widget_for_user( $widget_data, $user );
+
+		$response          = new stdClass();
+		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
+
+		wp_send_json( $response );
+
+		wp_die();
+	}
+
+	/**
+	 * Ajax handler for removing a widget.
+	 */
+	public function ajax_remove_widget() {
+
+		// Bail if our nonce is not valid.
+		check_ajax_referer( 'user-home-screen', 'nonce', true );
+
+		$user = wp_get_current_user();
+
+		// Bail if we don't have a user.
+		if ( empty( $user ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, you are missing a user.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		$tab_id       = sanitize_text_field( $_POST['tab_id'] );
+		$widget_index = (int)$_POST['widget_index'];
+
+		$this->remove_widget_for_user( $tab_id, $widget_index, $user );
 
 		$response          = new stdClass();
 		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
@@ -868,13 +903,23 @@ class User_Home_Screen {
 			$existing_data = array();
 		}
 
+		error_log( 'widget data before removing tab' );
+		error_log( print_r( $widget_data, true ) );
+
+		// Extract the tab ID.
+		$tab_id = $widget_data['tab'];
+		unset( $widget_data['tab'] );
+
+		error_log( 'widget data after removing tab' );
+		error_log( print_r( $widget_data, true ) );
+
 		/**
 		 * Allow the widget data to be customized as it's being added.
 		 *
 		 * @param  array    $widget_data  The array of widget data.
 		 * @param  WP_User  $user         The user object being updated.
 		 */
-		$existing_data[] = apply_filters( 'user_home_screen_add_widget_data', $widget_data, $user );
+		$existing_data[ $tab_id ][] = apply_filters( 'user_home_screen_add_widget_data', $widget_data, $user );
 
 		$updated_data = $existing_data;
 
@@ -884,10 +929,11 @@ class User_Home_Screen {
 	/**
 	 * Remove a widget from a user's home screen.
 	 *
+	 * @param  string   $tab_id        The ID of the tab the widget to remove is on.
 	 * @param  int      $widget_index  The index for the widget to remove.
 	 * @param  WP_User  $user          The user object to update.
 	 */
-	public function remove_widget_for_user( $widget_index, $user ) {
+	public function remove_widget_for_user( $tab_id, $widget_index, $user ) {
 
 		$existing_data = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
 
@@ -895,8 +941,8 @@ class User_Home_Screen {
 			$existing_data = array();
 		}
 
-		if ( isset( $existing_data[ $widget_index ] ) ) {
-			unset( $existing_data[ $widget_index ] );
+		if ( isset( $existing_data[ $tab_id ][ $widget_index ] ) ) {
+			unset( $existing_data[ $tab_id ][ $widget_index ] );
 		}
 
 		$updated_data = $existing_data;
@@ -922,9 +968,6 @@ class User_Home_Screen {
 		 * @param  WP_User  $user         The user object being updated.
 		 */
 		$widgets_data = apply_filters( 'user_home_screen_update_widgets_data', $widgets_data, $user );
-
-		// Ensure the array is sorted properly.
-		$widgets_data = array_values( $widgets_data );
 
 		update_user_meta( $user->ID, self::$user_widgets_meta_key, $widgets_data );
 	}

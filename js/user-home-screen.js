@@ -34,10 +34,8 @@ var userHomeScreen = ( function( $, data ) {
 		$addWidget    = $( '.uhs-add-widget' );
 		$removeWidget = $( '.uhs-remove-widget' );
 
-		// Setup events.
 		setupEvents();
 
-		// Show initial active tab.
 		showInitialActiveTab();
 	};
 
@@ -45,7 +43,9 @@ var userHomeScreen = ( function( $, data ) {
 	 * Show initial active tab.
 	 */
 	var showInitialActiveTab = function() {
+
 		var tabID = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
+
 		$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
 	}
 
@@ -54,19 +54,21 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var setupEvents = function() {
 
-		// When a nav tab is clicked, toggle classes.
 		$navTabs.on( 'click', function() {
 			handleTabClick( this );
 		});
 
-		// When the Add Widget button is clicked, open the Add Widget modal.
 		$addWidget.on( 'click', function() {
 			openAddWidgetModal();
 		});
 
-		// When the Remove Widget button is clicked, remove the widget.
 		$removeWidget.on( 'click', function() {
-			
+			var $clicked = $( this );
+			var $widget  = $clicked.closest( '.uhs-widget' );
+			var $tab     = $widget.closest( '.uhs-tab-content-wrap' );
+			var index    = $widget.index();
+
+			openRemoveWidgetModal( $widget, $tab, index );
 		});
 	};
 
@@ -98,6 +100,71 @@ var userHomeScreen = ( function( $, data ) {
 			$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
 		}
 	}
+
+	/**
+	 * Open the Add Tab modal.
+	 */
+	var openAddTabModal = function() {
+
+		var editTab   = wp.template( 'uhs-tab-edit' );
+		var fieldText = wp.template( 'uhs-field-text' );
+
+		var addTabData = {
+			label:   data.labels.tab_name,
+			classes: 'uhs-add-tab-name',
+			key:     'uhs-tab-name',
+			value:   '',
+		};
+
+		$.featherlight(
+			editTab({
+				label:      data.labels.add_tab,
+				nameTheTab: fieldText( addTabData ),
+				addButton:  data.labels.add_tab,
+			}),
+			modalConfig
+		);
+
+		var $spinner = $( '#uhs-save-tab-spinner' );
+		var $save    = $( '#uhs-save-tab-button' );
+
+		// Prevent the modal form from being submitted.
+		$( '#uhs-modal-tab-fields' ).on( 'submit', function( e ) {
+			e.preventDefault;
+		});
+
+		// Save the form data when the save button is clicked.
+		$save.on( 'click', function() {
+			var $modal     = $( '.featherlight-content .uhs-tab-edit' );
+			var $tabFields = $( '#uhs-modal-tab-fields' );
+			var tabData    = $tabFields.serialize();
+			var ajaxData   = {
+				'action'  : 'uhs_add_tab',
+				'nonce'   : data.nonce,
+				'tab_data': tabData,
+			};
+
+			$spinner.css( 'visibility', 'visible' );
+
+			var request = $.post( ajaxurl, ajaxData );
+
+			request.done( function( response ) {
+				$modal.empty();
+				$modal.append( '<h1>Thank you!</h1>' );
+
+				setTimeout( function() {
+					location.reload();
+				}, 1200 );
+
+				console.log( response );
+			});
+
+			request.fail( function( response ) {
+				$spinner.css( 'visibility', 'none' );
+				console.log( 'Something went wrong when trying to add a tab.' );
+			});
+		});
+	};
 
 	/**
 	 * Open the Add Widget modal.
@@ -143,7 +210,6 @@ var userHomeScreen = ( function( $, data ) {
 			var type          = $( this ).val();
 			var $widgetFields = $( '#uhs-modal-widget-fields' );
 
-			// Clear the current fields.
 			$widgetFields.empty();
 
 			// If the placeholder option was selected, bail.
@@ -152,10 +218,8 @@ var userHomeScreen = ( function( $, data ) {
 				return;
 			}
 
-			// Grab the HTML for the selected widget's fields.
 			var fieldsHTML = getWidgetFieldsHTML( type );
 
-			// Inject the right fields for the selected widget type.
 			$widgetFields.append( fieldsHTML );
 
 			// Initialize Select2 on the selects.
@@ -172,26 +236,21 @@ var userHomeScreen = ( function( $, data ) {
 			// Add a data attribute to the form indicating the widget type.
 			$widgetFields.attr( 'data-widget-type', type );
 
-			// Make the Save Widget button visible.
 			$save.addClass( 'uhs-visible' );
 		});
 
 		// Save the form data when the save button is clicked.
 		$save.on( 'click', function() {
-
-			// Grab the modal and form.
 			var $modal        = $( '.featherlight-content .uhs-widget-edit' );
 			var $widgetFields = $( '#uhs-modal-widget-fields' );
-
-			// Grab data from the form.
-			var widgetData = $widgetFields.serialize();
-
-			// Prepare data to save via ajax.
-			var ajaxData = {
+			var widgetData    = $widgetFields.serialize();
+			var tabID         = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
+			var ajaxData      = {
 				'action'     : 'uhs_add_widget',
 				'nonce'      : data.nonce,
 				'widget_type': $widgetFields.attr( 'data-widget-type' ),
 				'widget_data': widgetData,
+				'tab_id'     : tabID,
 			};
 
 			$spinner.css( 'visibility', 'visible' );
@@ -217,6 +276,41 @@ var userHomeScreen = ( function( $, data ) {
 	};
 
 	/**
+	 * Open the Remove Widget modal.
+	 *
+	 * @param {object} $widget - A jQuery object referencing the widget to remove.
+	 * @param {object} $tab    - A jQuery object referencing the tab.
+	 * @param {number} index   - The index for the widget to remove.
+	 */
+	var openRemoveWidgetModal = function( $widget, $tab, index ) {
+
+		var tabID = $tab.attr( 'data-for-tab' );
+
+		var ajaxData = {
+			'action'      : 'uhs_remove_widget',
+			'nonce'       : data.nonce,
+			'tab_id'      : tabID,
+			'widget_index': index,
+		};
+
+		var request = $.post( ajaxurl, ajaxData );
+
+		request.done( function( response ) {
+
+			setTimeout( function() {
+				location.reload();
+			}, 1200 );
+
+			console.log( response );
+		});
+
+		request.fail( function( response ) {
+			$spinner.css( 'visibility', 'none' );
+			console.log( 'Something went wrong when trying to save a widget.' );
+		});
+	}
+
+	/**
 	 * Given a widget type, return the HTML for the widget's fields.
 	 */
 	var getWidgetFieldsHTML = function( type ) {
@@ -237,77 +331,6 @@ var userHomeScreen = ( function( $, data ) {
 		});
 
 		return fields;
-	};
-
-	/**
-	 * Open the Add Tab modal.
-	 */
-	var openAddTabModal = function() {
-
-		var editTab   = wp.template( 'uhs-tab-edit' );
-		var fieldText = wp.template( 'uhs-field-text' );
-
-		var addTabData = {
-			label:   data.labels.tab_name,
-			classes: 'uhs-add-tab-name',
-			key:     'uhs-tab-name',
-			value:   '',
-		};
-
-		$.featherlight(
-			editTab({
-				label:      data.labels.add_tab,
-				nameTheTab: fieldText( addTabData ),
-				addButton:  data.labels.add_tab,
-			}),
-			modalConfig
-		);
-
-		var $spinner = $( '#uhs-save-tab-spinner' );
-		var $save    = $( '#uhs-save-tab-button' );
-
-		// Prevent the modal form from being submitted.
-		$( '#uhs-modal-tab-fields' ).on( 'submit', function( e ) {
-			e.preventDefault;
-		});
-
-		// Save the form data when the save button is clicked.
-		$save.on( 'click', function() {
-
-			// Grab the modal and form.
-			var $modal     = $( '.featherlight-content .uhs-tab-edit' );
-			var $tabFields = $( '#uhs-modal-tab-fields' );
-
-			// Grab data from the form.
-			var tabData = $tabFields.serialize();
-
-			// Prepare data to save via ajax.
-			var ajaxData = {
-				'action'  : 'uhs_add_tab',
-				'nonce'   : data.nonce,
-				'tab_data': tabData,
-			};
-
-			$spinner.css( 'visibility', 'visible' );
-
-			var request = $.post( ajaxurl, ajaxData );
-
-			request.done( function( response ) {
-				$modal.empty();
-				$modal.append( '<h1>Thank you!</h1>' );
-
-				setTimeout( function() {
-					location.reload();
-				}, 1200 );
-
-				console.log( response );
-			});
-
-			request.fail( function( response ) {
-				$spinner.css( 'visibility', 'none' );
-				console.log( 'Something went wrong when trying to add a tab.' );
-			});
-		});
 	};
 
 	return {
