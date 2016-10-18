@@ -35,6 +35,9 @@ class User_Home_Screen {
 		// Register our admin page.
 		add_action( 'admin_menu', array( $this, 'register_admin_page' ) );
 
+		// Ajax handler for adding a tab.
+		add_action( 'wp_ajax_uhs_add_tab', array( $this, 'ajax_add_tab' ) );
+
 		// Ajax handler for adding a widget.
 		add_action( 'wp_ajax_uhs_add_widget', array( $this, 'ajax_add_widget' ) );
 	}
@@ -99,6 +102,8 @@ class User_Home_Screen {
 			'edit_widget'        => __( 'Edit Widget', 'user-home-screen' ),
 			'select_widget_type' => __( 'Select widget type', 'user-home-screen' ),
 			'select_default'     => __( 'Select', 'user-home-screen' ),
+			'add_tab'            => __( 'Add Tab', 'user-home-screen' ),
+			'tab_name'           => __( 'Tab Name', 'user-home-screen' ),
 		);
 
 		// Add widget type data.
@@ -394,7 +399,10 @@ class User_Home_Screen {
 
 					// Handle initial empty tabs and ensure our add new tab is always present.
 					if ( ! is_array( $user_tabs ) ) {
-						$user_tabs = array( 'add-new' => '+' );
+						$user_tabs = array(
+							'main'    => __( 'Main', 'user-home-screen' ),
+							'add-new' => '+',
+						);
 					} else {
 						$user_tabs = array_merge( $user_tabs, array( 'add-new' => '+' ) );
 					}
@@ -402,6 +410,12 @@ class User_Home_Screen {
 					foreach ( $user_tabs as $tab_key => $tab_name ) {
 
 						$active_class = ( $user_tabs[0] === $tab_key ) ? 'nav-tab-active' : '';
+
+						// If $active_class is still empty no tabs have been set up yet by the
+						// user, so make the default 'main' tab active.
+						if ( empty( $active_class ) && 'main' === $tab_key ) {
+							$active_class = 'nav-tab-active';
+						}
 
 						printf(
 							'<a class="nav-tab %s" data-tab-id="%s">%s</a>',
@@ -650,6 +664,115 @@ class User_Home_Screen {
 	}
 
 	/**
+	 * Ajax handler for adding a tab.
+	 */
+	public function ajax_add_tab() {
+
+		// Bail if our nonce is not valid.
+		check_ajax_referer( 'user-home-screen', 'nonce', true );
+
+		$user = wp_get_current_user();
+
+		// Bail if we don't have a user.
+		if ( empty( $user ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, you are missing a user.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		// Extract clean arguments from the form data.
+		$args_input = urldecode( $_POST['tab_data'] );
+		$raw_args   = array();
+		$tab_name   = '';
+
+		parse_str( $args_input, $raw_args );
+
+		if ( ! empty( $raw_args['uhs-tab-name'] ) ) {
+			$tab_name = sanitize_text_field( $raw_args['uhs-tab-name'] );
+		}
+
+		// Add the tab for the user.
+		$this->add_tab_for_user( $tab_name, $user );
+
+		$response          = new stdClass();
+		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
+
+		wp_send_json( $response );
+
+		wp_die();
+	}
+
+	/**
+	 * Validate tab data.
+	 *
+	 * @param   array  $tab_data  The array of tab data.
+	 *
+	 * @return  array             The validated array of tab data.
+	 */
+	public function validate_tab_data( $tab_data ) {
+
+
+		return $tab_data;
+	}
+
+	/**
+	 * Add a tab to a user.
+	 *
+	 * @param  array    $tab_data  The array of tab data.
+	 * @param  WP_User  $user      The current user object.
+	 */
+	public function add_tab_for_user( $tab_data, $user ) {
+
+		// Get existing tab data for the user.
+		$existing_data = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
+
+		error_log( 'existing data' );
+		error_log( print_r( $existing_data, true ) );
+
+		if ( empty( $existing_data ) || ! is_array( $existing_data ) ) {
+			$existing_data = array();
+		}
+
+		// Generate a unique key for the tab.
+		$tab_key = uniqid( 'uhs_', false );
+
+		/**
+		 * Allow the tab data to be customized as it's being added.
+		 *
+		 * @param  array    $tab_data  The array of tab data.
+		 * @param  WP_User  $user      The user object being updated.
+		 */
+		$existing_data[ $tab_key ] = apply_filters( 'user_home_screen_add_tab_data', $tab_data, $user );
+
+		$updated_data = $existing_data;
+
+		$this->update_tabs_for_user( $updated_data, $user );
+	}
+
+	/**
+	 * Update tabs for a user.
+	 *
+	 * @param  array    $tabs_data  The array of tab data.
+	 * @param  WP_User  $user       The current user object.
+	 */
+	public function update_tabs_for_user( $tabs_data, $user ) {
+
+		error_log( 'about to save user tabs' );
+		error_log( print_r( $tabs_data, true ) );
+
+		/**
+		 * Allow the tabs data to be customized as it's being saved.
+		 *
+		 * @param  array    $tabs_data  The array of tabs data.
+		 * @param  WP_User  $user       The user object being updated.
+		 */
+		$tabs_data = apply_filters( 'user_home_screen_update_tabs_data', $tabs_data, $user );
+
+		update_user_meta( $user->ID, self::$user_tabs_meta_key, $tabs_data );
+	}
+
+	/**
 	 * Output our widget edit templates.
 	 *
 	 * @return  string  The widget templates HTML.
@@ -659,6 +782,7 @@ class User_Home_Screen {
 		// Templates.
 		$templates = array(
 			USER_HOME_SCREEN_PATH . 'templates/widget-edit.php',
+			USER_HOME_SCREEN_PATH . 'templates/tab-edit.php',
 			USER_HOME_SCREEN_PATH . 'templates/field-text.php',
 			USER_HOME_SCREEN_PATH . 'templates/field-select.php',
 			USER_HOME_SCREEN_PATH . 'templates/field-select-multiple.php',

@@ -4,8 +4,8 @@
 		<# print( data.typeSelect ); #>
 		<form id="uhs-modal-widget-fields"></form>
 		<div class="uhs-modal-bottom">
-			<a id="uhs-save-widget" class="button button-primary">{{ data.addButton }}</a>
-			<span id="uhs-spinner" class="spinner"></span>
+			<a id="uhs-save-widget-button" class="button button-primary">{{ data.addButton }}</a>
+			<span id="uhs-save-widget-spinner" class="spinner"></span>
 		</div>
 	</div>
 </script>
