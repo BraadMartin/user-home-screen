@@ -21,6 +21,19 @@
 	cursor: pointer;
 }
 
+.uhs-remove-tab {
+	border: 0;
+	background: transparent;
+	padding: 0;
+	margin-left: 10px;
+	margin-right: -2px;
+	cursor: pointer;
+}
+
+.uhs-remove-tab:hover {
+	background-color: #d64e07;
+}
+
 .uhs-tab-content-wrap {
 	display: none;
 	padding-top: 20px;
@@ -75,7 +88,7 @@
 }
 
 .uhs-remove-widget:hover {
-	background-color: #eee;
+	background-color: #d64e07;
 }
 
 /**

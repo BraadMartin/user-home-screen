@@ -38,6 +38,9 @@ class User_Home_Screen {
 		// Ajax handler for adding a tab.
 		add_action( 'wp_ajax_uhs_add_tab', array( $this, 'ajax_add_tab' ) );
 
+		// Ajax handler for removing a tab.
+		add_action( 'wp_ajax_uhs_remove_tab', array( $this, 'ajax_remove_tab' ) );
+
 		// Ajax handler for adding a widget.
 		add_action( 'wp_ajax_uhs_add_widget', array( $this, 'ajax_add_widget' ) );
 
@@ -101,12 +104,16 @@ class User_Home_Screen {
 
 		// Define labels.
 		$data['labels'] = array(
-			'add_widget'         => __( 'Add Widget', 'user-home-screen' ),
-			'edit_widget'        => __( 'Edit Widget', 'user-home-screen' ),
-			'select_widget_type' => __( 'Select widget type', 'user-home-screen' ),
-			'select_default'     => __( 'Select', 'user-home-screen' ),
-			'add_tab'            => __( 'Add Tab', 'user-home-screen' ),
-			'tab_name'           => __( 'Tab Name', 'user-home-screen' ),
+			'add_widget'            => __( 'Add Widget', 'user-home-screen' ),
+			'remove_widget'         => __( 'Remove Widget', 'user-home-screen' ),
+			'remove_widget_confirm' => __( 'Are you sure you want to remove the selected widget?', 'user-home-screen' ),
+			'edit_widget'           => __( 'Edit Widget', 'user-home-screen' ),
+			'select_widget_type'    => __( 'Select widget type', 'user-home-screen' ),
+			'select_default'        => __( 'Select', 'user-home-screen' ),
+			'add_tab'               => __( 'Add Tab', 'user-home-screen' ),
+			'remove_tab'            => __( 'Remove Tab', 'user-home-screen' ),
+			'remove_tab_confirm'    => __( 'Are you sure you want to remove the selected tab? Widgets added to this tab will also be removed.', 'user-home-screen' ),
+			'tab_name'              => __( 'Tab Name', 'user-home-screen' ),
 		);
 
 		// Add widget type data.
@@ -420,11 +427,18 @@ class User_Home_Screen {
 							$active_class = 'nav-tab-active';
 						}
 
+						if ( 'main' !== $tab_key && 'add-new' !== $tab_key ) {
+							$remove_button = '<button type="button" class="uhs-remove-tab"><span class="dashicons dashicons-no-alt"></span></button>';
+						} else {
+							$remove_button = '';
+						}
+
 						printf(
-							'<a class="nav-tab %s" data-tab-id="%s">%s</a>',
+							'<a class="nav-tab %s" data-tab-id="%s">%s%s</a>',
 							esc_attr( $active_class ),
 							esc_attr( $tab_key ),
-							esc_html( $tab_name )
+							esc_html( $tab_name ),
+							$remove_button
 						);
 					}
 					?>
@@ -679,6 +693,36 @@ class User_Home_Screen {
 	}
 
 	/**
+	 * Ajax handler for removing a tab.
+	 */
+	public function ajax_remove_tab() {
+
+		// Bail if our nonce is not valid.
+		check_ajax_referer( 'user-home-screen', 'nonce', true );
+
+		$user = wp_get_current_user();
+
+		// Bail if we don't have a user.
+		if ( empty( $user ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, you are missing a user.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		$tab_id = sanitize_text_field( $_POST['tab_id'] );
+
+		$this->remove_tab_for_user( $tab_id, $user, true );
+
+		$response          = new stdClass();
+		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
+
+		wp_send_json( $response );
+
+		wp_die();
+	}
+
+	/**
 	 * Add a tab to a user's home screen.
 	 *
 	 * @param  array    $tab_data  The array of tab data.
@@ -715,10 +759,11 @@ class User_Home_Screen {
 	/**
 	 * Remove a tab from a user's home screen.
 	 *
-	 * @param  string   $tab_key  The key for the tab to remove.
-	 * @param  WP_User  $user     The user object to update.
+	 * @param  string   $tab_key         The key for the tab to remove.
+	 * @param  WP_User  $user            The user object to update.
+	 * @param  bool     $remove_widgets  Whether to also remove widgets for the tab (optional).
 	 */
-	public function remove_tab_for_user( $tab_key, $user ) {
+	public function remove_tab_for_user( $tab_key, $user, $remove_widgets = false ) {
 
 		$existing_data = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
 
@@ -732,7 +777,17 @@ class User_Home_Screen {
 
 		$updated_data = $existing_data;
 
-		$this->update_widgets_for_user( $updated_data, $user );
+		$this->update_tabs_for_user( $updated_data, $user );
+
+		// Also remove widgets for the tab if set to.
+		if ( $remove_widgets ) {
+
+			$existing_widgets = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
+
+			unset( $existing_widgets[ $tab_key ] );
+
+			$this->update_widgets_for_user( $existing_widgets, $user );
+		}
 	}
 
 	/**
@@ -771,6 +826,7 @@ class User_Home_Screen {
 			USER_HOME_SCREEN_PATH . 'templates/field-text.php',
 			USER_HOME_SCREEN_PATH . 'templates/field-select.php',
 			USER_HOME_SCREEN_PATH . 'templates/field-select-multiple.php',
+			USER_HOME_SCREEN_PATH . 'templates/confirm.php',
 		);
 
 		// Loop over each template and include it.

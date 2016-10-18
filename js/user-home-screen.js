@@ -58,6 +58,13 @@ var userHomeScreen = ( function( $, data ) {
 			handleTabClick( this );
 		});
 
+		$navTabs.find( '.uhs-remove-tab' ).on( 'click', function( e ) {
+			e.preventDefault();
+			console.log( 'about to remove a tab' );
+			var tabID = $( this ).closest( '.nav-tab' ).attr( 'data-tab-id' );
+			openRemoveTabModal( tabID );
+		});
+
 		$addWidget.on( 'click', function() {
 			openAddWidgetModal();
 		});
@@ -167,6 +174,57 @@ var userHomeScreen = ( function( $, data ) {
 	};
 
 	/**
+	 * Open the Remove Tab modal.
+	 *
+	 * @param {string} tabID - The ID for the tab to remove.
+	 */
+	var openRemoveTabModal = function( tabID ) {
+
+		var confirm = wp.template( 'uhs-confirm' );
+
+		$.featherlight(
+			confirm({
+				label:       data.labels.remove_tab,
+				confirmText: data.labels.remove_tab_confirm,
+				buttonText:  data.labels.remove_tab,
+			}),
+			modalConfig
+		);
+
+		var $modal = $( '.featherlight-content .uhs-confirm' );
+		var $save  = $modal.find( '.uhs-confirm-button' );
+
+		$save.on( 'click', function() {
+			var $spinner = $modal.find( '.uhs-confirm-spinner' );
+			var ajaxData = {
+				'action': 'uhs_remove_tab',
+				'nonce':  data.nonce,
+				'tab_id': tabID,
+			};
+
+			$spinner.addClass( 'uhs-visible' );
+
+			var request = $.post( ajaxurl, ajaxData );
+
+			request.done( function( response ) {
+				$modal.empty();
+				$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
+
+				setTimeout( function() {
+					location.reload();
+				}, 1200 );
+
+				console.log( response );
+			});
+
+			request.fail( function( response ) {
+				$spinner.css( 'visibility', 'none' );
+				console.log( 'Something went wrong when trying to save a widget.' );
+			});
+		});
+	};
+
+	/**
 	 * Open the Add Widget modal.
 	 */
 	var openAddWidgetModal = function() {
@@ -242,7 +300,7 @@ var userHomeScreen = ( function( $, data ) {
 		// Save the form data when the save button is clicked.
 		$save.on( 'click', function() {
 			var $modal        = $( '.featherlight-content .uhs-widget-edit' );
-			var $widgetFields = $( '#uhs-modal-widget-fields' );
+			var $widgetFields = $modal.find( '#uhs-modal-widget-fields' );
 			var widgetData    = $widgetFields.serialize();
 			var tabID         = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
 			var ajaxData      = {
@@ -284,31 +342,51 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var openRemoveWidgetModal = function( $widget, $tab, index ) {
 
-		var tabID = $tab.attr( 'data-for-tab' );
+		var confirm = wp.template( 'uhs-confirm' );
 
-		var ajaxData = {
-			'action'      : 'uhs_remove_widget',
-			'nonce'       : data.nonce,
-			'tab_id'      : tabID,
-			'widget_index': index,
-		};
+		$.featherlight(
+			confirm({
+				label:       data.labels.remove_widget,
+				confirmText: data.labels.remove_widget_confirm,
+				buttonText:  data.labels.remove_widget,
+			}),
+			modalConfig
+		);
 
-		var request = $.post( ajaxurl, ajaxData );
+		var $modal = $( '.featherlight-content .uhs-confirm' );
+		var $save  = $modal.find( '.uhs-confirm-button' );
+		var tabID  = $tab.attr( 'data-for-tab' );
 
-		request.done( function( response ) {
+		$save.on( 'click', function() {
+			var $spinner = $modal.find( '.uhs-confirm-spinner' );
+			var ajaxData = {
+				'action'      : 'uhs_remove_widget',
+				'nonce'       : data.nonce,
+				'tab_id'      : tabID,
+				'widget_index': index,
+			};
 
-			setTimeout( function() {
-				location.reload();
-			}, 1200 );
+			$spinner.addClass( 'uhs-visible' );
 
-			console.log( response );
+			var request = $.post( ajaxurl, ajaxData );
+
+			request.done( function( response ) {
+				$modal.empty();
+				$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
+
+				setTimeout( function() {
+					location.reload();
+				}, 1200 );
+
+				console.log( response );
+			});
+
+			request.fail( function( response ) {
+				$spinner.css( 'visibility', 'none' );
+				console.log( 'Something went wrong when trying to save a widget.' );
+			});
 		});
-
-		request.fail( function( response ) {
-			$spinner.css( 'visibility', 'none' );
-			console.log( 'Something went wrong when trying to save a widget.' );
-		});
-	}
+	};
 
 	/**
 	 * Given a widget type, return the HTML for the widget's fields.
