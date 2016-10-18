@@ -921,6 +921,9 @@ class User_Home_Screen {
 		 */
 		$existing_data[ $tab_id ][] = apply_filters( 'user_home_screen_add_widget_data', $widget_data, $user );
 
+		// Reindex the array of widgets.
+		$existing_data[ $tab_id ] = array_values( $existing_data[ $tab_id ] );
+
 		$updated_data = $existing_data;
 
 		$this->update_widgets_for_user( $updated_data, $user );
@@ -941,9 +944,18 @@ class User_Home_Screen {
 			$existing_data = array();
 		}
 
+		error_log( 'existing data before remove' );
+		error_log( print_r( $existing_data, true ) );
+
 		if ( isset( $existing_data[ $tab_id ][ $widget_index ] ) ) {
 			unset( $existing_data[ $tab_id ][ $widget_index ] );
+
+			// Reindex the array of widgets.
+			$existing_data[ $tab_id ] = array_values( $existing_data[ $tab_id ] );
 		}
+
+		error_log( 'data after remove' );
+		error_log( print_r( $existing_data, true ) );
 
 		$updated_data = $existing_data;
 
