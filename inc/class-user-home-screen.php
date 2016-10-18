@@ -704,20 +704,7 @@ class User_Home_Screen {
 	}
 
 	/**
-	 * Validate tab data.
-	 *
-	 * @param   array  $tab_data  The array of tab data.
-	 *
-	 * @return  array             The validated array of tab data.
-	 */
-	public function validate_tab_data( $tab_data ) {
-
-
-		return $tab_data;
-	}
-
-	/**
-	 * Add a tab to a user.
+	 * Add a tab to a user's home screen.
 	 *
 	 * @param  array    $tab_data  The array of tab data.
 	 * @param  WP_User  $user      The current user object.
@@ -751,7 +738,30 @@ class User_Home_Screen {
 	}
 
 	/**
-	 * Update tabs for a user.
+	 * Remove a tab from a user's home screen.
+	 *
+	 * @param  string   $tab_key  The key for the tab to remove.
+	 * @param  WP_User  $user     The user object to update.
+	 */
+	public function remove_tab_for_user( $tab_key, $user ) {
+
+		$existing_data = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
+
+		if ( empty( $existing_data ) || ! is_array( $existing_data ) ) {
+			$existing_data = array();
+		}
+
+		if ( isset( $existing_data[ $tab_key ] ) ) {
+			unset( $existing_data[ $tab_key ] );
+		}
+
+		$updated_data = $existing_data;
+
+		$this->update_widgets_for_user( $updated_data, $user );
+	}
+
+	/**
+	 * Update tabs on a user's home screen.
 	 *
 	 * @param  array    $tabs_data  The array of tab data.
 	 * @param  WP_User  $user       The current user object.
