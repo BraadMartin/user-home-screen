@@ -60,8 +60,10 @@ var userHomeScreen = ( function( $, data ) {
 
 		$navTabs.find( '.uhs-remove-tab' ).on( 'click', function( e ) {
 			e.preventDefault();
-			console.log( 'about to remove a tab' );
+			e.stopPropagation();
+
 			var tabID = $( this ).closest( '.nav-tab' ).attr( 'data-tab-id' );
+
 			openRemoveTabModal( tabID );
 		});
 
@@ -146,8 +148,8 @@ var userHomeScreen = ( function( $, data ) {
 			var $tabFields = $( '#uhs-modal-tab-fields' );
 			var tabData    = $tabFields.serialize();
 			var ajaxData   = {
-				'action'  : 'uhs_add_tab',
-				'nonce'   : data.nonce,
+				'action':   'uhs_add_tab',
+				'nonce':    data.nonce,
 				'tab_data': tabData,
 			};
 
@@ -304,11 +306,11 @@ var userHomeScreen = ( function( $, data ) {
 			var widgetData    = $widgetFields.serialize();
 			var tabID         = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
 			var ajaxData      = {
-				'action'     : 'uhs_add_widget',
-				'nonce'      : data.nonce,
+				'action':      'uhs_add_widget',
+				'nonce':       data.nonce,
 				'widget_type': $widgetFields.attr( 'data-widget-type' ),
 				'widget_data': widgetData,
-				'tab_id'     : tabID,
+				'tab_id':      tabID,
 			};
 
 			$spinner.css( 'visibility', 'visible' );
@@ -360,9 +362,9 @@ var userHomeScreen = ( function( $, data ) {
 		$save.on( 'click', function() {
 			var $spinner = $modal.find( '.uhs-confirm-spinner' );
 			var ajaxData = {
-				'action'      : 'uhs_remove_widget',
-				'nonce'       : data.nonce,
-				'tab_id'      : tabID,
+				'action':      'uhs_remove_widget',
+				'nonce':        data.nonce,
+				'tab_id':       tabID,
 				'widget_index': index,
 			};
 
