@@ -660,6 +660,11 @@ class User_Home_Screen {
 							<?php echo get_the_date(); ?>
 						</div>
 						<?php endif; ?>
+						<?php if ( in_array( 'modified_date', $parts ) ) : ?>
+						<div class="uhs-post-list-widget-post-modified-date">
+							<?php echo get_the_modified_date(); ?>
+						</div>
+						<?php endif; ?>
 						<?php if ( in_array( 'category', $parts ) ) : ?>
 						<div class="uhs-post-list-widget-categories">
 							<?php echo self::get_taxonomy_term_list( $query->post->ID, 'category', '', ', ', false ); ?>

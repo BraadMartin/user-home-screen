@@ -135,7 +135,8 @@
 
 .uhs-post-list-widget-post-type,
 .uhs-post-list-widget-post-status,
-.uhs-post-list-widget-post-date {
+.uhs-post-list-widget-post-date,
+.uhs-post-list-widget-post-modified-date {
 	margin-bottom: 10px;
 }
 
