@@ -137,10 +137,11 @@ class User_Home_Screen {
 	 */
 	public function get_widget_type_data() {
 
-		$post_types    = $this->get_post_types();
-		$categories    = $this->get_categories();
-		$post_statuses = $this->get_post_statuses();
-		$authors       = $this->get_authors();
+		$post_types       = $this->get_post_types();
+		$categories       = $this->get_categories();
+		$post_statuses    = $this->get_post_statuses();
+		$authors          = $this->get_authors();
+		$order_by_options = $this->get_order_by_options();
 
 		$widget_types = array(
 			'post-list' => array(
@@ -178,6 +179,21 @@ class User_Home_Screen {
 						'type'        => 'select-multiple',
 						'placeholder' => __( 'Select an Author', 'user-home-screen' ),
 						'values'      => $authors,
+					),
+					array(
+						'key'    => 'order_by',
+						'label'  => __( 'Order By', 'user-home-screen' ),
+						'type'   => 'select',
+						'values' => $order_by_options,
+					),
+					array(
+						'key'    => 'order',
+						'label'  => __( 'Order', 'user-home-screen' ),
+						'type'   => 'select',
+						'values' => array(
+							'DESC' => __( 'Descending', 'user-home-screen' ),
+							'ASC'  => __( 'Ascending', 'user-home-screen' ),
+						),
 					),
 				),
 			),
@@ -230,6 +246,29 @@ class User_Home_Screen {
 	}
 
 	/**
+	 * Return an array of categories that should be selectable in widgets.
+	 *
+	 * @return  array  The array of categories.
+	 */
+	public function get_categories() {
+
+		$full_categories = get_terms( array( 'taxonomy' => 'category' ) );
+		$categories      = array();
+
+		// Transform into a simple array of user ID => Display name.
+		foreach ( $full_categories as $category ) {
+			$categories[ 'term_' . $category->term_id ] = $category->name;
+		}
+
+		/**
+		 * Allow the selectable authors to be filtered.
+		 *
+		 * @param  array  $authors  The default array of selectable categories.
+		 */
+		return apply_filters( 'user_home_screen_selectable_categories', $categories );
+	}
+
+	/**
 	 * Return an array of post statuses that should be selectable in widgets.
 	 *
 	 * @return  array  The array of post statuses.
@@ -263,8 +302,8 @@ class User_Home_Screen {
 		$authors    = array();
 
 		// Transform into a simple array of user ID => Display name.
-		// Here we have to store user_logins instead of the ID because if we key
-		// this array by IDs it won't be ordered by display_name.
+		// We have to prefix the ID here because otherwise the array would
+		// index based on ID.
 		foreach ( $full_users as $user ) {
 			$authors[ 'user_' . $user->ID ] = $user->data->display_name;
 		}
@@ -278,26 +317,26 @@ class User_Home_Screen {
 	}
 
 	/**
-	 * Return an array of categories that should be selectable in widgets.
+	 * Return an array of order by options that should be selectable in widgets.
 	 *
-	 * @return  array  The array of categories.
+	 * @return  array  The array of order by options.
 	 */
-	public function get_categories() {
+	public function get_order_by_options() {
 
-		$full_categories = get_terms( array( 'taxonomy' => 'category' ) );
-		$categories      = array();
-
-		// Transform into a simple array of user ID => Display name.
-		foreach ( $full_categories as $category ) {
-			$categories[ 'term_' . $category->term_id ] = $category->name;
-		}
+		$order_by_options = array(
+			'date'     => __( 'Publish Date', 'user-home-screen' ),
+			'modified' => __( 'Last Modified Date', 'user-home-screen' ),
+			'author'   => __( 'Author', 'user-home-screen' ),
+			'title'    => __( 'Title', 'user-home-screen' ),
+			'type'     => __( 'Post Type', 'user-home-screen' ),
+		);
 
 		/**
-		 * Allow the selectable authors to be filtered.
+		 * Allow the selectable order by options to be filtered.
 		 *
-		 * @param  array  $authors  The default array of selectable categories.
+		 * @param  array  $order_by_options  The default array of selectable order by options.
 		 */
-		return apply_filters( 'user_home_screen_selectable_categories', $categories );
+		return apply_filters( 'user_home_screen_selectable_order_by_options', $order_by_options );
 	}
 
 	/**
@@ -1131,6 +1170,16 @@ class User_Home_Screen {
 			$updated_args['query_args']['author__in'] = $author_ids;
 		}
 
+		// Order by.
+		if ( ! empty( $args['order_by'] ) ) {
+			$updated_args['query_args']['orderby'] = sanitize_text_field( $args['order_by'] );
+		}
+
+		// Order.
+		if ( ! empty( $args['order'] ) ) {
+			$updated_args['query_args']['order'] = sanitize_text_field( $args['order'] );
+		}
+
 		// Parts.
 		if ( ! empty( $args['parts'] ) ) {
 			$updated_args['parts'] = $args['parts'];
@@ -1165,6 +1214,11 @@ class User_Home_Screen {
 				$parts[] = 'publish_date';
 			}
 
+			// Show the last modified date if the order by is set to last modified date.
+			if ( ! empty( $query_args['orderby'] ) && 'modified' === $query_args['orderby'] ) {
+				$parts[] = 'modified_date';
+			}
+
 			// Show the post status if no post_status or multiple post statuses.
 			if (
 				empty( $query_args['post_status'] ) ||
@@ -1176,16 +1230,16 @@ class User_Home_Screen {
 			// Always show the author.
 			$parts[] = 'author';
 
-			/**
-			 * Allow the parts to be customized.
-			 *
-			 * @param  array  $parts         The default array of parts.
-			 * @param  array  $updated_args  The full args array.
-			 */
-			$updated_args['parts'] = apply_filters( 'user_home_screen_post_list_parts', $parts, $updated_args );
+			$updated_args['parts'] = $parts;
 		}
 
-		return $updated_args;
+		/**
+		 * Allow the args to be customized.
+		 *
+		 * @param  array  $updated_args  The updated args array.
+		 * @param  array  $args          The original args array.
+		 */
+		return apply_filters( 'user_home_screen_post_list_args', $updated_args, $args );
 	}
 
 	/**
