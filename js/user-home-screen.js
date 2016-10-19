@@ -285,11 +285,19 @@ var userHomeScreen = ( function( $, data ) {
 			// Initialize Select2 on the selects.
 			$widgetFields.find( 'select' ).each( function() {
 				var $this = $( this );
-				$this.select2({
-					multiple: true,
-					placeholder: $this.attr( 'data-placeholder' ),
-				});
-				$this.val( '' );
+
+				if ( $this.hasClass( 'uhs-multi-select' ) ) {
+					$this.select2({
+						multiple: true,
+						placeholder: $this.attr( 'data-placeholder' ),
+					});
+					$this.val( '' );
+				} else {
+					$this.select2({
+						minimumResultsForSearch: Infinity,
+					});
+				}
+
 				$this.trigger( 'change' );
 			});
 
