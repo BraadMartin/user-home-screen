@@ -5,6 +5,8 @@
  * @package User Home Screen
  */
 
+
+
 class User_Home_Screen {
 
 	/**
@@ -16,6 +18,11 @@ class User_Home_Screen {
 	 * The meta key we store all user tabs under.
 	 */
 	public static $user_tabs_meta_key = '_uhs_user_tabs';
+
+	/**
+	 * The meta key we store all other user options under.
+	 */
+	public static $user_options_meta_key = '_uhs_user_options';
 
 	/**
 	 * The constructor.
@@ -34,6 +41,16 @@ class User_Home_Screen {
 
 		// Register our admin page.
 		add_action( 'admin_menu', array( $this, 'register_admin_page' ) );
+
+		// Maybe redirect the default WordPress dashboard to User Home Screen.
+		add_action( 'wp_dashboard_setup', array( $this, 'maybe_redirect_dashboard' ) );
+
+		// Output our user profile fields.
+		add_action( 'personal_options', array( $this, 'output_user_profile_fields' ) );
+
+		// Save our options from the user profile screen.
+		add_action( 'personal_options_update', array( $this, 'save_user_profile_options' ) );
+		add_action( 'edit_user_profile_update', array( $this, 'save_user_profile_options' ) );
 
 		// Ajax handler for adding a tab.
 		add_action( 'wp_ajax_uhs_add_tab', array( $this, 'ajax_add_tab' ) );
@@ -58,6 +75,46 @@ class User_Home_Screen {
 		// Bail if we're not on our admin page.
 		if ( 'toplevel_page_user-home-screen' !== $hook ) {
 			return;
+		}
+
+		// Check for an already registered version of featherlight,
+		// and register ours if none is found.
+		if ( ! wp_script_is( 'featherlight', 'registered' ) ) {
+			wp_register_script(
+				'featherlight',
+				USER_HOME_SCREEN_URL . 'vendor/featherlight/featherlight.min.js',
+				array( 'jquery' ),
+				'1.4.0',
+				true
+			);
+		}
+		if ( ! wp_style_is( 'featherlight', 'registered' ) ) {
+			wp_register_style(
+				'featherlight',
+				USER_HOME_SCREEN_URL . 'vendor/featherlight/featherlight.min.css',
+				array(),
+				'1.4.0'
+			);
+		}
+
+		// Check for an already registered version of select2,
+		// and register ours if none is found.
+		if ( ! wp_script_is( 'select2', 'registered' ) ) {
+			wp_register_script(
+				'select2',
+				USER_HOME_SCREEN_URL . 'vendor/select2/select2.min.js',
+				array( 'jquery' ),
+				'4.0.3',
+				true
+			);
+		}
+		if ( ! wp_style_is( 'select2', 'registered' ) ) {
+			wp_register_style(
+				'select2',
+				USER_HOME_SCREEN_URL . 'vendor/select2/select2.min.css',
+				array(),
+				'4.0.3'
+			);
 		}
 
 		wp_enqueue_script(
@@ -373,6 +430,91 @@ class User_Home_Screen {
 	}
 
 	/**
+	 * Maybe redirect the default WordPress dashboard to User Home Screen.
+	 */
+	public function maybe_redirect_dashboard() {
+
+		$user         = wp_get_current_user();
+		$user_options = get_user_meta( $user->ID, self::$user_options_meta_key, true );
+
+		if ( ! empty( $user_options['redirect_dashboard'] ) ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=user-home-screen' ) );
+		}
+	}
+
+	/**
+	 * Save our options from the user profile screen.
+	 *
+	 * @param  int  $user_id  The current user's ID.
+	 */
+	public function save_user_profile_options( $user_id ) {
+
+		$nonce_valid = ( ! empty( $_POST['uhs-user-profile-nonce'] ) ) ? wp_verify_nonce( $_POST['uhs-user-profile-nonce'], 'uhs_user_profile' ) : false;
+
+		if ( $nonce_valid ) {
+
+			$existing_options = get_user_meta( $user_id, self::$user_options_meta_key, true );
+			$updated_options  = array();
+
+			// Handle existing options being empty.
+			if ( empty( $existing_options ) ) {
+				$existing_options = array();
+			}
+
+			if ( ! empty( $_POST['uhs-redirect-dashboard'] ) ) {
+				$updated_options['redirect_dashboard'] = 1;
+			} else {
+				$updated_options['redirect_dashboard'] = 0;
+			}
+
+			$updated_options = array_merge( $existing_options, $updated_options );
+
+			update_user_meta( $user_id, self::$user_options_meta_key, $updated_options );
+		}
+	}
+
+	/**
+	 * Output our user profile fields.
+	 *
+	 * @param  WP_User  $user  The current user object.
+	 */
+	public function output_user_profile_fields( $user ) {
+
+		$user_options = get_user_meta( $user->ID, self::$user_options_meta_key, true );
+
+		// Handle empty user options.
+		if ( empty( $user_options ) ) {
+			$user_options = array();
+		}
+
+		$default_options = array(
+			'redirect_dashboard' => false,
+		);
+
+		$user_options = array_merge( $default_options, $user_options );
+
+		$redirect_dashboard_label = __( 'Redirect Dashboard?', 'user-home-screen' );
+		$redirect_dashboard_desc  = __( 'Redirect the default WordPress dashboard to your User Home Screen', 'user-home-screen' );
+
+		?>
+		<tr class="uhs-user-profile-field">
+			<th scope="row"><?php esc_html_e( $redirect_dashboard_label ); ?></th>
+			<td>
+				<fieldset>
+					<legend class="screen-reader-text"><span><?php echo esc_html( $redirect_dashboard_label ); ?></span></legend>
+					<label for="uhs-redirect-dashboard">
+					<input name="uhs-redirect-dashboard" type="checkbox" id="uhs-redirect-dashboard" value="1" <?php checked( $user_options['redirect_dashboard'] ); ?>>
+						<?php echo esc_html( $redirect_dashboard_desc ); ?></label><br>
+				</fieldset>
+			</td>
+		</tr>
+		<?php
+
+		// Generate and output a nonce.
+		wp_nonce_field( 'uhs_user_profile', 'uhs-user-profile-nonce' );
+	}
+
+	/**
 	 * Return the user widgets config for the passed in user.
 	 *
 	 * @param  WP_User  $user  The current user object.
@@ -510,6 +652,16 @@ class User_Home_Screen {
 
 		$tabs_html = '';
 
+		// Handle emty user tabs.
+		if ( empty( $user_tabs ) ) {
+			$user_tabs = array();
+		}
+
+		// Handle empty user widgets.
+		if ( empty( $user_widgets ) ) {
+			$user_widgets = array();
+		}
+
 		// Loop over each tab.
 		foreach ( $user_tabs as $tab_key => $tab_name ) {
 
@@ -547,9 +699,11 @@ class User_Home_Screen {
 		/**
 		 * Allow the HTML for each tab's widgets to be customized.
 		 *
-		 * @param  string  $tab_html  The HTML for each tab's widgets.
+		 * @param  string  $tab_html      The HTML for each tab's widgets.
+		 * @param  array   $user_tabs     The current user's tabs.
+		 * @param  array   $user_widgets  The current user's widgets.
 		 */
-		return apply_filters( 'user_home_screen_tabs_html', $tabs_html );
+		return apply_filters( 'user_home_screen_tabs_html', $tabs_html, $user_tabs, $user_widgets );
 	}
 
 	/**
