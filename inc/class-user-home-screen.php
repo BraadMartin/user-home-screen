@@ -721,15 +721,25 @@ class User_Home_Screen {
 		 * and render a custom widget.
 		 *
 		 * @param  string  $html    The empty string of HTML.
-		 * @param  array   $widget  The widget instance data.
+		 * @param  array   $widget  The widget instance args.
 		 */
 		if ( ! empty( apply_filters( 'user_home_screen_pre_render_widget', $html, $widget ) ) ) {
 			return $html;
 		}
 
+		/**
+		 * Allow outside code to customize the widget args before rendering.
+		 *
+		 * @param  array  $widget  The widget instance data.
+		 */
+		$widget = apply_filters( 'user_home_screen_widget_data', $widget );
+
 		switch ( $widget['type'] ) {
 			case 'post-list':
 				$html = self::render_post_list_widget( $widget['args'] );
+				break;
+			case 'rss-feed':
+				$html = self::render_rss_feed_widget( $widget['args'] );
 				break;
 		}
 
@@ -837,6 +847,43 @@ class User_Home_Screen {
 			<h3><?php esc_html_e( 'No Posts Found...', 'user-home-screen' ); ?></h3>
 			<?php
 		}
+
+		$html = ob_get_clean();
+
+		// Wrap the HTML in a standard wrapper.
+		$html = sprintf(
+			'<div class="%s">%s</div>',
+			'uhs-widget type-post-list postbox',
+			$html
+		);
+
+		return $html;
+	}
+
+	/**
+	 * Render an rss-feed widget.
+	 *
+	 * @param   array  $args  The widget args.
+	 *
+	 * @return  string        The widget HTML.
+	 */
+	public static function render_rss_feed_widget( $args ) {
+
+		error_log( print_r( $args, true ) );
+
+		$html = '';
+
+		ob_start();
+
+		?>
+		<div class="uhs-widget-top-bar">
+			<?php /*<button type="button" class="handlediv button-link"><span class="toggle-indicator" aria-hidden="true"></span></button> */ ?>
+			<button type="button" class="uhs-remove-widget"><span class="dashicons dashicons-no-alt"></span></button>
+			<h2 class="uhs-widget-title hndle ui-sortable-handle">
+				<span><?php echo esc_html( $args['title'] ); ?></span>
+			</h2>
+		</div>
+		<?php
 
 		$html = ob_get_clean();
 
@@ -1157,14 +1204,14 @@ class User_Home_Screen {
 			$existing_data = array();
 		}
 
-		error_log( 'widget data before removing tab' );
+		error_log( 'widget data before removing widget' );
 		error_log( print_r( $widget_data, true ) );
 
 		// Extract the tab ID.
 		$tab_id = $widget_data['tab'];
 		unset( $widget_data['tab'] );
 
-		error_log( 'widget data after removing tab' );
+		error_log( 'widget data after removing widget' );
 		error_log( print_r( $widget_data, true ) );
 
 		/**
