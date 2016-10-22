@@ -44,7 +44,7 @@ var userHomeScreenWidgets = ( function( $, data ) {
 					layoutTemplate: '<div class="uhs-feed-content-wrap">{entries}</div>',
 					entryTemplate: '<div class="uhs-feed-item"><div class="uhs-feed-item-left"><h3 class="uhs-feed-item-title"><a href="{url}">{title}</a></h3></div><div class="uhs-feed-item-right"><div class="uhs-feed-item-date">{date}</div><div class="uhs-feed-item-author">{author}</div></div><div class="uhs-feed-item-content">{shortBodyPlain}...</div></div>',
 					tokens: {},
-					dateFormat: 'dddd MMM Do',
+					dateFormat: 'MMM Do, YYYY',
 					error: function(){},
 					success: function(){
 						$feedContent.addClass( 'uhs-loaded' );
