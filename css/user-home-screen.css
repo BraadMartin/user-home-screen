@@ -150,6 +150,57 @@
 }
 
 /**
+ * RSS Feed Widget.
+ */
+.uhs-feed-item {
+	position: relative;
+	padding: 10px 0;
+	border-bottom: 1px solid #eee;
+}
+
+.uhs-feed-item:last-child {
+	border-bottom: none;
+}
+
+.uhs-feed-item::after {
+	clear: both;
+	display: block;
+	content: '';
+}
+
+.uhs-feed-item-left {
+	max-width: calc( 100% - 120px );
+	float: left;
+}
+
+.uhs-feed-item-right {
+	width: 115px;
+	float: right;
+	text-align: right;
+	font-size: 12px;
+	padding-top: 7px;
+}
+
+.uhs-feed-item-title {
+	margin: 0 0 6px;
+	line-height: 1.4;
+	font-size: 16px;
+}
+
+.uhs-feed-item-title a {
+	text-decoration: none;
+}
+
+.uhs-feed-item-date,
+.uhs-feed-item-author {
+	margin-bottom: 10px;
+}
+
+.uhs-feed-item-content {
+	clear: both;
+}
+
+/**
  * Add/Edit Modal.
  */
 .uhs-modal .featherlight-content {
