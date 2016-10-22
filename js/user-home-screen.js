@@ -134,44 +134,69 @@ var userHomeScreen = ( function( $, data ) {
 			modalConfig
 		);
 
-		var $spinner = $( '#uhs-save-tab-spinner' );
-		var $save    = $( '#uhs-save-tab-button' );
+		var $tabNameInput = $( '.uhs-add-tab-name' );
+
+		// Bring focus to the tab name input.
+		$tabNameInput.focus();
 
 		// Prevent the modal form from being submitted.
 		$( '#uhs-modal-tab-fields' ).on( 'submit', function( e ) {
 			e.preventDefault;
 		});
 
+		// Save the form data when enter is pressed while focused on the input.
+		$tabNameInput.on( 'keydown', function( event ) {
+			if ( event.keyCode === 13 ) {
+				event.preventDefault();
+
+				var $modal     = $( '.featherlight-content .uhs-tab-edit' );
+				var $tabFields = $( '#uhs-modal-tab-fields' );
+				var tabData    = $tabFields.serialize();
+
+				ajaxAddTab( $modal, tabData );
+			}
+		});
+
 		// Save the form data when the save button is clicked.
-		$save.on( 'click', function() {
+		$( '#uhs-save-tab-button' ).on( 'click', function() {
 			var $modal     = $( '.featherlight-content .uhs-tab-edit' );
 			var $tabFields = $( '#uhs-modal-tab-fields' );
 			var tabData    = $tabFields.serialize();
-			var ajaxData   = {
-				'action':   'uhs_add_tab',
-				'nonce':    data.nonce,
-				'tab_data': tabData,
-			};
 
-			$spinner.css( 'visibility', 'visible' );
+			ajaxAddTab( $modal, tabData );
+		});
+	};
 
-			var request = $.post( ajaxurl, ajaxData );
+	/**
+	 * Send an Ajax request to add a tab.
+	 */
+	var ajaxAddTab = function( $modal, tabData ) {
 
-			request.done( function( response ) {
-				$modal.empty();
-				$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
+		var $spinner = $modal.find( '#uhs-save-tab-spinner' );
+		var ajaxData = {
+			'action':   'uhs_add_tab',
+			'nonce':    data.nonce,
+			'tab_data': tabData,
+		};
 
-				setTimeout( function() {
-					location.reload();
-				}, 1200 );
+		$spinner.css( 'visibility', 'visible' );
 
-				console.log( response );
-			});
+		var request = $.post( ajaxurl, ajaxData );
 
-			request.fail( function( response ) {
-				$spinner.css( 'visibility', 'none' );
-				console.log( 'Something went wrong when trying to add a tab.' );
-			});
+		request.done( function( response ) {
+			$modal.empty();
+			$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
+
+			setTimeout( function() {
+				location.reload();
+			}, 1200 );
+
+			console.log( response );
+		});
+
+		request.fail( function( response ) {
+			$spinner.css( 'visibility', 'none' );
+			console.log( 'Something went wrong when trying to add a tab.' );
 		});
 	};
 
