@@ -30,8 +30,9 @@ var userHomeScreenWidgets = ( function( $, data ) {
 			var $widget      = $( this );
 			var $feedContent = $widget.find( '.uhs-rss-feed-widget-feed-content' );
 			var feedURL      = $feedContent.attr( 'data-feed-url' );
+			var $spinner     = $widget.find( '.uhs-spinner' );
 
-			console.log( feedURL );
+			$spinner.addClass( 'uhs-visible' );
 
 			$feedContent.rss(
 				feedURL,
@@ -45,8 +46,12 @@ var userHomeScreenWidgets = ( function( $, data ) {
 					tokens: {},
 					dateFormat: 'dddd MMM Do',
 					error: function(){},
-					success: function(){},
-					onData: function(){}
+					success: function(){
+						$feedContent.addClass( 'uhs-loaded' );
+					},
+					onData: function(){
+						$spinner.removeClass( 'uhs-visible' );
+					},
 				}
 			);
 		});

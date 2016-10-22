@@ -911,8 +911,6 @@ class User_Home_Screen {
 	 */
 	public static function render_rss_feed_widget( $args ) {
 
-		error_log( print_r( $args, true ) );
-
 		$html = '';
 
 		ob_start();
@@ -925,7 +923,9 @@ class User_Home_Screen {
 				<span><?php echo esc_html( $args['title'] ); ?></span>
 			</h2>
 		</div>
-		<div class="uhs-rss-feed-widget-feed-content" data-feed-url="<?php echo esc_url( $args['feed_url'] ); ?>"></div>
+		<div class="uhs-rss-feed-widget-feed-content" data-feed-url="<?php echo esc_url( $args['feed_url'] ); ?>">
+			<span class="uhs-spinner spinner"></span>
+		</div>
 		<?php
 
 		$html = ob_get_clean();

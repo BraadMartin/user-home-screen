@@ -152,6 +152,25 @@
 /**
  * RSS Feed Widget.
  */
+.uhs-rss-feed-widget-feed-content {
+	text-align: center;
+}
+
+.uhs-rss-feed-widget-feed-content.uhs-loaded {
+	text-align: left;
+}
+
+.uhs-rss-feed-widget-feed-content .uhs-spinner {
+	float: none;
+	display: inline-block;
+	margin-top: 100px;
+	margin-bottom: 100px;
+}
+
+.uhs-rss-feed-widget-feed-content.uhs-loaded .uhs-spinner {
+	display: none;
+}
+
 .uhs-feed-item {
 	position: relative;
 	padding: 10px 0;
