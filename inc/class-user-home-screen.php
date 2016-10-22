@@ -117,6 +117,33 @@ class User_Home_Screen {
 			);
 		}
 
+		// Check for an already registered version of Moment JS,
+		// and register ours if none is found.
+		if ( ! wp_script_is( 'moment', 'registered' ) ) {
+			wp_register_script(
+				'moment',
+				USER_HOME_SCREEN_URL . 'vendor/moment/moment.min.js',
+				array(),
+				'2.15.1',
+				true
+			);
+		}
+
+		// Check for an already registered version of jquery-rss,
+		// and register ours if none is found.
+		if ( ! wp_script_is( 'jquery-rss', 'registered' ) ) {
+			wp_register_script(
+				'jquery-rss',
+				USER_HOME_SCREEN_URL . 'vendor/jquery-rss/jquery.rss.min.js',
+				array(
+					'jquery',
+					'moment',
+				),
+				'3.2.1',
+				true
+			);
+		}
+
 		wp_enqueue_script(
 			'user-home-screen',
 			USER_HOME_SCREEN_URL . 'js/user-home-screen.js',
@@ -126,6 +153,17 @@ class User_Home_Screen {
 				'wp-util',
 				'underscore',
 				'select2'
+			),
+			USER_HOME_SCREEN_VERSION,
+			true
+		);
+
+		wp_enqueue_script(
+			'user-home-screen-widgets',
+			USER_HOME_SCREEN_URL . 'js/user-home-screen-widgets.js',
+			array(
+				'jquery',
+				'jquery-rss'
 			),
 			USER_HOME_SCREEN_VERSION,
 			true
@@ -787,6 +825,8 @@ class User_Home_Screen {
 
 		if ( $query->have_posts() ) {
 
+			echo '<div class="uhs-post-list-widget-posts">';
+
 			while ( $query->have_posts() ) {
 
 				$query->the_post();
@@ -839,6 +879,8 @@ class User_Home_Screen {
 				<?php
 			}
 
+			echo '</div>';
+
 			wp_reset_postdata();
 
 		} else {
@@ -883,6 +925,7 @@ class User_Home_Screen {
 				<span><?php echo esc_html( $args['title'] ); ?></span>
 			</h2>
 		</div>
+		<div class="uhs-rss-feed-widget-feed-content" data-feed-url="<?php echo esc_url( $args['feed_url'] ); ?>"></div>
 		<?php
 
 		$html = ob_get_clean();
@@ -890,7 +933,7 @@ class User_Home_Screen {
 		// Wrap the HTML in a standard wrapper.
 		$html = sprintf(
 			'<div class="%s">%s</div>',
-			'uhs-widget type-post-list postbox',
+			'uhs-widget type-rss-feed postbox',
 			$html
 		);
 
