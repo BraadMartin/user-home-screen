@@ -14,6 +14,11 @@
 	float: right;
 }
 
+.uhs-ui-state-highlight {
+	background-color: transparent;
+	border: 1px dashed #aaa;
+}
+
 /**
  * Tab setup.
  */
@@ -32,6 +37,24 @@
 
 .uhs-remove-tab:hover {
 	background-color: #d64e07;
+}
+
+.uhs-tab-setup-notice {
+	display: block;
+	float: left;
+	color: #14ad0c;
+	padding: 9px 0 0 10px;
+}
+
+.uhs-tab-setup-notice .dashicons {
+	margin-right: 2px;
+	margin-top: -1px;
+}
+
+.uhs-no-tabs-notice {
+	clear: right;
+	float: right;
+	margin: 6px 0;
 }
 
 .uhs-tab-content-wrap {
@@ -54,7 +77,8 @@
 	justify-content: center;
 }
 
-.uhs-widget {
+.uhs-widget,
+.uhs-ui-state-highlight {
 	padding: 0 10px 10px;
 	margin: 0 10px 20px;
 	width: 360px;
@@ -217,6 +241,7 @@
 
 .uhs-feed-item-content {
 	clear: both;
+	line-height: 1.3;
 }
 
 /**

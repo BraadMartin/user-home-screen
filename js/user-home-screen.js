@@ -44,7 +44,12 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var showInitialActiveTab = function() {
 		var tabID = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
-		$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
+
+		if ( tabID === 'add-new' ) {
+			$addWidget.attr( 'disabled', true );
+		} else {
+			$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
+		}
 	};
 
 	/**
@@ -52,10 +57,12 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var setupEvents = function() {
 
+		// Tab click.
 		$navTabs.on( 'click', function() {
 			handleTabClick( this );
 		});
 
+		// Remove tab.
 		$navTabs.find( '.uhs-remove-tab' ).on( 'click', function( e ) {
 			e.preventDefault();
 			e.stopPropagation();
@@ -65,10 +72,22 @@ var userHomeScreen = ( function( $, data ) {
 			openRemoveTabModal( tabID );
 		});
 
+		// Add widget.
 		$addWidget.on( 'click', function() {
-			openAddWidgetModal();
+
+			// If the button is disabled, show a message, otherwise open the modal.
+			if ( $( this ).attr( 'disabled' ) ) {
+				if ( ! $( '.uhs-no-tabs-notice' ).length ) {
+					$( this ).after(
+						$( '<div class="uhs-no-tabs-notice" />' ).text( data.labels.no_tabs_notice )
+					);
+				}
+			} else {
+				openAddWidgetModal();
+			}
 		});
 
+		// Remove widget.
 		$removeWidget.on( 'click', function() {
 			var $clicked = $( this );
 			var $widget  = $clicked.closest( '.uhs-widget' );
@@ -76,6 +95,27 @@ var userHomeScreen = ( function( $, data ) {
 			var index    = $widget.index();
 
 			openRemoveWidgetModal( $widget, $tab, index );
+		});
+
+		var $widgetGrids = $( '.uhs-widget-grid' );
+
+		// Make widgets sortable.
+		$widgetGrids.sortable({
+			placeholder: 'uhs-ui-state-highlight',
+			handle: '.uhs-widget-title.hndle',
+			revert: 200,
+			tolerance: 'pointer',
+		});
+		$widgetGrids.disableSelection();
+
+		// Save the updated widget order after sorting.
+		$widgetGrids.on( 'sortupdate', function( event, ui ) {
+
+			// Grab the right widget grid.
+			var $widgetGrid = ui.item.closest( '.uhs-widget-grid' );
+			var tabID       = $widgetGrid.closest( '.uhs-tab-content-wrap' ).attr( 'data-for-tab' );
+
+			updateWidgetsOrder( $widgetGrid, tabID );
 		});
 	};
 
@@ -88,8 +128,8 @@ var userHomeScreen = ( function( $, data ) {
 
 		var $tab = $( tab );
 
-		// If the clicked tab was already active, do nothing.
-		if ( $tab.hasClass( 'nav-tab-active' ) ) {
+		// If the clicked tab was already active and wasn't the add-new tab, do nothing.
+		if ( $tab.hasClass( 'nav-tab-active' ) && 'add-new' !== $tab.attr( 'data-tab-id' ) ) {
 			return;
 		}
 
@@ -392,17 +432,18 @@ var userHomeScreen = ( function( $, data ) {
 			modalConfig
 		);
 
-		var $modal = $( '.featherlight-content .uhs-confirm' );
-		var $save  = $modal.find( '.uhs-confirm-button' );
-		var tabID  = $tab.attr( 'data-for-tab' );
+		var $modal   = $( '.featherlight-content .uhs-confirm' );
+		var $save    = $modal.find( '.uhs-confirm-button' );
+		var tabID    = $tab.attr( 'data-for-tab' );
+		var widgetID = $widget.attr( 'data-widget-id' );
 
 		$save.on( 'click', function() {
 			var $spinner = $modal.find( '.uhs-confirm-spinner' );
 			var ajaxData = {
-				'action':      'uhs_remove_widget',
-				'nonce':        data.nonce,
-				'tab_id':       tabID,
-				'widget_index': index,
+				'action':    'uhs_remove_widget',
+				'nonce':     data.nonce,
+				'tab_id':    tabID,
+				'widget_id': widgetID,
 			};
 
 			$spinner.addClass( 'uhs-visible' );
@@ -452,6 +493,34 @@ var userHomeScreen = ( function( $, data ) {
 		});
 
 		return fields;
+	};
+
+	/**
+	 * Save the updated widget order after sorting.
+	 *
+	 * @param {object} $widgetGrid - A jQuery object containing the updated widget grid.
+	 * @param {string} tabID       - The ID of the tab the widget grid is on.
+	 */
+	var updateWidgetsOrder = function( $widgetGrid, tabID ) {
+
+		var index = [];
+
+		var ajaxData = {
+			'action':      'uhs_update_widgets_order',
+			'nonce':        data.nonce,
+			'tab_id':       tabID,
+			'widget_order': index,
+		};
+
+		var request = $.post( ajaxurl, ajaxData );
+
+		request.done( function( response ) {
+			console.log( response );
+		});
+
+		request.fail( function( response ) {
+			console.log( 'Something went wrong when trying to save a widget.' );
+		});
 	};
 
 	/**
