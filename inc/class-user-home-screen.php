@@ -844,7 +844,7 @@ class User_Home_Screen {
 						</h3>
 						<?php if ( in_array( 'author', $parts ) ) : ?>
 						<div class="uhs-post-list-widget-post-author">
-							<?php echo esc_html__( 'By', 'user-home-screen' ) . ': ' . get_the_author(); ?>
+							<?php echo esc_html__( 'By', 'user-home-screen' ) . ' ' . get_the_author(); ?>
 						</div>
 						<?php endif; ?>
 					</div>
