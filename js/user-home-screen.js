@@ -40,12 +40,10 @@ var userHomeScreen = ( function( $, data ) {
 	};
 
 	/**
-	 * Show initial active tab.
+	 * Show initial active tab, either from a query param or from an HTML attribute.
 	 */
 	var showInitialActiveTab = function() {
-
 		var tabID = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
-
 		$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
 	};
 
@@ -107,6 +105,9 @@ var userHomeScreen = ( function( $, data ) {
 			$wrap.attr( 'data-active-tab', tabID );
 			$tabContent.removeClass( 'uhs-visible' );
 			$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
+
+			// Update the URL.
+			setQueryParam( 'tab', tabID );
 		}
 	};
 
@@ -169,6 +170,9 @@ var userHomeScreen = ( function( $, data ) {
 
 	/**
 	 * Send an Ajax request to add a tab.
+	 *
+	 * @param {object} $modal  - A jQuery object containing the Add Tab modal.
+	 * @param {object} tabData - The tab data to send in the Ajax request.
 	 */
 	var ajaxAddTab = function( $modal, tabData ) {
 
@@ -425,6 +429,10 @@ var userHomeScreen = ( function( $, data ) {
 
 	/**
 	 * Given a widget type, return the HTML for the widget's fields.
+	 *
+	 * @param {string} type - The widget type to get fields for.
+	 *
+	 * @return {string}     - The HTML for the widget's fields.
 	 */
 	var getWidgetFieldsHTML = function( type ) {
 
@@ -444,6 +452,45 @@ var userHomeScreen = ( function( $, data ) {
 		});
 
 		return fields;
+	};
+
+	/**
+	 * Insert or change a query param.
+	 *
+	 * See: http://stackoverflow.com/questions/486896/adding-a-parameter-to-the-url-with-javascript
+	 *
+	 * @param {string} key   - The query param key.
+	 * @param {string} value - The query param value.
+	 */
+	var setQueryParam = function( key, value ) {
+
+		key   = encodeURI( key );
+		value = encodeURI( value );
+
+		var kvp = document.location.search.substr( 1 ).split( '&' );
+		var i   = kvp.length;
+		var x;
+
+		while ( i-- ) {
+			x = kvp[ i ].split( '=' );
+
+			if ( x[0] == key ) {
+				x[1]     = value;
+				kvp[ i ] = x.join( '=' );
+				break;
+			}
+		}
+
+		if ( i < 0 ) {
+			kvp[ kvp.length ] = [ key, value ].join( '=' );
+		}
+
+		if ( history.pushState ) {
+			var newURL = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + kvp.join( '&' );
+			window.history.pushState({
+				path: newURL,
+			}, '', newURL );
+		}
 	};
 
 	return {

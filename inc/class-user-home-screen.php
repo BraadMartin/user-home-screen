@@ -636,14 +636,25 @@ class User_Home_Screen {
 						$user_nav_tabs = array_merge( $user_tabs, array( 'add-new' => '+' ) );
 					}
 
+					// Grab a "tab" query param from the URL if present.
+					$active_tab = ( ! empty( $_GET['tab'] ) ) ? $_GET['tab'] : '';
+
 					foreach ( $user_nav_tabs as $tab_key => $tab_name ) {
 
-						$active_class = ( array_key_exists( $tab_key, array_slice( $user_nav_tabs, 0, 1 ) ) ) ? 'nav-tab-active' : '';
-
-						// If $active_class is still empty no tabs have been set up yet by the
-						// user, so make the default 'main' tab active.
-						if ( empty( $active_class ) && 'main' === $tab_key ) {
+						// If an active tab is set in the URL use it, otherwise use the first tab from
+						// the user's tabs, otherwise if the user hasn't set up tabs use the default tab.
+						if ( ! empty( $active_tab ) && $tab_key === $active_tab ) {
 							$active_class = 'nav-tab-active';
+						} elseif ( empty( $active_tab ) ) {
+							if ( array_key_exists( $tab_key, array_slice( $user_nav_tabs, 0, 1 ) ) ) {
+								$active_class = 'nav-tab-active';
+							} else if ( 'main' === $tab_key ) {
+								$active_class = 'nav-tab-active';
+							} else {
+								$active_class = '';
+							}
+						} else {
+							$active_class = '';
 						}
 
 						if ( 'main' !== $tab_key && 'add-new' !== $tab_key ) {
