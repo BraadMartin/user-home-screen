@@ -47,7 +47,7 @@ var userHomeScreen = ( function( $, data ) {
 		var tabID = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
 
 		$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
-	}
+	};
 
 	/**
 	 * Setup events.
@@ -108,7 +108,7 @@ var userHomeScreen = ( function( $, data ) {
 			$tabContent.removeClass( 'uhs-visible' );
 			$tabContent.filter( '[data-for-tab="' + tabID + '"]' ).addClass( 'uhs-visible' );
 		}
-	}
+	};
 
 	/**
 	 * Open the Add Tab modal.
