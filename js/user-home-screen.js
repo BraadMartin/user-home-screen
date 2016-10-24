@@ -233,7 +233,7 @@ var userHomeScreen = ( function( $, data ) {
 
 			setTimeout( function() {
 				location.reload();
-			}, 1200 );
+			}, 400 );
 
 			console.log( response );
 		});
@@ -283,7 +283,7 @@ var userHomeScreen = ( function( $, data ) {
 
 				setTimeout( function() {
 					location.reload();
-				}, 1200 );
+				}, 400 );
 
 				console.log( response );
 			});
@@ -400,7 +400,7 @@ var userHomeScreen = ( function( $, data ) {
 
 				setTimeout( function() {
 					location.reload();
-				}, 1200 );
+				}, 400 );
 
 				console.log( response );
 			});
@@ -456,7 +456,7 @@ var userHomeScreen = ( function( $, data ) {
 
 				setTimeout( function() {
 					location.reload();
-				}, 1200 );
+				}, 400 );
 
 				console.log( response );
 			});

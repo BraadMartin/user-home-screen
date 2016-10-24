@@ -214,7 +214,7 @@ class User_Home_Screen {
 			'remove_tab'            => __( 'Remove Tab', 'user-home-screen' ),
 			'remove_tab_confirm'    => __( 'Are you sure you want to remove the selected tab? Widgets added to this tab will also be removed.', 'user-home-screen' ),
 			'tab_name'              => __( 'Tab Name', 'user-home-screen' ),
-			'no_tabs_notice'        => __( 'Please add a tab first, then you can add a widget', 'user-home-screen' ),
+			'no_tabs_notice'        => __( 'Please add a tab first, then you can add widgets', 'user-home-screen' ),
 		);
 
 		// Add widget type data.
@@ -1316,12 +1316,13 @@ class User_Home_Screen {
 		if ( empty( $widgets_data ) || ! is_array( $widgets_data ) ) {
 			$widgets_data = array();
 		}
-		if ( empty( $widgets_data[ $tab_id ] ) ) {
-			$widgets_data[ $tab_id ] = array();
-		}
 
 		$widget_id = $widget_data['id'];
 		$tab_id    = $widget_data['tab'];
+
+		if ( empty( $widgets_data[ $tab_id ] ) ) {
+			$widgets_data[ $tab_id ] = array();
+		}
 
 		// Remove the widget ID, since we use this to key the array.
 		unset( $widget_data['id'] );
