@@ -503,13 +503,22 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var updateWidgetsOrder = function( $widgetGrid, tabID ) {
 
-		var index = [];
+		console.log( $widgetGrid );
+
+		var widgetOrder = [];
+
+		$widgetGrid.find( '.uhs-widget' ).each( function() {
+			console.log( this );
+			widgetOrder.push( $( this ).attr( 'data-widget-id' ) );
+		});
+
+		console.log( widgetOrder );
 
 		var ajaxData = {
 			'action':      'uhs_update_widgets_order',
 			'nonce':        data.nonce,
 			'tab_id':       tabID,
-			'widget_order': index,
+			'widget_order': widgetOrder,
 		};
 
 		var request = $.post( ajaxurl, ajaxData );
