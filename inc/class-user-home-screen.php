@@ -857,52 +857,72 @@ class User_Home_Screen {
 
 				$query->the_post();
 
-				$post_type   = get_post_type_object( $query->post->post_type );
-				$post_status = get_post_status_object( $query->post->post_status );
+				$custom_html = '';
+				/**
+				 * Allow custom HTML to be used.
+				 *
+				 * @param  string    $custom_template  The HTML for a custom template.
+				 * @param  WP_Post   $post             The current post object.
+				 * @param  WP_Query  $query            The current query object.
+				 * @param  array     $args             The array of widget args.
+				 * @param  array     $parts            The array of template parts.
+				 */
+				$custom_html = apply_filters( 'user_home_screen_post_list_widget_post_html', $custom_html, $query->post, $query, $args, $parts );
 
-				?>
-				<div class="uhs-post-list-widget-post">
-					<div class="uhs-post-list-widget-left">
-						<h3 class="uhs-post-list-widget-post-title">
-							<a href="<?php echo esc_url( get_edit_post_link( get_the_ID(), false ) ); ?>">
-								<?php echo esc_html( the_title() ); ?>
-							</a>
-						</h3>
-						<?php if ( in_array( 'author', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-post-author">
-							<?php echo esc_html__( 'By', 'user-home-screen' ) . ' ' . get_the_author(); ?>
+				// Use custom HTML if provided, otherwise use the default HTML.
+				if ( ! empty( $custom_html ) ) {
+
+					echo $custom_html;
+
+				} else {
+
+					$post_type   = get_post_type_object( $query->post->post_type );
+					$post_status = get_post_status_object( $query->post->post_status );
+
+					?>
+					<div class="uhs-post-list-widget-post">
+						<div class="uhs-post-list-widget-left">
+							<h3 class="uhs-post-list-widget-post-title">
+								<a href="<?php echo esc_url( get_edit_post_link( $query->post->ID, false ) ); ?>">
+									<?php echo esc_html( get_the_title( $query->post->ID ) ); ?>
+								</a>
+							</h3>
+							<?php if ( in_array( 'author', $parts ) ) : ?>
+							<div class="uhs-post-list-widget-post-author">
+								<?php echo esc_html__( 'By', 'user-home-screen' ) . ' ' . get_the_author(); ?>
+							</div>
+							<?php endif; ?>
 						</div>
-						<?php endif; ?>
+						<div class="uhs-post-list-widget-right">
+							<?php if ( in_array( 'post_type', $parts ) ) : ?>
+							<div class="uhs-post-list-widget-post-type">
+								<?php echo esc_html( $post_type->labels->singular_name ); ?>
+							</div>
+							<?php endif; ?>
+							<?php if ( in_array( 'status', $parts ) ) : ?>
+							<div class="uhs-post-list-widget-post-status">
+								<?php echo esc_html( $post_status->label ); ?>
+							</div>
+							<?php endif; ?>
+							<?php if ( in_array( 'publish_date', $parts ) ) : ?>
+							<div class="uhs-post-list-widget-post-date">
+								<?php echo get_the_date(); ?>
+							</div>
+							<?php endif; ?>
+							<?php if ( in_array( 'modified_date', $parts ) ) : ?>
+							<div class="uhs-post-list-widget-post-modified-date">
+								<?php echo get_the_modified_date(); ?>
+							</div>
+							<?php endif; ?>
+							<?php if ( in_array( 'category', $parts ) ) : ?>
+							<div class="uhs-post-list-widget-categories">
+								<?php echo self::get_taxonomy_term_list( $query->post->ID, 'category', '', ', ', false ); ?>
+							</div>
+							<?php endif; ?>
+						</div>
 					</div>
-					<div class="uhs-post-list-widget-right">
-						<?php if ( in_array( 'post_type', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-post-type">
-							<?php echo esc_html( $post_type->labels->singular_name ); ?>
-						</div>
-						<?php endif; ?>
-						<?php if ( in_array( 'status', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-post-status">
-							<?php echo esc_html( $post_status->label ); ?>
-						</div>
-						<?php endif; ?>
-						<?php if ( in_array( 'publish_date', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-post-date">
-							<?php echo get_the_date(); ?>
-						</div>
-						<?php endif; ?>
-						<?php if ( in_array( 'modified_date', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-post-modified-date">
-							<?php echo get_the_modified_date(); ?>
-						</div>
-						<?php endif; ?>
-						<?php if ( in_array( 'category', $parts ) ) : ?>
-						<div class="uhs-post-list-widget-categories">
-							<?php echo self::get_taxonomy_term_list( $query->post->ID, 'category', '', ', ', false ); ?>
-						</div>
-						<?php endif; ?>
-					</div>
-				</div>
-				<?php
+					<?php
+				}
 			}
 
 			echo '</div>';
