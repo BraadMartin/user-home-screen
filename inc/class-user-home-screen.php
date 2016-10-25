@@ -804,10 +804,14 @@ class User_Home_Screen {
 		?>
 		<div class="uhs-widget postbox <?php echo esc_attr( $type_class ); ?>" data-widget-id="<?php echo esc_attr( $widget_id ); ?>">
 			<div class="uhs-widget-top-bar">
+				<button type="button" class="uhs-toggle-widget-info"><span class="dashicons dashicons-arrow-down"></span></button>
 				<button type="button" class="uhs-remove-widget"><span class="dashicons dashicons-no-alt"></span></button>
 				<h2 class="uhs-widget-title hndle ui-sortable-handle">
 					<span><?php echo esc_html( $widget_args['args']['title'] ); ?></span>
 				</h2>
+			</div>
+			<div class="uhs-widget-info">
+				<?php echo self::output_widget_info( $widget_id, $widget_args['args'] ); ?>
 			</div>
 			<?php
 				switch ( $widget_args['type'] ) {
@@ -831,6 +835,18 @@ class User_Home_Screen {
 		 * @param  array   $widget  The widget instance data.
 		 */
 		return apply_filters( 'user_home_screen_widget_html', $html, $widget );
+	}
+
+	/**
+	 * Output a widget info panel.
+	 *
+	 * @param   string  $widget_id  The widget ID.
+	 * @param   array   $args       The widget args.
+	 *
+	 * @return  string              The widget info HTML.
+	 */
+	public static function output_widget_info( $widget_id, $args ) {
+		echo 'Widget Info Goes Her';
 	}
 
 	/**

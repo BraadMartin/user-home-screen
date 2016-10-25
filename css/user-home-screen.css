@@ -95,16 +95,32 @@
 	padding: 10px 0 6px;
 	display: block;
 	margin: 0;
-	padding-right: 30px;
+	padding-right: 65px;
 	min-height: 23px;
+}
+
+.uhs-toggle-widget-info {
+	position: absolute;
+	border: none;
+	background-color: white;
+	cursor: pointer;
+	top: 10px;
+	right: 38px;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+}
+
+.uhs-toggle-widget-info:hover {
+	background-color: #e2e2e2;
 }
 
 .uhs-remove-widget {
 	position: absolute;
 	right: 10px;
-	top: 6px;
-	width: 28px;
-	height: 28px;
+	top: 10px;
+	width: 24px;
+	height: 24px;
 	padding: 0;
 	border: none;
 	background-color: white;
@@ -113,6 +129,16 @@
 
 .uhs-remove-widget:hover {
 	background-color: #d64e07;
+}
+
+.uhs-widget-info {
+	display: none;
+}
+
+.uhs-widget-info.uhs-visible {
+	display: block;
+	padding: 15px 0;
+	border-bottom: 1px solid #eee;
 }
 
 /**

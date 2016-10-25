@@ -7,11 +7,12 @@ var userHomeScreen = ( function( $, data ) {
 	/**
 	 * Store key DOM references.
 	 */
-	var $wrap         = $();
-	var $navTabs      = $();
-	var $tabContent   = $();
-	var $addWidget    = $();
-	var $removeWidget = $();
+	var $wrap             = $();
+	var $navTabs          = $();
+	var $tabContent       = $();
+	var $addWidget        = $();
+	var $removeWidget     = $();
+	var $toggleWidgetInfo = $();
 
 	/**
 	 * Modal config options.
@@ -28,11 +29,12 @@ var userHomeScreen = ( function( $, data ) {
 		console.log( data );
 
 		// Setup key DOM references.
-		$wrap         = $( '#uhs-wrap' );
-		$navTabs      = $( 'h2.nav-tab-wrapper .nav-tab' );
-		$tabContent   = $( '.uhs-tab-content-wrap' );
-		$addWidget    = $( '.uhs-add-widget' );
-		$removeWidget = $( '.uhs-remove-widget' );
+		$wrap             = $( '#uhs-wrap' );
+		$navTabs          = $( 'h2.nav-tab-wrapper .nav-tab' );
+		$tabContent       = $( '.uhs-tab-content-wrap' );
+		$addWidget        = $( '.uhs-add-widget' );
+		$removeWidget     = $( '.uhs-remove-widget' );
+		$toggleWidgetInfo = $( '.uhs-toggle-widget-info' );
 
 		setupEvents();
 
@@ -92,9 +94,15 @@ var userHomeScreen = ( function( $, data ) {
 			var $clicked = $( this );
 			var $widget  = $clicked.closest( '.uhs-widget' );
 			var $tab     = $widget.closest( '.uhs-tab-content-wrap' );
-			var index    = $widget.index();
 
-			openRemoveWidgetModal( $widget, $tab, index );
+			openRemoveWidgetModal( $widget, $tab );
+		});
+
+		$toggleWidgetInfo.on( 'click', function() {
+			var $clicked = $( this );
+			var $widget  = $clicked.closest( '.uhs-widget' );
+
+			toggleWidgetInfo( $widget );
 		});
 
 		var $widgetGrids = $( '.uhs-widget-grid' );
@@ -417,9 +425,8 @@ var userHomeScreen = ( function( $, data ) {
 	 *
 	 * @param {object} $widget - A jQuery object referencing the widget to remove.
 	 * @param {object} $tab    - A jQuery object referencing the tab.
-	 * @param {number} index   - The index for the widget to remove.
 	 */
-	var openRemoveWidgetModal = function( $widget, $tab, index ) {
+	var openRemoveWidgetModal = function( $widget, $tab ) {
 
 		var confirm = wp.template( 'uhs-confirm' );
 
@@ -469,6 +476,18 @@ var userHomeScreen = ( function( $, data ) {
 	};
 
 	/**
+	 * Toggle the widget info panel.
+	 *
+	 * @param {object} $widget - A jQuery object referencing the widget.
+	 */
+	var toggleWidgetInfo = function( $widget ) {
+
+		var $widgetInfo = $widget.find( '.uhs-widget-info' );
+
+		$widgetInfo.toggleClass( 'uhs-visible' );
+	};
+
+	/**
 	 * Given a widget type, return the HTML for the widget's fields.
 	 *
 	 * @param {string} type - The widget type to get fields for.
@@ -503,16 +522,12 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var updateWidgetsOrder = function( $widgetGrid, tabID ) {
 
-		console.log( $widgetGrid );
-
 		var widgetOrder = [];
 
 		$widgetGrid.find( '.uhs-widget' ).each( function() {
 			console.log( this );
 			widgetOrder.push( $( this ).attr( 'data-widget-id' ) );
 		});
-
-		console.log( widgetOrder );
 
 		var ajaxData = {
 			'action':      'uhs_update_widgets_order',
