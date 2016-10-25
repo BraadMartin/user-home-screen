@@ -797,14 +797,32 @@ class User_Home_Screen {
 		 */
 		$widget_args = apply_filters( 'user_home_screen_widget_args', $widget_args );
 
-		switch ( $widget_args['type'] ) {
-			case 'post-list':
-				$html = self::render_post_list_widget( $widget_id, $widget_args['args'] );
-				break;
-			case 'rss-feed':
-				$html = self::render_rss_feed_widget( $widget_id, $widget_args['args'] );
-				break;
-		}
+		$type_class = 'type-' . $widget_args['type'];
+
+		ob_start();
+
+		?>
+		<div class="uhs-widget postbox <?php echo esc_attr( $type_class ); ?>" data-widget-id="<?php echo esc_attr( $widget_id ); ?>">
+			<div class="uhs-widget-top-bar">
+				<button type="button" class="uhs-remove-widget"><span class="dashicons dashicons-no-alt"></span></button>
+				<h2 class="uhs-widget-title hndle ui-sortable-handle">
+					<span><?php echo esc_html( $widget_args['args']['title'] ); ?></span>
+				</h2>
+			</div>
+			<?php
+				switch ( $widget_args['type'] ) {
+					case 'post-list':
+						echo self::render_post_list_widget( $widget_id, $widget_args['args'] );
+						break;
+					case 'rss-feed':
+						echo self::render_rss_feed_widget( $widget_id, $widget_args['args'] );
+						break;
+				}
+			?>
+		</div>
+		<?php
+
+		$html = ob_get_clean();
 
 		/**
 		 * Allow the widget HTML to be customized.
@@ -838,16 +856,6 @@ class User_Home_Screen {
 		$query = new WP_Query( $args['query_args'] );
 
 		ob_start();
-
-		?>
-		<div class="uhs-widget-top-bar">
-			<?php /*<button type="button" class="handlediv button-link"><span class="toggle-indicator" aria-hidden="true"></span></button> */ ?>
-			<button type="button" class="uhs-remove-widget"><span class="dashicons dashicons-no-alt"></span></button>
-			<h2 class="uhs-widget-title hndle ui-sortable-handle">
-				<span><?php echo esc_html( $args['title'] ); ?></span>
-			</h2>
-		</div>
-		<?php
 
 		if ( $query->have_posts() ) {
 
@@ -936,17 +944,7 @@ class User_Home_Screen {
 			<?php
 		}
 
-		$html = ob_get_clean();
-
-		// Wrap the HTML in a standard wrapper.
-		$html = sprintf(
-			'<div class="%s" data-widget-id="%s">%s</div>',
-			'uhs-widget type-post-list postbox',
-			esc_attr( $widget_id ),
-			$html
-		);
-
-		return $html;
+		return ob_get_clean();
 	}
 
 	/**
@@ -959,34 +957,15 @@ class User_Home_Screen {
 	 */
 	public static function render_rss_feed_widget( $widget_id, $args ) {
 
-		$html = '';
-
 		ob_start();
 
 		?>
-		<div class="uhs-widget-top-bar">
-			<?php /*<button type="button" class="handlediv button-link"><span class="toggle-indicator" aria-hidden="true"></span></button> */ ?>
-			<button type="button" class="uhs-remove-widget"><span class="dashicons dashicons-no-alt"></span></button>
-			<h2 class="uhs-widget-title hndle ui-sortable-handle">
-				<span><?php echo esc_html( $args['title'] ); ?></span>
-			</h2>
-		</div>
 		<div class="uhs-rss-feed-widget-feed-content" data-feed-url="<?php echo esc_url( $args['feed_url'] ); ?>">
 			<span class="uhs-spinner spinner"></span>
 		</div>
 		<?php
 
-		$html = ob_get_clean();
-
-		// Wrap the HTML in a standard wrapper.
-		$html = sprintf(
-			'<div class="%s" data-widget-id="%s">%s</div>',
-			'uhs-widget type-rss-feed postbox',
-			esc_attr( $widget_id ),
-			$html
-		);
-
-		return $html;
+		return ob_get_clean();
 	}
 
 	/**
