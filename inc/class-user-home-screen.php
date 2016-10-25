@@ -731,7 +731,7 @@ class User_Home_Screen {
 			$widgets_html = '';
 
 			// Output user widgets for the current tab, or a prompt to add widgets.
-			if ( ! empty( $user_widgets ) ) {
+			if ( ! empty( $user_widgets[ $tab_key ] ) ) {
 
 				$widgets_html .= sprintf(
 					'<div class="%s" data-for-tab="%s"><div class="%s">',
