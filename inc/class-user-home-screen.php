@@ -811,7 +811,7 @@ class User_Home_Screen {
 				</h2>
 			</div>
 			<div class="uhs-widget-info">
-				<?php echo self::output_widget_info( $widget_id, $widget_args['args'] ); ?>
+				<?php echo self::output_widget_info( $widget_id, $widget_args ); ?>
 			</div>
 			<?php
 				switch ( $widget_args['type'] ) {
@@ -831,22 +831,57 @@ class User_Home_Screen {
 		/**
 		 * Allow the widget HTML to be customized.
 		 *
-		 * @param  string  $html    The default widget html.
-		 * @param  array   $widget  The widget instance data.
+		 * @param  string  $html         The default widget html.
+		 * @param  array   $widget_args  The widget instance data.
 		 */
-		return apply_filters( 'user_home_screen_widget_html', $html, $widget );
+		return apply_filters( 'user_home_screen_widget_html', $html, $widget_args );
 	}
 
 	/**
 	 * Output a widget info panel.
 	 *
-	 * @param   string  $widget_id  The widget ID.
-	 * @param   array   $args       The widget args.
+	 * @param   string  $widget_id    The widget ID.
+	 * @param   array   $widget_args  The widget args.
 	 *
-	 * @return  string              The widget info HTML.
+	 * @return  string                The widget info HTML.
 	 */
-	public static function output_widget_info( $widget_id, $args ) {
-		echo 'Widget Info Goes Her';
+	public static function output_widget_info( $widget_id, $widget_args ) {
+
+		$widget_info = '';
+		/**
+		 * Allow the widget info to be customized and custom widget types to be handled.
+		 *
+		 * @param  string  $widget_id    The current widget ID.
+		 * @param  array   $widget_args  The current widget args.
+		 */
+		$widget_info = apply_filters( 'user_home_screen_widget_info', $widget_info, $widget_id, $widget_args );
+
+		// Use custom widget info if specified.
+		if ( ! empty( $widget_info ) ) {
+			return $widget_info;
+		}
+
+		switch ( $widget_args['type'] ) {
+			case 'post-list':
+				$widget_info .= sprintf(
+					'<div class="%s"><span class="%s">%s:</span> %s</div>',
+					'uhs-widget-info-type',
+					'uhs-widget-info-label',
+					__( 'Widget Type', 'user-home-screen' )
+					__( 'Post List', 'user-home-screen' )
+				);
+				break;
+		}
+
+		ob_start();
+
+		?>
+		<div class="uhs-widget-info-inner">
+			<?php echo $widget_info; ?>
+		</div>
+		<?php
+
+		return ob_get_clean();
 	}
 
 	/**
