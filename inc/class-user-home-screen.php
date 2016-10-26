@@ -867,7 +867,7 @@ class User_Home_Screen {
 					'<div class="%s"><span class="%s">%s:</span> %s</div>',
 					'uhs-widget-info-type',
 					'uhs-widget-info-label',
-					__( 'Widget Type', 'user-home-screen' )
+					__( 'Widget Type', 'user-home-screen' ),
 					__( 'Post List', 'user-home-screen' )
 				);
 				break;
