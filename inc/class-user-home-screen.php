@@ -585,12 +585,6 @@ class User_Home_Screen {
 
 		$user_tabs = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
 
-		// Mock this for now.
-		/*$user_tabs = array(
-			'braad_tab_one' => 'Braad Tab',
-			'braad_tab_two' => 'Other Braad Tab',
-		);*/
-
 		/**
 		 * Allow the user tabs config to be customized.
 		 *
