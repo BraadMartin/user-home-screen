@@ -218,7 +218,7 @@ class User_Home_Screen {
 		);
 
 		// Add widget type data.
-		$data['widget_types'] = $this->get_widget_type_data();
+		$data['widget_types'] = self::get_widget_type_data();
 
 		// Add a nonce.
 		$data['nonce'] = wp_create_nonce( 'user-home-screen' );
@@ -236,13 +236,13 @@ class User_Home_Screen {
 	 *
 	 * @return  array  The array of widget type data.
 	 */
-	public function get_widget_type_data() {
+	public static function get_widget_type_data() {
 
-		$post_types       = $this->get_post_types();
-		$categories       = $this->get_categories();
-		$post_statuses    = $this->get_post_statuses();
-		$authors          = $this->get_authors();
-		$order_by_options = $this->get_order_by_options();
+		$post_types       = self::get_post_types();
+		$categories       = self::get_categories();
+		$post_statuses    = self::get_post_statuses();
+		$authors          = self::get_authors();
+		$order_by_options = self::get_order_by_options();
 
 		$widget_types = array(
 			'post-list' => array(
@@ -328,7 +328,7 @@ class User_Home_Screen {
 	 *
 	 * @return  array  The array of post types.
 	 */
-	public function get_post_types() {
+	public static function get_post_types() {
 
 		$full_post_types = get_post_types( array( 'public' => true ), 'objects' );
 		$post_types      = array( 'any' => __( 'Any', 'user-home-screen' ) );
@@ -351,7 +351,7 @@ class User_Home_Screen {
 	 *
 	 * @return  array  The array of categories.
 	 */
-	public function get_categories() {
+	public static function get_categories() {
 
 		$full_categories = get_terms( array( 'taxonomy' => 'category' ) );
 		$categories      = array();
@@ -374,7 +374,7 @@ class User_Home_Screen {
 	 *
 	 * @return  array  The array of post statuses.
 	 */
-	public function get_post_statuses() {
+	public static function get_post_statuses() {
 
 		$full_post_statuses = get_post_stati( array( 'show_in_admin_status_list' => 1 ), 'objects' );
 		$post_statuses      = array();
@@ -397,7 +397,7 @@ class User_Home_Screen {
 	 *
 	 * @return  array  The array of authors.
 	 */
-	public function get_authors() {
+	public static function get_authors() {
 
 		$full_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
 		$authors    = array();
@@ -422,7 +422,7 @@ class User_Home_Screen {
 	 *
 	 * @return  array  The array of order by options.
 	 */
-	public function get_order_by_options() {
+	public static function get_order_by_options() {
 
 		$order_by_options = array(
 			'date'     => __( 'Publish Date', 'user-home-screen' ),
@@ -861,15 +861,30 @@ class User_Home_Screen {
 			return $widget_info;
 		}
 
+		error_log( print_r( $widget_args, true ) );
+
+		$widget_type_data = self::get_widget_type_data();
+
+		// Add a standard Widget Type field if the widget type has a label.
+		if ( ! empty( $widget_type_data[ $widget_args['type'] ] ) ) {
+			$widget_info .= sprintf(
+				'<div class="%s"><span class="%s">%s:</span> %s</div>',
+				'uhs-widget-info-type',
+				'uhs-widget-info-label',
+				esc_html__( 'Widget Type', 'user-home-screen' ),
+				esc_html__( 'Post List', 'user-home-screen' )
+			);
+		}
+
 		switch ( $widget_args['type'] ) {
 			case 'post-list':
-				$widget_info .= sprintf(
+				/*$widget_info .= sprintf(
 					'<div class="%s"><span class="%s">%s:</span> %s</div>',
 					'uhs-widget-info-type',
 					'uhs-widget-info-label',
 					__( 'Widget Type', 'user-home-screen' ),
 					__( 'Post List', 'user-home-screen' )
-				);
+				);*/
 				break;
 		}
 
