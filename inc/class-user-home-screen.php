@@ -871,9 +871,6 @@ class User_Home_Screen {
 			);
 		}
 
-		error_log( print_r( $widget_args, true ) );
-		//error_log( print_r( $widget_type_data[ $widget_args['type'] ]['fields'], true ) );
-
 		switch ( $widget_args['type'] ) {
 			case 'post-list':
 
@@ -1002,6 +999,104 @@ class User_Home_Screen {
 			}
 
 			echo '</div>';
+
+			// Maybe output pagination.
+ 			//[found_posts] => 591
+			//[max_num_pages] => 60
+
+			$page = ( ! empty( $query->query_vars['paged'] ) ) ? (int) $query->query_vars['paged'] : 1;
+
+			if ( $query->max_num_pages > 1 ) {
+
+				// We're in a query that has more than 1 page.
+
+				if ( $page === 1 ) {
+
+					error_log( print_r( $query->max_num_pages, true ) );
+
+					// We're on the first page and only need to output next.
+					?>
+					<div class="uhs-post-list-widget-pagination">
+						<?php
+							printf(
+								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
+								'uhs-post-list-widget-page-x',
+								esc_html( $page ),
+								__( 'of', 'user-home-screen' ),
+								'uhs-post-list-widget-page-x-of',
+								esc_html( $query->max_num_pages )
+							);
+						?>
+						<div class="uhs-post-list-widget-next">
+							<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
+						</div>
+					</div>
+					<?php
+
+				} elseif ( $page === $query->max_num_pages ) {
+
+					// We're on the last page and only need to output previous.
+					?>
+					<div class="uhs-post-list-widget-pagination">
+						<div class="uhs-post-list-widget-previous">
+							<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
+						</div>
+						<?php
+							printf(
+								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
+								'uhs-post-list-widget-page-x',
+								esc_html( $page ),
+								__( 'of', 'user-home-screen' ),
+								'uhs-post-list-widget-page-x-of',
+								esc_html( $query->max_num_pages )
+							);
+						?>
+					</div>
+					<?php
+
+				} else {
+
+					// We're on a page that is not the first or last and need to output the full pagination.
+					?>
+					<div class="uhs-post-list-widget-pagination">
+						<div class="uhs-post-list-widget-previous">
+							<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
+						</div>
+						<?php
+							printf(
+								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
+								'uhs-post-list-widget-page-x',
+								esc_html( $page ),
+								__( 'of', 'user-home-screen' ),
+								'uhs-post-list-widget-page-x-of',
+								esc_html( $query->max_num_pages )
+							);
+						?>
+						<div class="uhs-post-list-widget-next">
+							<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
+						</div>
+					</div>
+					<?php
+				}
+
+			} elseif ( $query->found_posts <= $query->post_count ) {
+
+				// We're in a query that only has 1 page.
+				?>
+				<div class="uhs-post-list-widget-pagination">
+					<div class="uhs-post-list-widget-page-x-of">
+						<?php
+							printf(
+								'<span class="%s">1</span> %s <span class="%s"></span>',
+								'uhs-post-list-widget-page-x',
+								__( 'of', 'user-home-screen' ),
+								esc_html( $query->max_num_pages )
+							);
+						?>
+					</div>
+				</div>
+				<?php
+			}
 
 			wp_reset_postdata();
 
