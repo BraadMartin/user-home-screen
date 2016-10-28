@@ -855,30 +855,38 @@ class User_Home_Screen {
 			return $widget_info;
 		}
 
-		error_log( print_r( $widget_args, true ) );
-
 		$widget_type_data = self::get_widget_type_data();
 
 		// Add a standard Widget Type field if the widget type has a label.
-		if ( ! empty( $widget_type_data[ $widget_args['type'] ] ) ) {
+		if (
+			! empty( $widget_type_data[ $widget_args['type'] ] ) &&
+			! empty( $widget_type_data[ $widget_args['type'] ]['label'] )
+		) {
 			$widget_info .= sprintf(
 				'<div class="%s"><span class="%s">%s:</span> %s</div>',
 				'uhs-widget-info-type',
 				'uhs-widget-info-label',
 				esc_html__( 'Widget Type', 'user-home-screen' ),
-				esc_html__( 'Post List', 'user-home-screen' )
+				esc_html( $widget_type_data[ $widget_args['type'] ]['label'] )
 			);
 		}
 
+		error_log( print_r( $widget_args, true ) );
+		//error_log( print_r( $widget_type_data[ $widget_args['type'] ]['fields'], true ) );
+
 		switch ( $widget_args['type'] ) {
 			case 'post-list':
-				/*$widget_info .= sprintf(
-					'<div class="%s"><span class="%s">%s:</span> %s</div>',
-					'uhs-widget-info-type',
-					'uhs-widget-info-label',
-					__( 'Widget Type', 'user-home-screen' ),
-					__( 'Post List', 'user-home-screen' )
-				);*/
+
+				if ( ! empty( $widget_args['args']['widget_info'] ) ) {
+					foreach ( $widget_args['args']['widget_info'] as $arg_key => $arg_info ) {
+						$widget_info .= sprintf(
+							'<div class="%s">%s</div>',
+							'uhs-widget-info-' . str_replace( '_', '-', esc_attr( $arg_key ) ),
+							wp_kses_post( $arg_info )
+						);
+					}
+				}
+
 				break;
 		}
 
@@ -1490,9 +1498,13 @@ class User_Home_Screen {
 		error_log( print_r( $args, true ) );
 
 		// Defaults.
-		$updated_args               = array();
-		$updated_args['query_args'] = array();
-		$updated_args['parts']      = array();
+		$updated_args                  = array();
+		$updated_args['widget_info']   = array();
+		$updated_args['query_args']    = array();
+		$updated_args['parts']         = array();
+
+		// Store the array of original args to support editing an existing widget.
+		$updated_args['original_args'] = $args;
 
 		// Title.
 		$updated_args['title'] = ( ! empty( $args['title'] ) ) ? esc_html( $args['title'] ) : '';
@@ -1500,15 +1512,39 @@ class User_Home_Screen {
 		// Post Types.
 		if ( ! empty( $args['post_types'] ) ) {
 			if ( in_array( 'any', $args['post_types'] ) ) {
-				$updated_args['query_args']['post_type'] = 'any';
+				$updated_args['query_args']['post_type']  = 'any';
+				$post_types = esc_html__( 'All', 'user-home-screen' );
 			} else {
-				$updated_args['query_args']['post_type'] = $args['post_types'];
+				$updated_args['query_args']['post_type']  = $args['post_types'];
+
+				$post_types = array();
+
+				// Loop over each post type and get a usable post type name.
+				foreach ( $args['post_types'] as $post_type ) {
+					$post_type_object = get_post_type_object( $post_type );
+
+					if ( ! empty( $post_type_object->labels->name ) ) {
+						$post_types[] = $post_type_object->labels->name;
+					}
+				}
+
+				$post_types = implode( ', ', $post_types );
 			}
+
+			// Add widget info.
+			$updated_args['widget_info']['post_types'] = sprintf(
+				'<span class="%s">%s:</span> %s',
+				'uhs-widget-info-label',
+				esc_html__( 'Post Types', 'user-home-screen' ),
+				esc_html( $post_types )
+			);
 		}
 
 		// Categories.
 		if ( ! empty( $args['categories'] ) ) {
 			$term_ids = array();
+
+			// Parse clean term IDs.
 			if ( is_array( $args['categories'] ) ) {
 				foreach ( $args['categories'] as $term_key ) {
 					$term_id    = str_replace( 'term_', '', $term_key );
@@ -1518,17 +1554,61 @@ class User_Home_Screen {
 				$term_id    = str_replace( 'term_', '', $args['categories'] );
 				$term_ids[] = (int)$term_id;
 			}
+
+			// Set clean query arg.
 			$updated_args['query_args']['category__in'] = $term_ids;
+
+			$categories = array();
+
+			// Loop over each term ID and get a usable category name.
+			foreach ( $term_ids as $term_id ) {
+				$term = get_term_by( 'id', $term_id, 'category' );
+				if ( ! empty( $term->name ) ) {
+					$categories[] = esc_html( $term->name );
+				}
+			}
+			$categories = implode( ', ', $categories );
+
+			// Add widget info.
+			$updated_args['widget_info']['categories'] = sprintf(
+				'<span class="%s">%s:</span> %s',
+				'uhs-widget-info-label',
+				esc_html__( 'Categories', 'user-home-screen' ),
+				esc_html( $categories )
+			);
 		}
 
 		// Post Statuses.
 		if ( ! empty( $args['post_statuses'] ) ) {
 			$updated_args['query_args']['post_status'] = $args['post_statuses'];
+
+			$post_stati = array();
+
+			// Loop over each post status and get a usable post status label.
+			foreach ( $args['post_statuses'] as $post_status ) {
+				$post_status_object = get_post_status_object( $post_status );
+
+				if ( ! empty( $post_status_object->label ) ) {
+					$post_stati[] = $post_status_object->label;
+				}
+			}
+
+			$post_stati = implode( ', ', $post_stati );
+
+			// Add widget info.
+			$updated_args['widget_info']['post_statuses'] = sprintf(
+				'<span class="%s">%s:</span> %s',
+				'uhs-widget-info-label',
+				esc_html__( 'Post Statuses', 'user-home-screen' ),
+				esc_html( $post_stati )
+			);
 		}
 
 		// Authors.
 		if ( ! empty( $args['authors'] ) ) {
 			$author_ids = array();
+
+			// Parse clean user IDs.
 			if ( is_array( $args['authors'] ) ) {
 				foreach ( $args['authors'] as $user_key ) {
 					$user_id      = str_replace( 'user_', '', $user_key );
@@ -1538,7 +1618,30 @@ class User_Home_Screen {
 				$user_id      = str_replace( 'user_', '', $args['authors'] );
 				$author_ids[] = (int)$user_id;
 			}
+
+			// Set clean query arg.
 			$updated_args['query_args']['author__in'] = $author_ids;
+
+			$authors = array();
+
+			// Loop over each author and get a username.
+			foreach ( $author_ids as $author_id ) {
+				$user = get_userdata( $author_id );
+
+				if ( ! empty( $user->display_name ) ) {
+					$authors[] = $user->display_name;
+				}
+			}
+
+			$authors = implode( ', ', $authors );
+
+			// Add widget info.
+			$updated_args['widget_info']['authors'] = sprintf(
+				'<span class="%s">%s:</span> %s',
+				'uhs-widget-info-label',
+				esc_html__( 'Authors', 'user-home-screen' ),
+				esc_html( $authors )
+			);
 		}
 
 		// Order by.

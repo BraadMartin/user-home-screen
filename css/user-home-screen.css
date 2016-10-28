@@ -160,6 +160,14 @@
 	content: '';
 }
 
+.uhs-widget-info-inner div {
+	margin-bottom: 10px;
+}
+
+.uhs-widget-info-inner div:last-child {
+	margin-bottom: 0;
+}
+
 .uhs-post-list-widget-left {
 	max-width: calc( 100% - 120px );
 	float: left;
