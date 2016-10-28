@@ -66,6 +66,8 @@ class User_Home_Screen {
 
 		// Ajax handler for updating the widget order.
 		add_action( 'wp_ajax_uhs_update_widgets_order', array( $this, 'ajax_update_widgets_order' ) );
+
+		add_action( 'wp_ajax_uhs_post_list_get_page', array( $this, 'ajax_post_list_widget_get_posts' ) );
 	}
 
 	/**
@@ -563,7 +565,7 @@ class User_Home_Screen {
 	 *
 	 * @param  WP_User  $user  The current user object.
 	 */
-	public function get_user_widgets( $user ) {
+	public static function get_user_widgets( $user ) {
 
 		$user_widgets = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
 
@@ -603,7 +605,7 @@ class User_Home_Screen {
 		$user         = wp_get_current_user();
 		$user_name    = ( ! empty( $user->data->display_name ) ) ? $user->data->display_name : '';
 		$user_tabs    = $this->get_user_tabs( $user );
-		$user_widgets = $this->get_user_widgets( $user );
+		$user_widgets = self::get_user_widgets( $user );
 
 		$page_title = __( 'Welcome', 'user-home-screen' ) . ' ' . $user_name;
 		/**
@@ -896,12 +898,13 @@ class User_Home_Screen {
 	/**
 	 * Render a post-list widget.
 	 *
-	 * @param   string  $widget_id  The widget ID.
-	 * @param   array   $args       The widget args.
+	 * @param   string  $widget_id          The widget ID.
+	 * @param   array   $args               The widget args.
+	 * @param   bool    $include_pagination  Whether to include the pagination HTML.
 	 *
-	 * @return  string              The widget HTML.
+	 * @return  string                       The widget HTML.
 	 */
-	public static function render_post_list_widget( $widget_id, $args ) {
+	public static function render_post_list_widget( $widget_id, $args, $include_pagination = true ) {
 
 		$html = '';
 
@@ -919,7 +922,13 @@ class User_Home_Screen {
 
 		if ( $query->have_posts() ) {
 
-			echo '<div class="uhs-post-list-widget-posts">';
+			$page = ( ! empty( $query->query_vars['paged'] ) ) ? (int) $query->query_vars['paged'] : 1;
+
+			printf(
+				'<div class="%s" data-current-page="%s">',
+				'uhs-post-list-widget-posts',
+				esc_attr( $page )
+			);
 
 			while ( $query->have_posts() ) {
 
@@ -995,102 +1004,107 @@ class User_Home_Screen {
 
 			echo '</div>';
 
-			// Maybe output pagination.
- 			//[found_posts] => 591
-			//[max_num_pages] => 60
+			if ( $include_pagination ) {
 
-			$page = ( ! empty( $query->query_vars['paged'] ) ) ? (int) $query->query_vars['paged'] : 1;
+				if ( $query->max_num_pages > 1 ) {
 
-			if ( $query->max_num_pages > 1 ) {
+					// We're in a query that has more than 1 page.
 
-				// We're in a query that has more than 1 page.
+					if ( $page === 1 ) {
 
-				if ( $page === 1 ) {
-
-					error_log( print_r( $query->max_num_pages, true ) );
-
-					// We're on the first page and only need to output next.
-					?>
-					<div class="uhs-post-list-widget-pagination">
-						<?php
-							printf(
-								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
-								'uhs-post-list-widget-page-x',
-								esc_html( $page ),
-								__( 'of', 'user-home-screen' ),
-								'uhs-post-list-widget-page-x-of',
-								esc_html( $query->max_num_pages )
-							);
+						// We're on the first page and only need to output next.
 						?>
-						<div class="uhs-post-list-widget-next">
-							<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
-						</div>
-					</div>
-					<?php
-
-				} elseif ( $page === $query->max_num_pages ) {
-
-					// We're on the last page and only need to output previous.
-					?>
-					<div class="uhs-post-list-widget-pagination">
-						<div class="uhs-post-list-widget-previous">
-							<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
+						<div class="uhs-post-list-widget-pagination">
+							<div class="uhs-post-list-widget-pagination-numbers">
+								<?php
+									printf(
+										'<span class="%s">%s</span> %s <span class="%s">%s</span>',
+										'uhs-post-list-widget-page-x',
+										esc_html( $page ),
+										__( 'of', 'user-home-screen' ),
+										'uhs-post-list-widget-page-x-of',
+										esc_html( $query->max_num_pages )
+									);
+								?>
+							</div>
+							<div class="uhs-post-list-widget-next">
+								<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
+							</div>
 						</div>
 						<?php
-							printf(
-								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
-								'uhs-post-list-widget-page-x',
-								esc_html( $page ),
-								__( 'of', 'user-home-screen' ),
-								'uhs-post-list-widget-page-x-of',
-								esc_html( $query->max_num_pages )
-							);
+
+					} elseif ( $page === $query->max_num_pages ) {
+
+						// We're on the last page and only need to output previous.
 						?>
-					</div>
-					<?php
-
-				} else {
-
-					// We're on a page that is not the first or last and need to output the full pagination.
-					?>
-					<div class="uhs-post-list-widget-pagination">
-						<div class="uhs-post-list-widget-previous">
-							<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
+						<div class="uhs-post-list-widget-pagination">
+							<div class="uhs-post-list-widget-previous">
+								<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
+							</div>
+							<div class="uhs-post-list-widget-pagination-numbers">
+								<?php
+									printf(
+										'<span class="%s">%s</span> %s <span class="%s">%s</span>',
+										'uhs-post-list-widget-page-x',
+										esc_html( $page ),
+										__( 'of', 'user-home-screen' ),
+										'uhs-post-list-widget-page-x-of',
+										esc_html( $query->max_num_pages )
+									);
+								?>
+							</div>
 						</div>
 						<?php
-							printf(
-								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
-								'uhs-post-list-widget-page-x',
-								esc_html( $page ),
-								__( 'of', 'user-home-screen' ),
-								'uhs-post-list-widget-page-x-of',
-								esc_html( $query->max_num_pages )
-							);
+
+					} else {
+
+						// We're on a page that is not the first or last and need to output the full pagination.
 						?>
-						<div class="uhs-post-list-widget-next">
-							<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
+						<div class="uhs-post-list-widget-pagination">
+							<div class="uhs-post-list-widget-previous">
+								<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
+							</div>
+							<div class="uhs-post-list-widget-pagination-numbers">
+								<?php
+									printf(
+										'<span class="%s">%s</span> %s <span class="%s">%s</span>',
+										'uhs-post-list-widget-page-x',
+										esc_html( $page ),
+										__( 'of', 'user-home-screen' ),
+										'uhs-post-list-widget-page-x-of',
+										esc_html( $query->max_num_pages )
+									);
+								?>
+							</div>
+							<div class="uhs-post-list-widget-next">
+								<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
+							</div>
+						</div>
+						<?php
+					}
+
+				} elseif ( $query->found_posts <= $query->post_count ) {
+
+					// We're in a query that only has 1 page.
+					?>
+					<div class="uhs-post-list-widget-pagination">
+						<div class="uhs-post-list-widget-pagination-numbers">
+							<div class="uhs-post-list-widget-page-x-of">
+								<?php
+									printf(
+										'<span class="%s">%s</span> %s <span class="%s">%s</span>',
+										'uhs-post-list-widget-page-x',
+										esc_html( $page ),
+										__( 'of', 'user-home-screen' ),
+										'uhs-post-list-widget-page-x-of',
+										esc_html( $query->max_num_pages )
+									);
+								?>
+							</div>
 						</div>
 					</div>
 					<?php
 				}
-
-			} elseif ( $query->found_posts <= $query->post_count ) {
-
-				// We're in a query that only has 1 page.
-				?>
-				<div class="uhs-post-list-widget-pagination">
-					<div class="uhs-post-list-widget-page-x-of">
-						<?php
-							printf(
-								'<span class="%s">1</span> %s <span class="%s"></span>',
-								'uhs-post-list-widget-page-x',
-								__( 'of', 'user-home-screen' ),
-								esc_html( $query->max_num_pages )
-							);
-						?>
-					</div>
-				</div>
-				<?php
 			}
 
 			wp_reset_postdata();
@@ -1450,6 +1464,61 @@ class User_Home_Screen {
 
 		$response          = new stdClass();
 		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
+
+		wp_send_json( $response );
+
+		wp_die();
+	}
+
+	/**
+	 * Ajax handler for returning the HTML for a list of posts.
+	 */
+	public function ajax_post_list_widget_get_posts() {
+
+		// Bail if our nonce is not valid.
+		check_ajax_referer( 'user-home-screen', 'nonce', true );
+
+		$user = wp_get_current_user();
+
+		// Bail if we don't have a user.
+		if ( empty( $user ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, you are missing a user.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		// Bail if we're missing required data.
+		if ( empty( $_POST['widget_id'] ) || empty( $_POST['tab_id'] ) || empty( $_POST['page'] ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, you are missing a widget ID, tab ID, or a page.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		$widget_id    = sanitize_text_field( $_POST['widget_id'] );
+		$tab_id       = sanitize_text_field( $_POST['tab_id'] );
+		$page         = (int) $_POST['page'];
+		$user_widgets = self::get_user_widgets( $user );
+
+		// Bail if the widget doesn't exist for the user.
+		if ( empty( $user_widgets[ $tab_id ][ $widget_id ] ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, the requested widget doesn\'t appear to exist.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		$args = $user_widgets[ $tab_id ][ $widget_id ];
+
+		// Modify the query args to include the new page.
+		$args['query_args']['paged'] = $page;
+
+		$html = self::render_post_list_widget( $widget_id, $args, false );
+
+		$response             = new stdClass();
+		$response->message    = esc_html__( 'It appears to have worked', 'user-home-screen' );
+		$response->posts_html = $html;
 
 		wp_send_json( $response );
 

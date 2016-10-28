@@ -144,7 +144,20 @@
 /**
  * Post List Widget.
  */
+.uhs-post-list-widget-posts {
+	text-align: center;
+}
+
+.uhs-post-list-widget-posts .uhs-spinner {
+	float: none;
+	display: inline-block;
+	margin-top: 100px;
+	margin-bottom: 100px;
+	visibility: visible;
+}
+
 .uhs-post-list-widget-post {
+	text-align: left;
 	position: relative;
 	padding: 10px 0;
 	border-bottom: 1px solid #eee;
@@ -205,6 +218,34 @@
 
 .uhs-post-list-widget-categories li {
 	margin-left: 4px;
+}
+
+.uhs-post-list-widget-pagination {
+	text-align: center;
+	margin: 20px 0;
+	position: relative;
+}
+
+.uhs-post-list-widget-pagination::after {
+	content: '';
+	clear: both;
+	display: block;
+}
+
+.uhs-post-list-widget-previous {
+	position: absolute;
+	text-align: left;
+	left: 0;
+	top: 0;
+	cursor: pointer;
+}
+
+.uhs-post-list-widget-next {
+	position: absolute;
+	text-align: right;
+	right: 0;
+	top: 0;
+	cursor: pointer;
 }
 
 /**
