@@ -871,20 +871,15 @@ class User_Home_Screen {
 			);
 		}
 
-		switch ( $widget_args['type'] ) {
-			case 'post-list':
-
-				if ( ! empty( $widget_args['args']['widget_info'] ) ) {
-					foreach ( $widget_args['args']['widget_info'] as $arg_key => $arg_info ) {
-						$widget_info .= sprintf(
-							'<div class="%s">%s</div>',
-							'uhs-widget-info-' . str_replace( '_', '-', esc_attr( $arg_key ) ),
-							wp_kses_post( $arg_info )
-						);
-					}
-				}
-
-				break;
+		// Add any widget info fields that have been saved in the widget args.
+		if ( ! empty( $widget_args['args']['widget_info'] ) ) {
+			foreach ( $widget_args['args']['widget_info'] as $arg_key => $arg_info ) {
+				$widget_info .= sprintf(
+					'<div class="%s">%s</div>',
+					'uhs-widget-info-' . str_replace( '_', '-', esc_attr( $arg_key ) ),
+					wp_kses_post( $arg_info )
+				);
+			}
 		}
 
 		ob_start();
