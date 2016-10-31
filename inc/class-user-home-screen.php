@@ -919,8 +919,8 @@ class User_Home_Screen {
 	/**
 	 * Render a post-list widget.
 	 *
-	 * @param   string  $widget_id          The widget ID.
-	 * @param   array   $args               The widget args.
+	 * @param   string  $widget_id           The widget ID.
+	 * @param   array   $args                The widget args.
 	 * @param   bool    $include_pagination  Whether to include the pagination HTML.
 	 *
 	 * @return  string                       The widget HTML.
@@ -977,13 +977,14 @@ class User_Home_Screen {
 
 					$post_type   = get_post_type_object( $query->post->post_type );
 					$post_status = get_post_status_object( $query->post->post_status );
+					$post_title  = ( ! empty( get_the_title( $query->post->ID ) ) ) ? get_the_title( $query->post->ID ) : __( 'Untitled', 'user-home-screen' );
 
 					?>
 					<div class="uhs-post-list-widget-post">
 						<div class="uhs-post-list-widget-left">
 							<h3 class="uhs-post-list-widget-post-title">
 								<a href="<?php echo esc_url( get_edit_post_link( $query->post->ID, false ) ); ?>" target="_blank">
-									<?php echo esc_html( get_the_title( $query->post->ID ) ); ?>
+									<?php echo esc_html( $post_title ); ?>
 								</a>
 							</h3>
 							<?php if ( in_array( 'author', $parts ) ) : ?>
