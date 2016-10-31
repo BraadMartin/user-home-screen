@@ -217,6 +217,7 @@ class User_Home_Screen {
 			'remove_tab_confirm'    => __( 'Are you sure you want to remove the selected tab? Widgets added to this tab will also be removed.', 'user-home-screen' ),
 			'tab_name'              => __( 'Tab Name', 'user-home-screen' ),
 			'no_tabs_notice'        => __( 'Please add a tab first, then you can add widgets', 'user-home-screen' ),
+			'post_list_ajax_fail'   => __( 'Sorry, it appears the Ajax request to fetch posts has failed', 'user-home-screen' ),
 		);
 
 		// Add widget type data.
@@ -737,7 +738,7 @@ class User_Home_Screen {
 				);
 
 				foreach ( $user_widgets[ $tab_key ] as $widget_id => $widget_args ) {
-					$widgets_html .= self::render_widget( $widget_id, $widget_args );
+					$widgets_html .= self::render_widget( $widget_id, $widget_args, $tab_key );
 				}
 
 				$widgets_html .= '</div></div>';
@@ -768,11 +769,13 @@ class User_Home_Screen {
 	/**
 	 * Build and return the HTML for a widget.
 	 *
-	 * @param   array  $widget  The widget instance data.
+	 * @param   string  $widget_id    The widget ID.
+	 * @param   array   $widget_args  The widget instance data.
+	 * @param   string  $tab_id       The tab ID.
 	 *
-	 * @return  string          The widget HTML.
+	 * @return  string                The widget HTML.
 	 */
-	public static function render_widget( $widget_id, $widget_args ) {
+	public static function render_widget( $widget_id, $widget_args, $tab_id ) {
 
 		$html = '';
 		/**
@@ -798,7 +801,7 @@ class User_Home_Screen {
 		ob_start();
 
 		?>
-		<div class="uhs-widget postbox <?php echo esc_attr( $type_class ); ?>" data-widget-id="<?php echo esc_attr( $widget_id ); ?>">
+		<div class="uhs-widget postbox <?php echo esc_attr( $type_class ); ?>" data-widget-id="<?php echo esc_attr( $widget_id ); ?>" data-tab-id="<?php echo esc_attr( $tab_id ); ?>">
 			<div class="uhs-widget-top-bar">
 				<button type="button" class="uhs-toggle-widget-info"><span class="dashicons dashicons-arrow-down"></span></button>
 				<button type="button" class="uhs-remove-widget"><span class="dashicons dashicons-no-alt"></span></button>
@@ -812,10 +815,10 @@ class User_Home_Screen {
 			<?php
 				switch ( $widget_args['type'] ) {
 					case 'post-list':
-						echo self::render_post_list_widget( $widget_id, $widget_args['args'] );
+						echo self::render_post_list_widget_placeholder();
 						break;
 					case 'rss-feed':
-						echo self::render_rss_feed_widget( $widget_id, $widget_args['args'] );
+						echo self::render_rss_feed_widget_placeholder( $widget_args['args']['feed_url'] );
 						break;
 				}
 			?>
@@ -896,6 +899,24 @@ class User_Home_Screen {
 	}
 
 	/**
+	 * Return the HTML placeholder for a Post List widget.
+	 *
+	 * @return  string  The widget HTML.
+	 */
+	public static function render_post_list_widget_placeholder() {
+
+		ob_start();
+
+		?>
+		<div class="uhs-post-list-widget-posts">
+			<span class="uhs-spinner spinner"></span>
+		</div>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
 	 * Render a post-list widget.
 	 *
 	 * @param   string  $widget_id          The widget ID.
@@ -904,7 +925,7 @@ class User_Home_Screen {
 	 *
 	 * @return  string                       The widget HTML.
 	 */
-	public static function render_post_list_widget( $widget_id, $args, $include_pagination = true ) {
+	public static function ajax_render_post_list_widget( $widget_id, $args, $include_pagination = true ) {
 
 		$html = '';
 
@@ -925,9 +946,10 @@ class User_Home_Screen {
 			$page = ( ! empty( $query->query_vars['paged'] ) ) ? (int) $query->query_vars['paged'] : 1;
 
 			printf(
-				'<div class="%s" data-current-page="%s">',
+				'<div class="%s" data-current-page="%s" data-total-pages="%s">',
 				'uhs-post-list-widget-posts',
-				esc_attr( $page )
+				esc_attr( $page ),
+				esc_attr( $query->max_num_pages )
 			);
 
 			while ( $query->have_posts() ) {
@@ -1082,19 +1104,18 @@ class User_Home_Screen {
 	}
 
 	/**
-	 * Render an rss-feed widget.
+	 * Return the HTML placeholder for the RSS Feed widget.
 	 *
-	 * @param   string  $widget_id  The widget ID.
-	 * @param   array   $args       The widget args.
+	 * @param   string  $feed_url  The feed URL.
 	 *
-	 * @return  string              The widget HTML.
+	 * @return  string             The widget HTML.
 	 */
-	public static function render_rss_feed_widget( $widget_id, $args ) {
+	public static function render_rss_feed_widget_placeholder( $feed_url ) {
 
 		ob_start();
 
 		?>
-		<div class="uhs-rss-feed-widget-feed-content" data-feed-url="<?php echo esc_url( $args['feed_url'] ); ?>">
+		<div class="uhs-rss-feed-widget-feed-content" data-feed-url="<?php echo esc_url( $feed_url ); ?>">
 			<span class="uhs-spinner spinner"></span>
 		</div>
 		<?php
@@ -1458,10 +1479,14 @@ class User_Home_Screen {
 			wp_die();
 		}
 
-		$widget_id    = sanitize_text_field( $_POST['widget_id'] );
-		$tab_id       = sanitize_text_field( $_POST['tab_id'] );
-		$page         = (int) $_POST['page'];
-		$user_widgets = self::get_user_widgets( $user );
+		$widget_id          = sanitize_text_field( $_POST['widget_id'] );
+		$tab_id             = sanitize_text_field( $_POST['tab_id'] );
+		$page               = (int) $_POST['page'];
+		$user_widgets       = self::get_user_widgets( $user );
+		$include_pagination = ( ! empty( $_POST['include_pagination'] ) ) ? true : false;
+
+		error_log( print_r( $_POST, true ) );
+		error_log( ( $include_pagination ) ? 'true' : 'false' );
 
 		// Bail if the widget doesn't exist for the user.
 		if ( empty( $user_widgets[ $tab_id ][ $widget_id ] ) ) {
@@ -1476,12 +1501,11 @@ class User_Home_Screen {
 		// Modify the query args to include the new page.
 		$args['args']['query_args']['paged'] = $page;
 
-		$html = self::render_post_list_widget( $widget_id, $args['args'], false );
+		$html = self::ajax_render_post_list_widget( $widget_id, $args['args'], $include_pagination );
 
 		$response             = new stdClass();
 		$response->message    = esc_html__( 'It appears to have worked', 'user-home-screen' );
 		$response->posts_html = $html;
-		$response->new_page   = $page;
 
 		wp_send_json( $response );
 

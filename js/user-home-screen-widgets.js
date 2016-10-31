@@ -34,17 +34,43 @@ var userHomeScreenWidgets = ( function( $, data ) {
 
 		$postListWidgets.each( function() {
 
-			var $widget     = $( this );
-			var $pagination = $widget.find( '.uhs-post-list-widget-pagination' );
-			var $prevPage   = $pagination.find( '.uhs-post-list-widget-previous' );
-			var $nextPage   = $pagination.find( '.uhs-post-list-widget-next' );
+			var $widget   = $( this );
+			var widgetID  = $widget.attr( 'data-widget-id' );
+			var tabID     = $widget.attr( 'data-tab-id' );
 
-			// Handle clicks on the pagination controls.
-			$prevPage.on( 'click', function() {
-				handlePostListPaginationClick( 'previous', $widget );
+			// Make an Ajax request to fetch the post list HTML.
+			var request = ajaxFetchPostList( widgetID, tabID, '1', true );
+
+			request.done( function( response ) {
+
+				console.log( response );
+
+				if ( response.hasOwnProperty( 'posts_html' ) ) {
+
+					updatePostListWidgetPosts( $widget, response.posts_html );
+
+					// Set up references to the pagination, which we only output once
+					// and then update after that.
+					var $pagination = $widget.find( '.uhs-post-list-widget-pagination' );
+					var $prevPage   = $pagination.find( '.uhs-post-list-widget-previous' );
+					var $nextPage   = $pagination.find( '.uhs-post-list-widget-next' );
+
+					// Handle clicks on the pagination controls.
+					$prevPage.on( 'click', function() {
+						handlePostListPaginationClick( 'previous', $widget );
+					});
+					$nextPage.on( 'click', function() {
+						handlePostListPaginationClick( 'next', $widget );
+					});
+
+				} else {
+
+					console.log( data.labels.post_list_ajax_fail );
+				}
 			});
-			$nextPage.on( 'click', function() {
-				handlePostListPaginationClick( 'next', $widget );
+
+			request.fail( function() {
+				console.log( data.labels.post_list_ajax_fail );
 			});
 		});
 	};
@@ -58,54 +84,92 @@ var userHomeScreenWidgets = ( function( $, data ) {
 	var handlePostListPaginationClick = function( direction, $widget ) {
 
 		var widgetID    = $widget.attr( 'data-widget-id' );
-		var tabID       = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
+		var tabID       = $widget.attr( 'data-tab-id' );
 		var $postList   = $widget.find( '.uhs-post-list-widget-posts' );
-		var $pagination = $widget.find( '.uhs-post-list-widget-pagination' );
 		var currentPage = $postList.attr( 'data-current-page' );
 		var newPage     = ( 'next' === direction ) ? parseInt( currentPage ) + 1 : parseInt( currentPage ) - 1;
-		var totalPages  = parseInt( $pagination.find( '.uhs-post-list-widget-page-x-of' ).text() );
 
 		// Bail if the new page somehow ended up being 0;
 		if ( 0 === newPage ) {
 			return;
 		}
 
-		var ajaxData = {
-			'action':    'uhs_post_list_get_page',
-			'nonce':     data.nonce,
-			'widget_id': widgetID,
-			'tab_id'   : tabID,
-			'page'     : newPage,
-		};
-
 		$postList.html( $( '<span />' ).attr( 'class', 'spinner uhs-spinner' ) );
 
-		// Make an Ajax request to get the new Posts.
-		var request = $.post( ajaxurl, ajaxData );
+		var request = ajaxFetchPostList( widgetID, tabID, newPage, false );
 
 		request.done( function( response ) {
 			console.log( response );
+			if ( response.hasOwnProperty( 'posts_html' ) ) {
 
-			// Update post list.
-			$postList.replaceWith( response.posts_html );
+				updatePostListWidgetPosts( $widget, response.posts_html );
 
-			// Update pagination.
-			$pagination.find( '.uhs-post-list-widget-page-x' ).text( newPage );
-			if ( newPage === 1 ) {
-				$pagination.find( '.uhs-post-list-widget-previous' ).removeClass( 'uhs-visible' );
-				$pagination.find( '.uhs-post-list-widget-next' ).addClass( 'uhs-visible' );
-			} else if ( newPage === totalPages ) {
-				$pagination.find( '.uhs-post-list-widget-previous' ).addClass( 'uhs-visible' );
-				$pagination.find( '.uhs-post-list-widget-next' ).removeClass( 'uhs-visible' );
 			} else {
-				$pagination.find( '.uhs-post-list-widget-previous' ).addClass( 'uhs-visible' );
-				$pagination.find( '.uhs-post-list-widget-next' ).addClass( 'uhs-visible' );
+
+				console.log( data.labels.post_list_ajax_fail );
 			}
 		});
 
-		request.fail( function( response ) {
-			console.log( 'Something went wrong when trying to fetch new posts in a Post List widget.' );
+		request.fail( function() {
+			console.log( data.labels.post_list_ajax_fail );
 		});
+	};
+
+	/**
+	 * Make an ajax request for a list of posts.
+	 *
+	 * @param  {string} widgetID          - The ID for the Post List widget.
+	 * @param  {string} tabID             - The ID for the tab the widget is on.
+	 * @param  {number} page              - The current "page" in the pagination sense.
+	 * @param  {bool}   includePagination - Whether to include pagination.
+	 *
+	 * @return {object}                   - The ajax response object.
+	 */
+	var ajaxFetchPostList = function( widgetID, tabID, page, includePagination ) {
+
+		var pagination = ( includePagination ) ? 1 : 0;
+		var ajaxData   = {
+			'action':             'uhs_post_list_get_page',
+			'nonce':              data.nonce,
+			'widget_id':          widgetID,
+			'tab_id':             tabID,
+			'page':               page,
+			'include_pagination': pagination,
+		};
+
+		// Make an Ajax request to get the new Posts and return a promise.
+		return $.post( ajaxurl, ajaxData );
+	};
+
+	/**
+	 * Update the post list HTML in a Post List widget.
+	 *
+	 * @param {object} $widget - A jQuery object containing the widget.
+	 * @param {string} html    - The new HTML for the post list.
+	 */
+	var updatePostListWidgetPosts = function( $widget, html ) {
+
+		// Update post list.
+		$widget.find( '.uhs-post-list-widget-posts' ).replaceWith( html );
+
+		// Grab fresh DOM references.
+		var $postList   = $widget.find( '.uhs-post-list-widget-posts' );
+		var $pagination = $widget.find( '.uhs-post-list-widget-pagination' );
+		var page        = $postList.attr( 'data-current-page' );
+		var totalPages  = $postList.attr( 'data-total-pages' );
+
+		// Update pagination.
+		$pagination.find( '.uhs-post-list-widget-page-x' ).text( page );
+		if ( page === 1 ) {
+			$pagination.find( '.uhs-post-list-widget-previous' ).removeClass( 'uhs-visible' );
+			$pagination.find( '.uhs-post-list-widget-next' ).addClass( 'uhs-visible' );
+		} else if ( page === totalPages ) {
+			$pagination.find( '.uhs-post-list-widget-previous' ).addClass( 'uhs-visible' );
+			$pagination.find( '.uhs-post-list-widget-next' ).removeClass( 'uhs-visible' );
+		} else {
+			$pagination.find( '.uhs-post-list-widget-previous' ).addClass( 'uhs-visible' );
+			$pagination.find( '.uhs-post-list-widget-next' ).addClass( 'uhs-visible' );
+		}
 	};
 
 	/**
