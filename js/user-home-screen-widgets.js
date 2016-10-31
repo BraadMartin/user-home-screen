@@ -60,7 +60,7 @@ var userHomeScreenWidgets = ( function( $, data ) {
 		var widgetID    = $widget.attr( 'data-widget-id' );
 		var tabID       = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
 		var currentPage = $widget.find( '.uhs-post-list-widget-posts' ).attr( 'data-current-page' );
-		var newPage     = ( 'next' === direction ) ? currentPage + 1 : currentPage - 1;
+		var newPage     = ( 'next' === direction ) ? parseInt( currentPage ) + 1 : parseInt( currentPage ) - 1;
 		var $postList   = $widget.find( '.uhs-post-list-widget-posts' );
 
 		// Bail if the new page somehow ended up being 0;

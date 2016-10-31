@@ -1512,9 +1512,9 @@ class User_Home_Screen {
 		$args = $user_widgets[ $tab_id ][ $widget_id ];
 
 		// Modify the query args to include the new page.
-		$args['query_args']['paged'] = $page;
+		$args['args']['query_args']['paged'] = $page;
 
-		$html = self::render_post_list_widget( $widget_id, $args, false );
+		$html = self::render_post_list_widget( $widget_id, $args['args'], false );
 
 		$response             = new stdClass();
 		$response->message    = esc_html__( 'It appears to have worked', 'user-home-screen' );
