@@ -925,7 +925,7 @@ class User_Home_Screen {
 	 *
 	 * @return  string                       The widget HTML.
 	 */
-	public static function ajax_render_post_list_widget( $widget_id, $args, $include_pagination = true ) {
+	public static function render_post_list_widget( $widget_id, $args, $include_pagination = true ) {
 
 		$html = '';
 
@@ -982,7 +982,7 @@ class User_Home_Screen {
 					<div class="uhs-post-list-widget-post">
 						<div class="uhs-post-list-widget-left">
 							<h3 class="uhs-post-list-widget-post-title">
-								<a href="<?php echo esc_url( get_edit_post_link( $query->post->ID, false ) ); ?>">
+								<a href="<?php echo esc_url( get_edit_post_link( $query->post->ID, false ) ); ?>" target="_blank">
 									<?php echo esc_html( get_the_title( $query->post->ID ) ); ?>
 								</a>
 							</h3>
@@ -1501,7 +1501,7 @@ class User_Home_Screen {
 		// Modify the query args to include the new page.
 		$args['args']['query_args']['paged'] = $page;
 
-		$html = self::ajax_render_post_list_widget( $widget_id, $args['args'], $include_pagination );
+		$html = self::render_post_list_widget( $widget_id, $args['args'], $include_pagination );
 
 		$response             = new stdClass();
 		$response->message    = esc_html__( 'It appears to have worked', 'user-home-screen' );
