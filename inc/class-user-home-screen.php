@@ -1025,113 +1025,58 @@ class User_Home_Screen {
 	 *
 	 * @param   int  $current_page  The current page we're on.
 	 * @param   int  $max_pages     The maximum number of pages for the query.
-	 * @param   int  $found_posts   The number of posts matching the query.
 	 *
 	 * @return  string              The pagination HTML.
 	 */
-	public static function render_post_list_widget_pagination( $current_page, $max_pages, $found_posts ) {
+	public static function render_post_list_widget_pagination( $current_page = 1, $max_pages = 1 ) {
 
-		ob_start();
-
+		// Determine whether to initially show next and previous links.
 		if ( $max_pages > 1 ) {
-
-			// We're in a query that has more than 1 page.
-
 			if ( $current_page === 1 ) {
 
 				// We're on the first page and only need to output next.
-				?>
-				<div class="uhs-post-list-widget-pagination">
-					<div class="uhs-post-list-widget-pagination-numbers">
-						<?php
-							printf(
-								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
-								'uhs-post-list-widget-page-x',
-								esc_html( $current_page ),
-								__( 'of', 'user-home-screen' ),
-								'uhs-post-list-widget-page-x-of',
-								esc_html( $max_pages )
-							);
-						?>
-					</div>
-					<div class="uhs-post-list-widget-next">
-						<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
-					</div>
-				</div>
-				<?php
+				$include_next = true;
 
 			} elseif ( $current_page === $max_pages ) {
 
 				// We're on the last page and only need to output previous.
-				?>
-				<div class="uhs-post-list-widget-pagination">
-					<div class="uhs-post-list-widget-previous">
-						<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
-					</div>
-					<div class="uhs-post-list-widget-pagination-numbers">
-						<?php
-							printf(
-								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
-								'uhs-post-list-widget-page-x',
-								esc_html( $current_page ),
-								__( 'of', 'user-home-screen' ),
-								'uhs-post-list-widget-page-x-of',
-								esc_html( $max_pages )
-							);
-						?>
-					</div>
-				</div>
-				<?php
+				$include_previous = true;
 
 			} else {
 
 				// We're on a page that is not the first or last and need to output the full pagination.
-				?>
-				<div class="uhs-post-list-widget-pagination">
-					<div class="uhs-post-list-widget-previous">
-						<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
-					</div>
-					<div class="uhs-post-list-widget-pagination-numbers">
-						<?php
-							printf(
-								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
-								'uhs-post-list-widget-page-x',
-								esc_html( $current_page ),
-								__( 'of', 'user-home-screen' ),
-								'uhs-post-list-widget-page-x-of',
-								esc_html( $max_pages )
-							);
-						?>
-					</div>
-					<div class="uhs-post-list-widget-next">
-						<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
-					</div>
-				</div>
-				<?php
+				$include_next     = true;
+				$include_previous = true;
 			}
-
-		} elseif ( $found_posts <= $post_count ) {
-
-			// We're in a query that only has 1 page.
-			?>
-			<div class="uhs-post-list-widget-pagination">
-				<div class="uhs-post-list-widget-pagination-numbers">
-					<div class="uhs-post-list-widget-page-x-of">
-						<?php
-							printf(
-								'<span class="%s">%s</span> %s <span class="%s">%s</span>',
-								'uhs-post-list-widget-page-x',
-								esc_html( $current_page ),
-								__( 'of', 'user-home-screen' ),
-								'uhs-post-list-widget-page-x-of',
-								esc_html( $max_pages )
-							);
-						?>
-					</div>
-				</div>
-			</div>
-			<?php
 		}
+
+		$prev_class = ( ! empty( $include_previous ) ) ? 'uhs-visible' : '';
+		$next_class = ( ! empty( $include_next ) ) ? 'uhs-visible' : '';
+
+		ob_start();
+
+		?>
+		<div class="uhs-post-list-widget-pagination">
+			<div class="uhs-post-list-widget-previous <?php echo esc_attr( $prev_class ); ?>">
+				<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
+			</div>
+			<div class="uhs-post-list-widget-pagination-numbers">
+				<?php
+					printf(
+						'<span class="%s">%s</span> %s <span class="%s">%s</span>',
+						'uhs-post-list-widget-page-x',
+						esc_html( $current_page ),
+						__( 'of', 'user-home-screen' ),
+						'uhs-post-list-widget-page-x-of',
+						esc_html( $max_pages )
+					);
+				?>
+			</div>
+			<div class="uhs-post-list-widget-next <?php echo esc_attr( $next_class ); ?>">
+				<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
+			</div>
+		</div>
+		<?php
 
 		return ob_get_clean();
 	}
