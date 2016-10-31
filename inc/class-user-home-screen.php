@@ -1481,6 +1481,7 @@ class User_Home_Screen {
 		$response             = new stdClass();
 		$response->message    = esc_html__( 'It appears to have worked', 'user-home-screen' );
 		$response->posts_html = $html;
+		$response->new_page   = $page;
 
 		wp_send_json( $response );
 

@@ -59,9 +59,11 @@ var userHomeScreenWidgets = ( function( $, data ) {
 
 		var widgetID    = $widget.attr( 'data-widget-id' );
 		var tabID       = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
-		var currentPage = $widget.find( '.uhs-post-list-widget-posts' ).attr( 'data-current-page' );
-		var newPage     = ( 'next' === direction ) ? parseInt( currentPage ) + 1 : parseInt( currentPage ) - 1;
 		var $postList   = $widget.find( '.uhs-post-list-widget-posts' );
+		var $pagination = $widget.find( '.uhs-post-list-widget-pagination' );
+		var currentPage = $postList.attr( 'data-current-page' );
+		var newPage     = ( 'next' === direction ) ? parseInt( currentPage ) + 1 : parseInt( currentPage ) - 1;
+		var totalPages  = parseInt( $pagination.find( '.uhs-post-list-widget-page-x-of' ).text() );
 
 		// Bail if the new page somehow ended up being 0;
 		if ( 0 === newPage ) {
@@ -83,9 +85,22 @@ var userHomeScreenWidgets = ( function( $, data ) {
 
 		request.done( function( response ) {
 			console.log( response );
-			console.log( response.posts_html );
 
+			// Update post list.
 			$postList.replaceWith( response.posts_html );
+
+			// Update pagination.
+			$pagination.find( '.uhs-post-list-widget-page-x' ).text( newPage );
+			if ( newPage === 1 ) {
+				$pagination.find( '.uhs-post-list-widget-previous' ).removeClass( 'uhs-visible' );
+				$pagination.find( '.uhs-post-list-widget-next' ).addClass( 'uhs-visible' );
+			} else if ( newPage === totalPages ) {
+				$pagination.find( '.uhs-post-list-widget-previous' ).addClass( 'uhs-visible' );
+				$pagination.find( '.uhs-post-list-widget-next' ).removeClass( 'uhs-visible' );
+			} else {
+				$pagination.find( '.uhs-post-list-widget-previous' ).addClass( 'uhs-visible' );
+				$pagination.find( '.uhs-post-list-widget-next' ).addClass( 'uhs-visible' );
+			}
 		});
 
 		request.fail( function( response ) {

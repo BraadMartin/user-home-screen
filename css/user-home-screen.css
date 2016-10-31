@@ -232,20 +232,27 @@
 	display: block;
 }
 
-.uhs-post-list-widget-previous {
+.uhs-post-list-widget-previous,
+.uhs-post-list-widget-next {
+	display: none;
 	position: absolute;
-	text-align: left;
-	left: 0;
 	top: 0;
 	cursor: pointer;
 }
 
+.uhs-post-list-widget-previous.uhs-visible,
+.uhs-post-list-widget-next.uhs-visible {
+	display: block;
+}
+
+.uhs-post-list-widget-previous {
+	text-align: left;
+	left: 0;
+}
+
 .uhs-post-list-widget-next {
-	position: absolute;
 	text-align: right;
 	right: 0;
-	top: 0;
-	cursor: pointer;
 }
 
 /**
