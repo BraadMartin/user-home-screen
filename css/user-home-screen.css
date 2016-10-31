@@ -182,7 +182,7 @@
 }
 
 .uhs-post-list-widget-left {
-	max-width: calc( 100% - 120px );
+	max-width: calc( 100% - 122px );
 	float: left;
 }
 
@@ -197,7 +197,7 @@
 }
 
 .uhs-post-list-widget-right {
-	width: 115px;
+	width: 118px;
 	float: right;
 	text-align: right;
 	font-size: 12px;
