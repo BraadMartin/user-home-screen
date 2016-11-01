@@ -1219,9 +1219,6 @@ class User_Home_Screen {
 		// Get existing tab data for the user.
 		$tabs_data = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
 
-		error_log( 'existing tabs data' );
-		error_log( print_r( $tabs_data, true ) );
-
 		if ( empty( $tabs_data ) || ! is_array( $tabs_data ) ) {
 			$tabs_data = array();
 		}
@@ -1278,9 +1275,6 @@ class User_Home_Screen {
 	 * @param  WP_User  $user       The current user object.
 	 */
 	public function update_tabs_for_user( $tabs_data, $user ) {
-
-		error_log( 'about to save user tabs' );
-		error_log( print_r( $tabs_data, true ) );
 
 		/**
 		 * Allow the tabs data to be customized as it's being saved.
@@ -1500,9 +1494,6 @@ class User_Home_Screen {
 		$user_widgets       = self::get_user_widgets( $user );
 		$include_pagination = ( ! empty( $_POST['include_pagination'] ) ) ? true : false;
 
-		error_log( print_r( $_POST, true ) );
-		error_log( ( $include_pagination ) ? 'true' : 'false' );
-
 		// Bail if the widget doesn't exist for the user.
 		if ( empty( $user_widgets[ $tab_id ][ $widget_id ] ) ) {
 			$response          = new stdClass();
@@ -1538,9 +1529,6 @@ class User_Home_Screen {
 		// Get existing widget data for the user.
 		$widgets_data = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
 
-		error_log( 'widgets data before add' );
-		error_log( print_r( $widgets_data, true ) );
-
 		if ( empty( $widgets_data ) || ! is_array( $widgets_data ) ) {
 			$widgets_data = array();
 		}
@@ -1563,9 +1551,6 @@ class User_Home_Screen {
 		 */
 		$widgets_data[ $tab_id ][ $widget_id ] = apply_filters( 'user_home_screen_add_widget_data', $widget_data, $user );
 
-		error_log( 'widgets data after add' );
-		error_log( print_r( $widgets_data, true ) );
-
 		$this->update_widgets_for_user( $widgets_data, $user );
 	}
 
@@ -1584,15 +1569,9 @@ class User_Home_Screen {
 			$widgets_data = array();
 		}
 
-		error_log( 'widgets data before remove' );
-		error_log( print_r( $widgets_data, true ) );
-
 		if ( ! empty( $widgets_data[ $tab_id ][ $widget_id ] ) ) {
 			unset( $widgets_data[ $tab_id ][ $widget_id ] );
 		}
-
-		error_log( 'widgets data after remove' );
-		error_log( print_r( $widgets_data, true ) );
 
 		$this->update_widgets_for_user( $widgets_data, $user );
 	}
@@ -1604,9 +1583,6 @@ class User_Home_Screen {
 	 * @param  WP_User  $user          The user object to update.
 	 */
 	public function update_widgets_for_user( $widgets_data, $user ) {
-
-		error_log( 'about to save user meta' );
-		error_log( print_r( $widgets_data, true ) );
 
 		/**
 		 * Allow the widget data to be customized as it's being saved.
@@ -1654,9 +1630,6 @@ class User_Home_Screen {
 	 * @return  array         The validated widget args.
 	 */
 	public function validate_post_list_widget_args( $args ) {
-
-		error_log( 'validating' );
-		error_log( print_r( $args, true ) );
 
 		// Defaults.
 		$updated_args                  = array();
