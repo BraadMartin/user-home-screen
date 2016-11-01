@@ -626,6 +626,7 @@ class User_Home_Screen {
 			<div class="uhs-inner-wrap">
 				<h1><?php echo esc_html( $page_title ); ?></h1>
 				<a class="button button-primary uhs-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
+				<span class="uhs-widget-spinner uhs-spinner spinner"></span>
 				<h2 class="nav-tab-wrapper">
 					<?php
 

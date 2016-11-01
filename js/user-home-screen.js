@@ -12,6 +12,7 @@ var userHomeScreen = ( function( $, data ) {
 	var $tabContent       = $();
 	var $addWidget        = $();
 	var $removeWidget     = $();
+	var $widgetGrids      = $();
 	var $toggleWidgetInfo = $();
 
 	/**
@@ -32,6 +33,7 @@ var userHomeScreen = ( function( $, data ) {
 		$tabContent       = $( '.uhs-tab-content-wrap' );
 		$addWidget        = $( '.uhs-add-widget' );
 		$removeWidget     = $( '.uhs-remove-widget' );
+		$widgetGrids      = $( '.uhs-widget-grid' );
 		$toggleWidgetInfo = $( '.uhs-toggle-widget-info' );
 
 		setupEvents();
@@ -103,16 +105,8 @@ var userHomeScreen = ( function( $, data ) {
 			toggleWidgetInfo( $widget );
 		});
 
-		var $widgetGrids = $( '.uhs-widget-grid' );
-
 		// Make widgets sortable.
-		$widgetGrids.sortable({
-			placeholder: 'uhs-ui-state-highlight',
-			handle: '.uhs-widget-title.hndle',
-			revert: 200,
-			tolerance: 'pointer',
-		});
-		$widgetGrids.disableSelection();
+		enableWidgetSorting( true );
 
 		// Save the updated widget order after sorting.
 		$widgetGrids.on( 'sortupdate', function( event, ui ) {
@@ -501,6 +495,34 @@ var userHomeScreen = ( function( $, data ) {
 	};
 
 	/**
+	 * Enable sorting on all widget grids.
+	 *
+	 * @param {bool} initialize - Whether we are initializing sorting for the first time
+	 *                            or just re-enabling after disabling.
+	 */
+	var enableWidgetSorting = function( initialize ) {
+
+		if ( initialize ) {
+			$widgetGrids.sortable({
+				placeholder: 'uhs-ui-state-highlight',
+				handle:      '.uhs-widget-title.hndle',
+				revert:      200,
+				tolerance:   'pointer',
+			});
+			$widgetGrids.disableSelection();
+		} else {
+			$widgetGrids.sortable( 'enable' );
+		}
+	};
+
+	/**
+	 * Disable sorting on all widget grids.
+	 */
+	var disableWidgetSorting = function() {
+		$widgetGrids.sortable( 'disable' );
+	};
+
+	/**
 	 * Save the updated widget order after sorting.
 	 *
 	 * @param {object} $widgetGrid - A jQuery object containing the updated widget grid.
@@ -508,7 +530,11 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var updateWidgetsOrder = function( $widgetGrid, tabID ) {
 
+		var $spinner    = $( '.uhs-widget-spinner' );
 		var widgetOrder = [];
+
+		$spinner.addClass( 'uhs-visible' );
+		disableWidgetSorting();
 
 		$widgetGrid.find( '.uhs-widget' ).each( function() {
 			widgetOrder.push( $( this ).attr( 'data-widget-id' ) );
@@ -524,10 +550,12 @@ var userHomeScreen = ( function( $, data ) {
 		var request = $.post( ajaxurl, ajaxData );
 
 		request.done( function( response ) {
-			console.log( response );
+			$spinner.removeClass( 'uhs-visible' );
+			enableWidgetSorting( false );
 		});
 
 		request.fail( function() {
+			$spinner.removeClass( 'uhs-visible' );
 		});
 	};
 

@@ -14,6 +14,10 @@
 	float: right;
 }
 
+.uhs-widget-spinner {
+	margin-top: 5px;
+}
+
 .uhs-ui-state-highlight {
 	background-color: transparent;
 	border: 1px dashed #aaa;
