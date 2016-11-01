@@ -1,4 +1,4 @@
-/**
+	/**
  * User Home Screen JS.
  */
 
@@ -25,8 +25,6 @@ var userHomeScreen = ( function( $, data ) {
 	 * Initialize.
 	 */
 	var init = function() {
-
-		console.log( data );
 
 		// Setup key DOM references.
 		$wrap             = $( '#uhs-wrap' );
@@ -242,13 +240,10 @@ var userHomeScreen = ( function( $, data ) {
 			setTimeout( function() {
 				location.reload();
 			}, 400 );
-
-			console.log( response );
 		});
 
-		request.fail( function( response ) {
+		request.fail( function() {
 			$spinner.css( 'visibility', 'none' );
-			console.log( 'Something went wrong when trying to add a tab.' );
 		});
 	};
 
@@ -292,13 +287,10 @@ var userHomeScreen = ( function( $, data ) {
 				setTimeout( function() {
 					location.reload();
 				}, 400 );
-
-				console.log( response );
 			});
 
-			request.fail( function( response ) {
+			request.fail( function() {
 				$spinner.css( 'visibility', 'none' );
-				console.log( 'Something went wrong when trying to save a widget.' );
 			});
 		});
 	};
@@ -409,13 +401,10 @@ var userHomeScreen = ( function( $, data ) {
 				setTimeout( function() {
 					location.reload();
 				}, 400 );
-
-				console.log( response );
 			});
 
-			request.fail( function( response ) {
+			request.fail( function() {
 				$spinner.css( 'visibility', 'none' );
-				console.log( 'Something went wrong when trying to save a widget.' );
 			});
 		});
 	};
@@ -464,13 +453,10 @@ var userHomeScreen = ( function( $, data ) {
 				setTimeout( function() {
 					location.reload();
 				}, 400 );
-
-				console.log( response );
 			});
 
-			request.fail( function( response ) {
+			request.fail( function() {
 				$spinner.css( 'visibility', 'none' );
-				console.log( 'Something went wrong when trying to save a widget.' );
 			});
 		});
 	};
@@ -525,7 +511,6 @@ var userHomeScreen = ( function( $, data ) {
 		var widgetOrder = [];
 
 		$widgetGrid.find( '.uhs-widget' ).each( function() {
-			console.log( this );
 			widgetOrder.push( $( this ).attr( 'data-widget-id' ) );
 		});
 
@@ -542,8 +527,7 @@ var userHomeScreen = ( function( $, data ) {
 			console.log( response );
 		});
 
-		request.fail( function( response ) {
-			console.log( 'Something went wrong when trying to save a widget.' );
+		request.fail( function() {
 		});
 	};
 
