@@ -240,6 +240,11 @@
 	cursor: pointer;
 }
 
+.uhs-post-list-widget-previous:hover,
+.uhs-post-list-widget-next:hover {
+	text-decoration: underline;
+}
+
 .uhs-post-list-widget-previous.uhs-visible,
 .uhs-post-list-widget-next.uhs-visible {
 	display: block;
