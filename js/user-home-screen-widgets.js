@@ -153,13 +153,17 @@ var userHomeScreenWidgets = ( function( $, data ) {
 		$widget.find( '.uhs-post-list-widget-posts' ).replaceWith( html );
 
 		// Grab fresh DOM references.
-		var $postList   = $widget.find( '.uhs-post-list-widget-posts' );
-		var $pagination = $widget.find( '.uhs-post-list-widget-pagination' );
-		var page        = $postList.attr( 'data-current-page' );
-		var totalPages  = $postList.attr( 'data-total-pages' );
+		var $postList      = $widget.find( '.uhs-post-list-widget-posts' );
+		var $pagination    = $widget.find( '.uhs-post-list-widget-pagination' );
+		var page           = $postList.attr( 'data-current-page' );
+		var totalPages     = $postList.attr( 'data-total-pages' );
+		var currentPostMin = $postList.attr( 'data-current-post-min' );
+		var currentPostMax = $postList.attr( 'data-current-post-max' );
 
 		// Update pagination.
-		$pagination.find( '.uhs-post-list-widget-page-x' ).text( page );
+		$pagination.find( '.uhs-post-list-widget-post-x-x' ).text( currentPostMin + ' - ' + currentPostMax );
+
+		// Maybe show/hide next/previous links.
 		if ( page === 1 ) {
 			$pagination.find( '.uhs-post-list-widget-previous' ).removeClass( 'uhs-visible' );
 			$pagination.find( '.uhs-post-list-widget-next' ).addClass( 'uhs-visible' );

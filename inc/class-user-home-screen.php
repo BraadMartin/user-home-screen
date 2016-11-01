@@ -943,13 +943,25 @@ class User_Home_Screen {
 
 		if ( $query->have_posts() ) {
 
+			// Determine which "page" we're on in the pagination sense.
 			$page = ( ! empty( $query->query_vars['paged'] ) ) ? (int) $query->query_vars['paged'] : 1;
 
+			// Determine which set of posts we're on in the pagination sense.
+			if ( $page < $query->max_num_pages ) {
+				$current_posts_min = ( $query->post_count * ( $page - 1 ) ) + 1;
+				$current_posts_max = $query->post_count * $page;
+			} else {
+				$current_posts_min = $query->found_posts - $query->post_count + 1;
+				$current_posts_max = $query->found_posts;
+			}
+
 			printf(
-				'<div class="%s" data-current-page="%s" data-total-pages="%s">',
+				'<div class="%s" data-current-page="%s" data-total-pages="%s" data-current-post-min="%s" data-current-post-max="%s">',
 				'uhs-post-list-widget-posts',
 				esc_attr( $page ),
-				esc_attr( $query->max_num_pages )
+				esc_attr( $query->max_num_pages ),
+				esc_attr( $current_posts_min ),
+				esc_attr( $current_posts_max )
 			);
 
 			while ( $query->have_posts() ) {
@@ -1028,7 +1040,7 @@ class User_Home_Screen {
 			echo '</div>';
 
 			if ( $include_pagination ) {
-				echo self::render_post_list_widget_pagination( $page, $query->max_num_pages, $query->found_posts );
+				echo self::render_post_list_widget_pagination( $current_posts_min, $current_posts_max, $query->found_posts );
 			}
 
 			wp_reset_postdata();
@@ -1046,21 +1058,22 @@ class User_Home_Screen {
 	/**
 	 * Return the HTML for the pagination section of the Post List widget.
 	 *
-	 * @param   int  $current_page  The current page we're on.
-	 * @param   int  $max_pages     The maximum number of pages for the query.
+	 * @param   int  $current_posts_min  The current first post in the list.
+	 * @param   int  $current_posts_max  The current last post in the list.
+	 * @param   int  $found_posts        The number of found posts.
 	 *
-	 * @return  string              The pagination HTML.
+	 * @return  string                   The pagination HTML.
 	 */
-	public static function render_post_list_widget_pagination( $current_page = 1, $max_pages = 1 ) {
+	public static function render_post_list_widget_pagination( $current_posts_min, $current_posts_max, $found_posts = 0 ) {
 
 		// Determine whether to initially show next and previous links.
-		if ( $max_pages > 1 ) {
-			if ( $current_page === 1 ) {
+		if ( $current_posts_max < $found_posts ) {
+			if ( $current_posts_min === 1 ) {
 
 				// We're on the first page and only need to output next.
 				$include_next = true;
 
-			} elseif ( $current_page === $max_pages ) {
+			} elseif ( $current_posts_max === $found_posts ) {
 
 				// We're on the last page and only need to output previous.
 				$include_previous = true;
@@ -1086,12 +1099,13 @@ class User_Home_Screen {
 			<div class="uhs-post-list-widget-pagination-numbers">
 				<?php
 					printf(
-						'<span class="%s">%s</span> %s <span class="%s">%s</span>',
-						'uhs-post-list-widget-page-x',
-						esc_html( $current_page ),
+						'<span class="%s">%s - %s</span> %s <span class="%s">%s</span>',
+						'uhs-post-list-widget-post-x-x',
+						esc_html( $current_posts_min ),
+						esc_html( $current_posts_max ),
 						__( 'of', 'user-home-screen' ),
-						'uhs-post-list-widget-page-x-of',
-						esc_html( $max_pages )
+						'uhs-post-list-widget-total-posts',
+						esc_html( $found_posts )
 					);
 				?>
 			</div>
