@@ -356,8 +356,12 @@ class User_Home_Screen {
 	 */
 	public static function get_categories() {
 
-		$full_categories = get_terms( array( 'taxonomy' => 'category' ) );
-		$categories      = array();
+		$full_categories = get_terms( array(
+			'taxonomy'               => 'category',
+			'update_term_meta_cache' => false,
+		) );
+
+		$categories = array();
 
 		// Transform into a simple array of user ID => Display name.
 		foreach ( $full_categories as $category ) {
@@ -402,8 +406,13 @@ class User_Home_Screen {
 	 */
 	public static function get_authors() {
 
-		$full_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
-		$authors    = array();
+		$full_users = get_users( array(
+			'orderby'     => 'display_name',
+			'order'       => 'ASC',
+			'count_total' => false,
+		) );
+
+		$authors = array();
 
 		// Transform into a simple array of user ID => Display name.
 		// We have to prefix the ID here because otherwise the array would
