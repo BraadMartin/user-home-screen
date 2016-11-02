@@ -627,6 +627,7 @@ class User_Home_Screen {
 				<h1><?php echo esc_html( $page_title ); ?></h1>
 				<a class="button button-primary uhs-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
 				<span class="uhs-widget-spinner uhs-spinner spinner"></span>
+				<span class="uhs-widget-save-confirm"><?php esc_html_e( 'Widgets Saved', 'user-home-screen' ); ?></span>
 				<h2 class="nav-tab-wrapper">
 					<?php
 
@@ -687,7 +688,7 @@ class User_Home_Screen {
 				</h2>
 				<?php echo $this->output_tab_widgets( $user, $user_tabs, $user_widgets ); ?>
 			</div>
-			<?php echo $this->output_widget_edit_templates(); ?>
+			<?php echo $this->output_js_templates(); ?>
 		</div>
 		<?php
 
@@ -1289,11 +1290,9 @@ class User_Home_Screen {
 	}
 
 	/**
-	 * Output our widget edit templates.
-	 *
-	 * @return  string  The widget templates HTML.
+	 * Output our JS templates.
 	 */
-	public function output_widget_edit_templates() {
+	public function output_js_templates() {
 
 		// Templates.
 		$templates = array(
@@ -1312,12 +1311,12 @@ class User_Home_Screen {
 			 * Allow the template paths to be filtered.
 			 *
 			 * This filter makes it possible for outside code to swap our templates
-			 * for custom templates, and as long as the template ID and data object
-			 * keys are kept the same everything should still work.
+			 * for custom templates. As long as the template ID and data object keys
+			 * are kept the same everything should still work.
 			 *
-			 * @param  string   $template  The template path.
+			 * @param  string  $template  The template path.
 			 */
-			include_once apply_filters( 'user_home_screen_js_templates', $template);
+			include_once apply_filters( 'user_home_screen_js_templates', $template );
 		}
 	}
 
