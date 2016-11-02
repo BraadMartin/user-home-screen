@@ -341,6 +341,10 @@
 	margin-bottom: 10px;
 }
 
+.uhs-feed-item-author {
+	line-height: 1.2;
+}
+
 .uhs-feed-item-content {
 	clear: both;
 	line-height: 1.3;
