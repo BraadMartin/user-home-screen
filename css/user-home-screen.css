@@ -3,11 +3,13 @@
  */
 
 .uhs-hidden {
-	visibility: none !important;
+	visibility: hidden !important;
+	transition: visibility 0.2s;
 }
 
 .uhs-visible {
 	visibility: visible !important;
+	transition: visibility 0.2s;
 }
 
 .uhs-add-widget {
@@ -16,6 +18,15 @@
 
 .uhs-widget-spinner {
 	margin-top: 5px;
+}
+
+.uhs-widget-save-confirm {
+	float: right;
+	display: inline-block;
+	margin-top: 6px;
+	visibility: hidden;
+	transition: visibility 0.2s;
+	color: #11a011;
 }
 
 .uhs-ui-state-highlight {

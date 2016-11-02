@@ -7,13 +7,15 @@ var userHomeScreen = ( function( $, data ) {
 	/**
 	 * Store key DOM references.
 	 */
-	var $wrap             = $();
-	var $navTabs          = $();
-	var $tabContent       = $();
-	var $addWidget        = $();
-	var $removeWidget     = $();
-	var $widgetGrids      = $();
-	var $toggleWidgetInfo = $();
+	var $wrap              = $();
+	var $navTabs           = $();
+	var $tabContent        = $();
+	var $addWidget         = $();
+	var $removeWidget      = $();
+	var $widgetGrids       = $();
+	var $widgetSpinner     = $();
+	var $widgetSaveConfirm = $();
+	var $toggleWidgetInfo  = $();
 
 	/**
 	 * Modal config options.
@@ -28,13 +30,15 @@ var userHomeScreen = ( function( $, data ) {
 	var init = function() {
 
 		// Setup key DOM references.
-		$wrap             = $( '#uhs-wrap' );
-		$navTabs          = $( 'h2.nav-tab-wrapper .nav-tab' );
-		$tabContent       = $( '.uhs-tab-content-wrap' );
-		$addWidget        = $( '.uhs-add-widget' );
-		$removeWidget     = $( '.uhs-remove-widget' );
-		$widgetGrids      = $( '.uhs-widget-grid' );
-		$toggleWidgetInfo = $( '.uhs-toggle-widget-info' );
+		$wrap              = $( '#uhs-wrap' );
+		$navTabs           = $( 'h2.nav-tab-wrapper .nav-tab' );
+		$tabContent        = $( '.uhs-tab-content-wrap' );
+		$addWidget         = $( '.uhs-add-widget' );
+		$removeWidget      = $( '.uhs-remove-widget' );
+		$widgetGrids       = $( '.uhs-widget-grid' );
+		$widgetSpinner     = $( '.uhs-widget-spinner' );
+		$widgetSaveConfirm = $( '.uhs-widget-save-confirm' );
+		$toggleWidgetInfo  = $( '.uhs-toggle-widget-info' );
 
 		setupEvents();
 
@@ -530,10 +534,10 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var updateWidgetsOrder = function( $widgetGrid, tabID ) {
 
-		var $spinner    = $( '.uhs-widget-spinner' );
 		var widgetOrder = [];
 
-		$spinner.addClass( 'uhs-visible' );
+		$widgetSpinner.addClass( 'uhs-visible' );
+
 		disableWidgetSorting();
 
 		$widgetGrid.find( '.uhs-widget' ).each( function() {
@@ -550,8 +554,15 @@ var userHomeScreen = ( function( $, data ) {
 		var request = $.post( ajaxurl, ajaxData );
 
 		request.done( function( response ) {
-			$spinner.removeClass( 'uhs-visible' );
+
+			$widgetSpinner.removeClass( 'uhs-visible' );
+			$widgetSaveConfirm.addClass( 'uhs-visible' );
+
 			enableWidgetSorting( false );
+
+			setTimeout( function() {
+				$widgetSaveConfirm.removeClass( 'uhs-visible' );
+			}, 1000 );
 		});
 
 		request.fail( function() {
