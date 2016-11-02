@@ -1641,10 +1641,10 @@ class User_Home_Screen {
 	public function validate_post_list_widget_args( $args ) {
 
 		// Defaults.
-		$updated_args                  = array();
-		$updated_args['widget_info']   = array();
-		$updated_args['query_args']    = array();
-		$updated_args['parts']         = array();
+		$updated_args                = array();
+		$updated_args['widget_info'] = array();
+		$updated_args['query_args']  = array();
+		$updated_args['parts']       = array();
 
 		// Store the array of original args to support editing an existing widget.
 		$updated_args['original_args'] = $args;
@@ -1868,9 +1868,31 @@ class User_Home_Screen {
 	 */
 	public function validate_rss_feed_widget_args( $args ) {
 
-		$updated_args = $args;
+		$updated_args                = array();
+		$updated_args['widget_info'] = array();
 
-		return $updated_args;
+		// Title.
+		$updated_args['title'] = ( ! empty( $args['title'] ) ) ? esc_html( $args['title'] ) : '';
+
+		// Feed URL.
+		$updated_args['feed_url'] = ( ! empty( $args['feed_url'] ) ) ? esc_url( $args['feed_url'] ) : '';
+
+		// Widget Info.
+		$updated_args['widget_info']['feed_url'] = sprintf(
+			'<span class="%s">%s:</span> <a href="%s" target="_blank">%s</a>',
+			'uhs-widget-info-label',
+			esc_html__( 'Feed URL', 'user-home-screen' ),
+			esc_url( $updated_args['feed_url'] ),
+			esc_html( $updated_args['feed_url'] )
+		);
+
+		/**
+		 * Allow the args to be customized.
+		 *
+		 * @param  array  $updated_args  The updated args array.
+		 * @param  array  $args          The original args array.
+		 */
+		return apply_filters( 'user_home_screen_post_list_args', $updated_args, $args );
 	}
 
 	/**
