@@ -562,7 +562,7 @@ var userHomeScreen = ( function( $, data ) {
 
 			setTimeout( function() {
 				$widgetSaveConfirm.removeClass( 'uhs-visible' );
-			}, 1000 );
+			}, 1800 );
 		});
 
 		request.fail( function() {
