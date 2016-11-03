@@ -73,7 +73,7 @@ var userHomeScreenWidgets = ( function( $, data ) {
 	};
 
 	/**
-	 * Handle clicks on the pagination controls.
+	 * Handle clicks on the pagination controls on a Post List widget.
 	 *
 	 * @param {string} direction - Which direction we're paginating in.
 	 * @param {object} $widget   - A jQuery object containing the widget.
@@ -194,12 +194,26 @@ var userHomeScreenWidgets = ( function( $, data ) {
 
 			// Handle clicks on the pagination controls.
 			$prevPage.on( 'click', function() {
-				updateRssFeedWidgetPosts( $widget, 2 );
+				handleRssFeedPaginationClick( 'previous', $widget );
 			});
 			$nextPage.on( 'click', function() {
-				updateRssFeedWidgetPosts( $widget, 2 );
+				handleRssFeedPaginationClick( 'next', $widget );
 			});
 		});
+	};
+
+	/**
+	 * Handle clicks on the pagination controls on a RSS Feed widget.
+	 *
+	 * @param {string} direction - Which direction we're paginating in.
+	 * @param {object} $widget   - A jQuery object containing the widget.
+	 */
+	var handleRssFeedPaginationClick = function( direction, $widget ) {
+
+		var currentPage = $widget.find( '.uhs-rss-feed-widget-feed-content' ).attr( 'data-current-page' );
+		var newPage     = ( 'next' === direction ) ? parseInt( currentPage ) + 1 : parseInt( currentPage ) - 1;
+
+		updateRssFeedWidgetPosts( $widget, newPage );
 	};
 
 	/**
@@ -216,7 +230,14 @@ var userHomeScreenWidgets = ( function( $, data ) {
 		var feedURL          = $feedContent.attr( 'data-feed-url' );
 		var $spinner         = $widget.find( '.uhs-spinner' );
 		var limit            = 10;
-		var offsetStart      = limit * page;
+
+		if ( page === 1 ) {
+			var offsetStart = false;
+			var offsetEnd   = false;
+		} else {
+			var offsetStart = ( limit * page ) + 1;
+			var offsetEnd   = offsetStart + limit - 1;
+		}
 
 		$feedContentWrap.empty();
 		$spinner.addClass( 'uhs-visible' );
@@ -224,6 +245,7 @@ var userHomeScreenWidgets = ( function( $, data ) {
 		$feedContentWrap.rss( feedURL, {
 			limit: limit,
 			offsetStart: offsetStart,
+			offsetEnd: offsetEnd,
 			ssl: true,
 			layoutTemplate: '{entries}',
 			entryTemplate: '<div class="uhs-feed-item"><div class="uhs-feed-item-left"><h3 class="uhs-feed-item-title"><a href="{url}">{title}</a></h3></div><div class="uhs-feed-item-right"><div class="uhs-feed-item-date">{date}</div><div class="uhs-feed-item-author">{author}</div></div><div class="uhs-feed-item-content">{shortBodyPlain}...</div></div>',
@@ -238,15 +260,13 @@ var userHomeScreenWidgets = ( function( $, data ) {
 			},
 		});
 
+		$feedContent.attr( 'data-current-page', page );
 		$pagination.find( '.uhs-rss-feed-widget-page-x' ).text( page );
 
 		// Maybe show/hide next/previous links.
 		if ( page === 1 ) {
 			$pagination.find( '.uhs-rss-feed-widget-previous' ).removeClass( 'uhs-visible' );
 			$pagination.find( '.uhs-rss-feed-widget-next' ).addClass( 'uhs-visible' );
-		} else if ( page === totalPages ) {
-			$pagination.find( '.uhs-rss-feed-widget-previous' ).addClass( 'uhs-visible' );
-			$pagination.find( '.uhs-rss-feed-widget-next' ).removeClass( 'uhs-visible' );
 		} else {
 			$pagination.find( '.uhs-rss-feed-widget-previous' ).addClass( 'uhs-visible' );
 			$pagination.find( '.uhs-rss-feed-widget-next' ).addClass( 'uhs-visible' );

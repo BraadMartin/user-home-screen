@@ -282,19 +282,19 @@
 	text-align: center;
 }
 
-.uhs-rss-feed-widget-feed-content.uhs-loaded {
-	text-align: left;
-}
-
 .uhs-rss-feed-widget-feed-content .uhs-spinner {
 	float: none;
-	display: inline-block;
 	margin-top: 100px;
 	margin-bottom: 100px;
+	display: none;
 }
 
-.uhs-rss-feed-widget-feed-content.uhs-loaded .uhs-spinner {
-	display: none;
+.uhs-rss-feed-widget-feed-content .uhs-spinner.uhs-visible {
+	display: inline-block;
+}
+
+.uhs-feed-content-wrap {
+	text-align: left;
 }
 
 .uhs-feed-item {
@@ -354,6 +354,7 @@
 	text-align: center;
 	margin: 10px 0 5px;
 	position: relative;
+	display: none; /* Temporary for v1 */
 }
 
 .uhs-rss-feed-widget-pagination::after {
