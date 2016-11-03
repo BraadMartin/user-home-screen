@@ -415,8 +415,7 @@ class User_Home_Screen {
 		$authors = array();
 
 		// Transform into a simple array of user ID => Display name.
-		// We have to prefix the ID here because otherwise the array would
-		// index based on ID.
+		// We have to prefix the ID here to prevent the array for sorting by ID.
 		foreach ( $full_users as $user ) {
 			$authors[ 'user_' . $user->ID ] = $user->data->display_name;
 		}
@@ -1824,6 +1823,17 @@ class User_Home_Screen {
 		// Order by.
 		if ( ! empty( $args['order_by'] ) ) {
 			$updated_args['query_args']['orderby'] = sanitize_text_field( $args['order_by'] );
+
+			$order_by_options = self::get_order_by_options();
+
+			if ( in_array( $args['order_by'], $order_by_options ) ) {
+				$updated_args['widget_info']['order_by'] = sprintf(
+					'<span class="%s">%s:</span> %s',
+					'uhs-widget-info-label',
+					esc_html__( 'Order By', 'user-home-screen' ),
+					esc_html( $order_by_options[ $args['order_by'] ] )
+				);
+			}
 		}
 
 		// Order.
