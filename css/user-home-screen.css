@@ -350,6 +350,46 @@
 	line-height: 1.3;
 }
 
+.uhs-rss-feed-widget-pagination {
+	text-align: center;
+	margin: 10px 0 5px;
+	position: relative;
+}
+
+.uhs-rss-feed-widget-pagination::after {
+	content: '';
+	clear: both;
+	display: block;
+}
+
+.uhs-rss-feed-widget-previous,
+.uhs-rss-feed-widget-next {
+	display: none;
+	position: absolute;
+	top: 0;
+	cursor: pointer;
+}
+
+.uhs-rss-feed-widget-previous:hover,
+.uhs-rss-feed-widget-next:hover {
+	text-decoration: underline;
+}
+
+.uhs-rss-feed-widget-previous.uhs-visible,
+.uhs-rss-feed-widget-next.uhs-visible {
+	display: block;
+}
+
+.uhs-rss-feed-widget-previous {
+	text-align: left;
+	left: 0;
+}
+
+.uhs-rss-feed-widget-next {
+	text-align: right;
+	right: 0;
+}
+
 /**
  * Add/Edit Modal.
  */

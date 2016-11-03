@@ -43,8 +43,6 @@ var userHomeScreenWidgets = ( function( $, data ) {
 
 			request.done( function( response ) {
 
-				console.log( response );
-
 				if ( response.hasOwnProperty( 'posts_html' ) ) {
 
 					updatePostListWidgetPosts( $widget, response.posts_html );
@@ -64,7 +62,6 @@ var userHomeScreenWidgets = ( function( $, data ) {
 					});
 
 				} else {
-
 					console.log( data.labels.post_list_ajax_fail );
 				}
 			});
@@ -188,31 +185,70 @@ var userHomeScreenWidgets = ( function( $, data ) {
 
 		$feedWidgets.each( function() {
 
-			var $widget      = $( this );
-			var $feedContent = $widget.find( '.uhs-rss-feed-widget-feed-content' );
-			var feedURL      = $feedContent.attr( 'data-feed-url' );
-			var $spinner     = $widget.find( '.uhs-spinner' );
+			var $widget     = $( this );
+			var $pagination = $widget.find( '.uhs-rss-feed-widget-pagination' );
+			var $prevPage   = $pagination.find( '.uhs-rss-feed-widget-previous' );
+			var $nextPage   = $pagination.find( '.uhs-rss-feed-widget-next' );
 
-			$spinner.addClass( 'uhs-visible' );
+			updateRssFeedWidgetPosts( $widget, 1 );
 
-			$feedContent.rss( feedURL, {
-				limit: 10,
-				offsetStart: false,
-				offsetEnd: false,
-				ssl: true,
-				layoutTemplate: '<div class="uhs-feed-content-wrap">{entries}</div>',
-				entryTemplate: '<div class="uhs-feed-item"><div class="uhs-feed-item-left"><h3 class="uhs-feed-item-title"><a href="{url}">{title}</a></h3></div><div class="uhs-feed-item-right"><div class="uhs-feed-item-date">{date}</div><div class="uhs-feed-item-author">{author}</div></div><div class="uhs-feed-item-content">{shortBodyPlain}...</div></div>',
-				tokens: {},
-				dateFormat: 'MMM Do, YYYY',
-				error: function(){},
-				success: function(){
-					$feedContent.addClass( 'uhs-loaded' );
-				},
-				onData: function(){
-					$spinner.removeClass( 'uhs-visible' );
-				},
+			// Handle clicks on the pagination controls.
+			$prevPage.on( 'click', function() {
+				updateRssFeedWidgetPosts( $widget, 2 );
+			});
+			$nextPage.on( 'click', function() {
+				updateRssFeedWidgetPosts( $widget, 2 );
 			});
 		});
+	};
+
+	/**
+	 * Update the Posts HTML in an RSS Feed widget.
+	 *
+	 * @param {object} $widget - A jQuery object containing the widget.
+	 * @param {number} page    - The "page" to display, in the pagination sense.
+	 */
+	var updateRssFeedWidgetPosts = function( $widget, page ) {
+
+		var $feedContent     = $widget.find( '.uhs-rss-feed-widget-feed-content' );
+		var $feedContentWrap = $feedContent.find( '.uhs-feed-content-wrap' );
+		var $pagination      = $widget.find( '.uhs-rss-feed-widget-pagination' );
+		var feedURL          = $feedContent.attr( 'data-feed-url' );
+		var $spinner         = $widget.find( '.uhs-spinner' );
+		var limit            = 10;
+		var offsetStart      = limit * page;
+
+		$feedContentWrap.empty();
+		$spinner.addClass( 'uhs-visible' );
+
+		$feedContentWrap.rss( feedURL, {
+			limit: limit,
+			offsetStart: offsetStart,
+			ssl: true,
+			layoutTemplate: '{entries}',
+			entryTemplate: '<div class="uhs-feed-item"><div class="uhs-feed-item-left"><h3 class="uhs-feed-item-title"><a href="{url}">{title}</a></h3></div><div class="uhs-feed-item-right"><div class="uhs-feed-item-date">{date}</div><div class="uhs-feed-item-author">{author}</div></div><div class="uhs-feed-item-content">{shortBodyPlain}...</div></div>',
+			tokens: {},
+			dateFormat: 'MMM Do, YYYY',
+			error: function() {},
+			success: function() {
+				$feedContent.addClass( 'uhs-loaded' );
+			},
+			onData: function() {
+				$spinner.removeClass( 'uhs-visible' );
+			},
+		});
+
+		// Maybe show/hide next/previous links.
+		if ( page === 1 ) {
+			$pagination.find( '.uhs-rss-feed-widget-previous' ).removeClass( 'uhs-visible' );
+			$pagination.find( '.uhs-rss-feed-widget-next' ).addClass( 'uhs-visible' );
+		} else if ( page === totalPages ) {
+			$pagination.find( '.uhs-rss-feed-widget-previous' ).addClass( 'uhs-visible' );
+			$pagination.find( '.uhs-rss-feed-widget-next' ).removeClass( 'uhs-visible' );
+		} else {
+			$pagination.find( '.uhs-rss-feed-widget-previous' ).addClass( 'uhs-visible' );
+			$pagination.find( '.uhs-rss-feed-widget-next' ).addClass( 'uhs-visible' );
+		}
 	};
 
 	return {

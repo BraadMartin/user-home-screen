@@ -1143,6 +1143,41 @@ class User_Home_Screen {
 		?>
 		<div class="uhs-rss-feed-widget-feed-content" data-feed-url="<?php echo esc_url( $feed_url ); ?>">
 			<span class="uhs-spinner spinner"></span>
+			<div class="uhs-feed-content-wrap"></div>
+			<?php echo self::render_rss_feed_widget_pagination(); ?>
+		</div>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Return the HTML for the pagination section of the RSS Feed widget.
+	 *
+	 * @return  string  The pagination HTML.
+	 */
+	public static function render_rss_feed_widget_pagination() {
+
+		ob_start();
+
+		?>
+		<div class="uhs-rss-feed-widget-pagination">
+			<div class="uhs-rss-feed-widget-previous">
+				<?php esc_html_e( 'Previous', 'user-home-screen' ); ?>
+			</div>
+			<div class="uhs-rss-feed-widget-pagination-numbers">
+				<?php
+					printf(
+						'<span class="%s"></span> %s <span class="%s"></span>',
+						'uhs-rss-feed-widget-post-x-x',
+						__( 'of', 'user-home-screen' ),
+						'uhs-rss-feed-widget-total-posts'
+					);
+				?>
+			</div>
+			<div class="uhs-rss-feed-widget-next">
+				<?php esc_html_e( 'Next', 'user-home-screen' ); ?>
+			</div>
 		</div>
 		<?php
 
