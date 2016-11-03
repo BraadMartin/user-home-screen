@@ -238,6 +238,8 @@ var userHomeScreenWidgets = ( function( $, data ) {
 			},
 		});
 
+		$pagination.find( '.uhs-rss-feed-widget-page-x' ).text( page );
+
 		// Maybe show/hide next/previous links.
 		if ( page === 1 ) {
 			$pagination.find( '.uhs-rss-feed-widget-previous' ).removeClass( 'uhs-visible' );

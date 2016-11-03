@@ -1168,10 +1168,9 @@ class User_Home_Screen {
 			<div class="uhs-rss-feed-widget-pagination-numbers">
 				<?php
 					printf(
-						'<span class="%s"></span> %s <span class="%s"></span>',
-						'uhs-rss-feed-widget-post-x-x',
-						__( 'of', 'user-home-screen' ),
-						'uhs-rss-feed-widget-total-posts'
+						'%s <span class="%s"></span>',
+						esc_html__( 'Page', 'user-home-screen' ),
+						'uhs-rss-feed-widget-page-x'
 					);
 				?>
 			</div>
