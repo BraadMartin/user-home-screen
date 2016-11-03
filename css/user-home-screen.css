@@ -148,12 +148,13 @@
 
 .uhs-widget-info {
 	display: none;
+	line-height: 1.2;
+	padding: 15px 0;
+	border-bottom: 1px solid #eee;
 }
 
 .uhs-widget-info.uhs-visible {
 	display: block;
-	padding: 15px 0;
-	border-bottom: 1px solid #eee;
 }
 
 /**
