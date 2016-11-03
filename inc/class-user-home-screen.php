@@ -246,6 +246,7 @@ class User_Home_Screen {
 		$post_statuses    = self::get_post_statuses();
 		$authors          = self::get_authors();
 		$order_by_options = self::get_order_by_options();
+		$order_options    = self::get_order_options();
 
 		$widget_types = array(
 			'post-list' => array(
@@ -294,10 +295,7 @@ class User_Home_Screen {
 						'key'    => 'order',
 						'label'  => __( 'Order', 'user-home-screen' ),
 						'type'   => 'select',
-						'values' => array(
-							'DESC' => __( 'Descending', 'user-home-screen' ),
-							'ASC'  => __( 'Ascending', 'user-home-screen' ),
-						),
+						'values' => $order_options,
 					),
 				),
 			),
@@ -449,6 +447,26 @@ class User_Home_Screen {
 		 * @param  array  $order_by_options  The default array of selectable order by options.
 		 */
 		return apply_filters( 'user_home_screen_selectable_order_by_options', $order_by_options );
+	}
+
+	/**
+	 * Return an array of order options that should be selectable in widgets.
+	 *
+	 * @return  array  The array of order options.
+	 */
+	public static function get_order_options() {
+
+		$order_options = array(
+			'DESC' => __( 'Descending', 'user-home-screen' ),
+			'ASC'  => __( 'Ascending', 'user-home-screen' ),
+		);
+
+		/**
+		 * Allow the selectable order options to be filtered.
+		 *
+		 * @param  array  $order_options  The default array of selectable order options.
+		 */
+		return apply_filters( 'user_home_screen_selectable_order_options', $order_options );
 	}
 
 	/**
@@ -1826,7 +1844,7 @@ class User_Home_Screen {
 
 			$order_by_options = self::get_order_by_options();
 
-			if ( in_array( $args['order_by'], $order_by_options ) ) {
+			if ( in_array( $args['order_by'], array_keys( $order_by_options ) ) ) {
 				$updated_args['widget_info']['order_by'] = sprintf(
 					'<span class="%s">%s:</span> %s',
 					'uhs-widget-info-label',
@@ -1839,6 +1857,17 @@ class User_Home_Screen {
 		// Order.
 		if ( ! empty( $args['order'] ) ) {
 			$updated_args['query_args']['order'] = sanitize_text_field( $args['order'] );
+
+			$order_options = self::get_order_options();
+
+			if ( in_array( $args['order'], array_keys( $order_options ) ) ) {
+				$updated_args['widget_info']['order'] = sprintf(
+					'<span class="%s">%s:</span> %s',
+					'uhs-widget-info-label',
+					esc_html__( 'Order', 'user-home-screen' ),
+					esc_html( $order_options[ $args['order'] ] )
+				);
+			}
 		}
 
 		// Parts.
