@@ -82,12 +82,50 @@ var userHomeScreenWidgets = ( function( $, data ) {
 	 */
 	var initPostListTemplatePartSelector = function( $widget ) {
 
+		var widgetID   = $widget.attr( 'data-widget-id' );
+		var tabID      = $widget.attr( 'data-tab-id' );
 		var $selector  = $widget.find( '.uhs-post-list-template-part-selector' );
 		var $postsWrap = $widget.find( '.uhs-post-list-widget-posts-wrap' );
+		var $spinner   = $selector.find( '.uhs-spinner' );
+		var $confirm   = $selector.find( '.uhs-post-list-template-part-selector-save-confirm' );
 
 		$selector.find( 'input[type="checkbox"]' ).on( 'click', function() {
 			var showClass = $( this ).attr( 'data-show-class' );
 			$postsWrap.toggleClass( showClass );
+		});
+
+		$selector.find( '.uhs-post-list-template-part-selector-save' ).on( 'click', function() {
+			var parts = [];
+
+			$selector.find( 'input[type="checkbox"]:checked' ).each( function() {
+				parts.push( $( this ).attr( 'data-template-part' ) );
+			});
+
+			var ajaxData = {
+				'action':         'uhs_post_list_save_template_parts',
+				'nonce':          data.nonce,
+				'widget_id':      widgetID,
+				'tab_id':         tabID,
+				'template_parts': parts,
+			};
+
+			$spinner.addClass( 'uhs-visible' );
+
+			var request = $.post( ajaxurl, ajaxData );
+
+			request.done( function( response ) {
+				$spinner.removeClass( 'uhs-visible' );
+
+				$confirm.addClass( 'uhs-visible' );
+
+				setTimeout( function() {
+					$confirm.removeClass( 'uhs-visible' );
+				}, 1600 );
+			});
+
+			request.fail( function() {
+				console.log( data.labels.post_list_ajax_fail );
+			});
 		});
 	};
 

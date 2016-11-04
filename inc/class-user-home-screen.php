@@ -72,6 +72,9 @@ class User_Home_Screen {
 
 		// Ajax handler for getting the HTML for a "page" of posts for the Post List widget.
 		add_action( 'wp_ajax_uhs_post_list_get_page', array( $this, 'ajax_post_list_widget_get_posts' ) );
+
+		// Ajax handler for saving "template parts" on a Post List widget.
+		add_action( 'wp_ajax_uhs_post_list_save_template_parts', array( $this, 'ajax_post_list_widget_save_template_parts' ) );
 	}
 
 	/**
@@ -972,18 +975,29 @@ class User_Home_Screen {
 
 			foreach ( $template_parts as $part => $name ) {
 
-				$class      = 'uhs-post-list-template-part-selector-for-' . str_replace( '_', '-', $part );
-				$show_class = 'uhs-post-list-show-' . str_replace( '_', '-', $part );
-				$checked    = ( in_array( $part, $widget_args['args']['parts'] ) ) ? 'checked="true"' : '';
+				$part_slug  = str_replace( '_', '-', $part );
+				$class      = 'uhs-post-list-template-part-selector-for-' . $part_slug;
+				$show_class = 'uhs-post-list-show-' . $part_slug;
+				$checked    = ( in_array( $part, $widget_args['args']['template_parts'] ) ) ? 'checked="true"' : '';
 
 				$template_parts_selector .= sprintf(
-					'<div class="%s"><label><input type="checkbox" data-show-class="%s" %s /><span>%s</span></label></div>',
+					'<div class="%s"><label><input type="checkbox" data-show-class="%s" data-template-part="%s" %s /><span>%s</span></label></div>',
 					esc_attr( $class ),
 					esc_attr( $show_class ),
+					esc_attr( $part ),
 					$checked,
 					esc_html( $name )
 				);
 			}
+
+			$template_parts_selector .= sprintf(
+				'<button type="button" class="%s">%s</button><span class="%s">%s</span><span class="%s"></span>',
+				'uhs-post-list-template-part-selector-save button button-secondary',
+				esc_html__( 'Save Template Parts', 'user-home-screen' ),
+				'uhs-post-list-template-part-selector-save-confirm',
+				esc_html__( 'Widget Saved', 'user-home-screen' ),
+				'uhs-spinner spinner'
+			);
 
 			$template_parts_selector .= '</div>';
 
@@ -1002,7 +1016,7 @@ class User_Home_Screen {
 	 */
 	public static function render_post_list_widget_placeholder( $args ) {
 
-		$parts          = ( ! empty( $args['parts'] ) ) ? $args['parts'] : array();
+		$parts          = ( ! empty( $args['template_parts'] ) ) ? $args['template_parts'] : array();
 		$classes        = array();
 		$template_parts = self::get_post_list_template_parts();
 
@@ -1648,6 +1662,57 @@ class User_Home_Screen {
 	}
 
 	/**
+	 * Ajax handler for saving "template parts" on a Post List widget.
+	 */
+	public function ajax_post_list_widget_save_template_parts() {
+
+		// Bail if our nonce is not valid.
+		check_ajax_referer( 'user-home-screen', 'nonce', true );
+
+		$user = wp_get_current_user();
+
+		// Bail if we don't have a user.
+		if ( empty( $user ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, you are missing a user.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		// Bail if we're missing required data.
+		if ( empty( $_POST['widget_id'] ) || empty( $_POST['tab_id'] ) || empty( $_POST['template_parts'] ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, you are missing a widget ID, tab ID, or a template parts array.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		$user_widgets   = self::get_user_widgets( $user );
+		$widget_id      = sanitize_text_field( $_POST['widget_id'] );
+		$tab_id         = sanitize_text_field( $_POST['tab_id'] );
+		$template_parts = array_map( 'sanitize_text_field', (array) $_POST['template_parts'] );
+
+		// Bail if the widget doesn't exist for the user.
+		if ( empty( $user_widgets[ $tab_id ][ $widget_id ] ) ) {
+			$response          = new stdClass();
+			$response->message = esc_html__( 'Sorry, the requested widget doesn\'t appear to exist.', 'user-home-screen' );
+			wp_send_json( $response );
+			wp_die();
+		}
+
+		$user_widgets[ $tab_id ][ $widget_id ]['args']['template_parts'] = $template_parts;
+
+		$this->update_widgets_for_user( $user_widgets, $user );
+
+		$response             = new stdClass();
+		$response->message    = esc_html__( 'It appears to have worked', 'user-home-screen' );
+
+		wp_send_json( $response );
+
+		wp_die();
+	}
+
+	/**
 	 * Add a new widget to a user's home screen.
 	 *
 	 * @param  array    $widget_data  The array of widget data.
@@ -1761,10 +1826,10 @@ class User_Home_Screen {
 	public function validate_post_list_widget_args( $args ) {
 
 		// Defaults.
-		$updated_args                = array();
-		$updated_args['widget_info'] = array();
-		$updated_args['query_args']  = array();
-		$updated_args['parts']       = array();
+		$updated_args                   = array();
+		$updated_args['widget_info']    = array();
+		$updated_args['query_args']     = array();
+		$updated_args['template_parts'] = array();
 
 		// Store the array of original args to support editing an existing widget.
 		$updated_args['original_args'] = $args;
@@ -1940,8 +2005,8 @@ class User_Home_Screen {
 		}
 
 		// Parts.
-		if ( ! empty( $args['parts'] ) ) {
-			$updated_args['parts'] = $args['parts'];
+		if ( ! empty( $args['template_parts'] ) ) {
+			$updated_args['template_parts'] = $args['template_parts'];
 		} else {
 			$parts = array();
 			$query_args = $updated_args['query_args'];
@@ -1989,7 +2054,7 @@ class User_Home_Screen {
 			// Always show the author.
 			$parts[] = 'author';
 
-			$updated_args['parts'] = $parts;
+			$updated_args['template_parts'] = $parts;
 		}
 
 		/**

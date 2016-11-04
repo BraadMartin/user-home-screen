@@ -201,6 +201,18 @@
 	margin-left: 3px;
 }
 
+.uhs-post-list-template-part-selector-save-confirm {
+	display: none;
+	float: right;
+	transition: visibility 0.2s;
+	color: #11a011;
+	margin: 8px 2px 0;
+}
+
+.uhs-post-list-template-part-selector-save-confirm.uhs-visible {
+	display: inline-block;
+}
+
 .uhs-post-list-widget-left {
 	max-width: calc( 100% - 122px );
 	float: left;
