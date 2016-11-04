@@ -23,11 +23,18 @@ class User_Home_Screen {
 	public static $user_options_meta_key = '_uhs_user_options';
 
 	/**
+	 * Our Data class instance.
+	 *
+	 * @var  User_Home_Screen_Data.
+	 */
+	public $data = null;
+
+	/**
 	 * Our Ajax class instance.
 	 *
 	 * @var  User_Home_Screen_Ajax.
 	 */
-	private $ajax = null;
+	public $ajax = null;
 
 	/**
 	 * The constructor.
@@ -53,12 +60,11 @@ class User_Home_Screen {
 		// Output our user profile fields.
 		add_action( 'personal_options', array( $this, 'output_user_profile_fields' ) );
 
-		// Save our options from the user profile screen.
-		add_action( 'personal_options_update', array( $this, 'save_user_profile_options' ) );
-		add_action( 'edit_user_profile_update', array( $this, 'save_user_profile_options' ) );
-
 		// Output extra content in the widget info section of certain widget types.
 		add_filter( 'user_home_screen_widget_info', array( $this, 'output_widget_info_extras' ), 10, 3 );
+
+		$this->data = new User_Home_Screen_Data( $this );
+		$this->data->init();
 
 		// Initialize Ajax class if we're serving an Ajax request.
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
@@ -183,313 +189,13 @@ class User_Home_Screen {
 			USER_HOME_SCREEN_VERSION
 		);
 
-		$uhs_data = $this->get_js_data();
+		$uhs_data = user_home_screen_get_js_data();
 
 		wp_localize_script(
 			'user-home-screen',
 			'uhsData',
 			$uhs_data
 		);
-	}
-
-	/**
-	 * Build and return the array of data we'll pass to our JS.
-	 *
-	 * @todo    Add more specific ajax fail labels for non-Post List widget contexts.
-	 *
-	 * @return  array  The array of JS data.
-	 */
-	public function get_js_data() {
-
-		$data = array();
-
-		// Define labels.
-		$data['labels'] = array(
-			'add_widget'            => __( 'Add Widget', 'user-home-screen' ),
-			'remove_widget'         => __( 'Remove Widget', 'user-home-screen' ),
-			'remove_widget_confirm' => __( 'Are you sure you want to remove the selected widget?', 'user-home-screen' ),
-			'edit_widget'           => __( 'Edit Widget', 'user-home-screen' ),
-			'select_widget_type'    => __( 'Select widget type', 'user-home-screen' ),
-			'select_default'        => __( 'Select', 'user-home-screen' ),
-			'add_tab'               => __( 'Add Tab', 'user-home-screen' ),
-			'remove_tab'            => __( 'Remove Tab', 'user-home-screen' ),
-			'remove_tab_confirm'    => __( 'Are you sure you want to remove the selected tab? Widgets added to this tab will also be removed.', 'user-home-screen' ),
-			'tab_name'              => __( 'Tab Name', 'user-home-screen' ),
-			'no_tabs_notice'        => __( 'Please add a tab first, then you can add widgets', 'user-home-screen' ),
-			'post_list_ajax_fail'   => __( 'Sorry, it appears the Ajax request to fetch posts has failed', 'user-home-screen' ),
-		);
-
-		// Add widget type data.
-		$data['widget_types'] = self::get_widget_type_data();
-
-		// Add a nonce.
-		$data['nonce'] = wp_create_nonce( 'user-home-screen' );
-
-		/**
-		 * Allow the JS data to be customized.
-		 *
-		 * @param  array  $data  The default JS data.
-		 */
-		return apply_filters( 'user_home_screen_js_data', $data );
-	}
-
-	/**
-	 * Return the array of widget type data.
-	 *
-	 * @return  array  The array of widget type data.
-	 */
-	public static function get_widget_type_data() {
-
-		$post_types       = self::get_post_types();
-		$categories       = self::get_categories();
-		$post_statuses    = self::get_post_statuses();
-		$authors          = self::get_authors();
-		$order_by_options = self::get_order_by_options();
-		$order_options    = self::get_order_options();
-
-		$widget_types = array(
-			'post-list' => array(
-				'label'  => __( 'Post List', 'user-home-screen' ),
-				'fields' => array(
-					array(
-						'key'   => 'title',
-						'label' => __( 'Widget Title', 'user-home-screen' ),
-						'type'  => 'text',
-					),
-					array(
-						'key'         => 'post_types',
-						'label'       => __( 'Post Types', 'user-home-screen' ),
-						'type'        => 'select-multiple',
-						'placeholder' => __( 'Select a Post Type', 'user-home-screen' ),
-						'values'      => $post_types,
-					),
-					array(
-						'key'         => 'categories',
-						'label'       => __( 'Categories', 'user-home-screen' ),
-						'type'        => 'select-multiple',
-						'placeholder' => __( 'Select a Category', 'user-home-screen' ),
-						'values'      => $categories,
-					),
-					array(
-						'key'         => 'post_statuses',
-						'label'       => __( 'Post Statuses', 'user-home-screen' ),
-						'type'        => 'select-multiple',
-						'placeholder' => __( 'Select a Post Status', 'user-home-screen' ),
-						'values'      => $post_statuses,
-					),
-					array(
-						'key'         => 'authors',
-						'label'       => __( 'Authors', 'user-home-screen' ),
-						'type'        => 'select-multiple',
-						'placeholder' => __( 'Select an Author', 'user-home-screen' ),
-						'values'      => $authors,
-					),
-					array(
-						'key'    => 'order_by',
-						'label'  => __( 'Order By', 'user-home-screen' ),
-						'type'   => 'select',
-						'values' => $order_by_options,
-					),
-					array(
-						'key'    => 'order',
-						'label'  => __( 'Order', 'user-home-screen' ),
-						'type'   => 'select',
-						'values' => $order_options,
-					),
-				),
-			),
-			'rss-feed' => array(
-				'label' => __( 'RSS Feed', 'user-home-screen' ),
-				'fields' => array(
-					array(
-						'key'   => 'title',
-						'label' => __( 'Widget Title', 'user-home-screen' ),
-						'type'  => 'text',
-					),
-					array(
-						'key'   => 'feed_url',
-						'label' => __( 'Feed URL', 'user-home-screen' ),
-						'type'  => 'text',
-					),
-				),
-			),
-		);
-
-		/**
-		 * Allow the widget types data to be customized.
-		 *
-		 * @param  array  $widget_types  The default array of widget types data.
-		 */
-		return apply_filters( 'user_home_screen_widget_types', $widget_types );
-	}
-
-	/**
-	 * Return an array of post types that should be selectable in widgets.
-	 *
-	 * @return  array  The array of post types.
-	 */
-	public static function get_post_types() {
-
-		$full_post_types = get_post_types( array( 'public' => true ), 'objects' );
-		$post_types      = array( 'any' => __( 'Any', 'user-home-screen' ) );
-
-		// Transform into a simple array of post_type => Display Name.
-		foreach ( $full_post_types as $post_type => $config ) {
-			$post_types[ $post_type ] = $config->labels->name;
-		}
-
-		/**
-		 * Allow the selectable post types to be customized.
-		 *
-		 * @param  array  $post_types  The default array of selectable post types.
-		 */
-		return apply_filters( 'user_home_screen_selectable_post_types', $post_types );
-	}
-
-	/**
-	 * Return an array of categories that should be selectable in widgets.
-	 *
-	 * @return  array  The array of categories.
-	 */
-	public static function get_categories() {
-
-		$full_categories = get_terms( array(
-			'taxonomy'               => 'category',
-			'update_term_meta_cache' => false,
-		) );
-
-		$categories = array();
-
-		// Transform into a simple array of user ID => Display name.
-		foreach ( $full_categories as $category ) {
-			$categories[ 'term_' . $category->term_id ] = $category->name;
-		}
-
-		/**
-		 * Allow the selectable authors to be filtered.
-		 *
-		 * @param  array  $authors  The default array of selectable categories.
-		 */
-		return apply_filters( 'user_home_screen_selectable_categories', $categories );
-	}
-
-	/**
-	 * Return an array of post statuses that should be selectable in widgets.
-	 *
-	 * @return  array  The array of post statuses.
-	 */
-	public static function get_post_statuses() {
-
-		$full_post_statuses = get_post_stati( array( 'show_in_admin_status_list' => 1 ), 'objects' );
-		$post_statuses      = array();
-
-		// Transform into a simple array of post_status => Display name.
-		foreach ( $full_post_statuses as $post_status => $config ) {
-			$post_statuses[ $post_status ] = $config->label;
-		}
-
-		/**
-		 * Allow the selectable post statuses to be filtered.
-		 *
-		 * @param  array  $post_statuses  The default array of selectable post statuses.
-		 */
-		return apply_filters( 'user_home_screen_selectable_post_statuses', $post_statuses );
-	}
-
-	/**
-	 * Return an array of authors that should be selectable in widgets.
-	 *
-	 * @return  array  The array of authors.
-	 */
-	public static function get_authors() {
-
-		$full_users = get_users( array(
-			'orderby'     => 'display_name',
-			'order'       => 'ASC',
-			'count_total' => false,
-		) );
-
-		$authors = array();
-
-		// Transform into a simple array of user ID => Display name.
-		// We have to prefix the ID here to prevent the array for sorting by ID.
-		foreach ( $full_users as $user ) {
-			$authors[ 'user_' . $user->ID ] = $user->data->display_name;
-		}
-
-		/**
-		 * Allow the selectable authors to be filtered.
-		 *
-		 * @param  array  $authors  The default array of selectable authors.
-		 */
-		return apply_filters( 'user_home_screen_selectable_authors', $authors );
-	}
-
-	/**
-	 * Return an array of order by options that should be selectable in widgets.
-	 *
-	 * @return  array  The array of order by options.
-	 */
-	public static function get_order_by_options() {
-
-		$order_by_options = array(
-			'date'     => __( 'Publish Date', 'user-home-screen' ),
-			'modified' => __( 'Last Modified Date', 'user-home-screen' ),
-			'author'   => __( 'Author', 'user-home-screen' ),
-			'title'    => __( 'Title', 'user-home-screen' ),
-			'type'     => __( 'Post Type', 'user-home-screen' ),
-		);
-
-		/**
-		 * Allow the selectable order by options to be filtered.
-		 *
-		 * @param  array  $order_by_options  The default array of selectable order by options.
-		 */
-		return apply_filters( 'user_home_screen_selectable_order_by_options', $order_by_options );
-	}
-
-	/**
-	 * Return an array of order options that should be selectable in widgets.
-	 *
-	 * @return  array  The array of order options.
-	 */
-	public static function get_order_options() {
-
-		$order_options = array(
-			'DESC' => __( 'Descending', 'user-home-screen' ),
-			'ASC'  => __( 'Ascending', 'user-home-screen' ),
-		);
-
-		/**
-		 * Allow the selectable order options to be filtered.
-		 *
-		 * @param  array  $order_options  The default array of selectable order options.
-		 */
-		return apply_filters( 'user_home_screen_selectable_order_options', $order_options );
-	}
-
-	/**
-	 * Return an array of template parts for the Post List widget.
-	 *
-	 * @return  array  The array of template part options.
-	 */
-	public static function get_post_list_template_parts() {
-
-		$template_parts = array(
-			'author'        => __( 'Author', 'user-home-screen' ),
-			'post_type'     => __( 'Post Type', 'user-home-screen' ),
-			'status'        => __( 'Post Status', 'user-home-screen' ),
-			'publish_date'  => __( 'Publish Date', 'user-home-screen' ),
-			'modified_date' => __( 'Modified Date', 'user-home-screen' ),
-			'category'      => __( 'Categories', 'user-home-screen' ),
-		);
-
-		/**
-		 * Allow the selectable template parts to be filtered.
-		 *
-		 * @param  array  $template_parts  The default array of template parts.
-		 */
-		return apply_filters( 'user_home_screen_selectable_post_list_template_parts', $template_parts );
 	}
 
 	/**
@@ -539,37 +245,6 @@ class User_Home_Screen {
 	}
 
 	/**
-	 * Save our options from the user profile screen.
-	 *
-	 * @param  int  $user_id  The current user's ID.
-	 */
-	public function save_user_profile_options( $user_id ) {
-
-		$nonce_valid = ( ! empty( $_POST['uhs-user-profile-nonce'] ) ) ? wp_verify_nonce( $_POST['uhs-user-profile-nonce'], 'uhs_user_profile' ) : false;
-
-		if ( $nonce_valid ) {
-
-			$existing_options = get_user_meta( $user_id, self::$user_options_meta_key, true );
-			$updated_options  = array();
-
-			// Handle existing options being empty.
-			if ( empty( $existing_options ) ) {
-				$existing_options = array();
-			}
-
-			if ( ! empty( $_POST['uhs-redirect-dashboard'] ) ) {
-				$updated_options['redirect_dashboard'] = 1;
-			} else {
-				$updated_options['redirect_dashboard'] = 0;
-			}
-
-			$updated_options = array_merge( $existing_options, $updated_options );
-
-			update_user_meta( $user_id, self::$user_options_meta_key, $updated_options );
-		}
-	}
-
-	/**
 	 * Output our user profile fields.
 	 *
 	 * @param  WP_User  $user  The current user object.
@@ -611,42 +286,6 @@ class User_Home_Screen {
 	}
 
 	/**
-	 * Return the user widgets config for the passed in user.
-	 *
-	 * @param  WP_User  $user  The current user object.
-	 */
-	public static function get_user_widgets( $user ) {
-
-		$user_widgets = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
-
-		/**
-		 * Allow the user widgets config to be customized.
-		 *
-		 * @param  array    $user_widgets  The user widgets config.
-		 * @param  WP_User  $user          The current user object.
-		 */
-		return apply_filters( 'user_home_screen_user_widgets', $user_widgets, $user );
-	}
-
-	/**
-	 * Return the user tabs config for the passed in user.
-	 *
-	 * @param  WP_User  $user  The current user object.
-	 */
-	public function get_user_tabs( $user ) {
-
-		$user_tabs = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
-
-		/**
-		 * Allow the user tabs config to be customized.
-		 *
-		 * @param  array    $user_widgets  The user tabs config.
-		 * @param  WP_User  $user          The current user object.
-		 */
-		return apply_filters( 'user_home_screen_user_tabs', $user_tabs, $user );
-	}
-
-	/**
 	 * Output the user home screen.
 	 */
 	public function output_user_home_screen() {
@@ -654,8 +293,8 @@ class User_Home_Screen {
 		// Set up the user data.
 		$user         = wp_get_current_user();
 		$user_name    = ( ! empty( $user->data->display_name ) ) ? $user->data->display_name : '';
-		$user_tabs    = $this->get_user_tabs( $user );
-		$user_widgets = self::get_user_widgets( $user );
+		$user_tabs    = $this->data->get_user_tabs( $user );
+		$user_widgets = $this->data->get_user_widgets( $user );
 
 		$page_title = __( 'Welcome', 'user-home-screen' ) . ' ' . $user_name;
 		/**
@@ -666,7 +305,7 @@ class User_Home_Screen {
 		 */
 		$page_title = apply_filters( 'user_home_screen_page_title', $page_title, $user );
 
-		$add_widget_text = $this->get_js_data()['labels']['add_widget'];
+		$add_widget_text = user_home_screen_get_js_data()['labels']['add_widget'];
 
 		ob_start();
 
@@ -897,7 +536,7 @@ class User_Home_Screen {
 	 */
 	public static function output_widget_info( $widget_id, $widget_args ) {
 
-		$widget_type_data = self::get_widget_type_data();
+		$widget_type_data = user_home_screen_get_widget_type_data();
 		$widget_info      = '';
 
 		// Add a standard Widget Type field if the widget type has a label.
@@ -961,7 +600,7 @@ class User_Home_Screen {
 
 		if ( 'post-list' === $widget_args['type'] ) {
 
-			$template_parts          = self::get_post_list_template_parts();
+			$template_parts          = user_home_screen_get_post_list_template_parts();
 			$template_parts_selector = '<div class="uhs-post-list-template-part-selector">';
 			$template_parts_selector .= '<h3 class="uhs-post-list-template-part-selector-title">' . esc_html__( 'Template Parts', 'user-home-screen' ) . '</h3>';
 
@@ -1010,7 +649,7 @@ class User_Home_Screen {
 
 		$parts          = ( ! empty( $args['template_parts'] ) ) ? $args['template_parts'] : array();
 		$classes        = array();
-		$template_parts = self::get_post_list_template_parts();
+		$template_parts = user_home_screen_get_post_list_template_parts();
 
 		foreach ( $template_parts as $template_part => $template_part_name ) {
 			if ( in_array( $template_part, $parts ) ) {
@@ -1132,7 +771,7 @@ class User_Home_Screen {
 								<?php echo get_the_modified_date(); ?>
 							</div>
 							<div class="uhs-post-list-widget-category">
-								<?php echo self::get_taxonomy_term_list( $query->post->ID, 'category', '', ', ', false ); ?>
+								<?php echo user_home_screen_get_taxonomy_term_list( $query->post->ID, 'category', '', ', ', false ); ?>
 							</div>
 						</div>
 					</div>
@@ -1276,85 +915,6 @@ class User_Home_Screen {
 	}
 
 	/**
-	 * Add a tab to a user's home screen.
-	 *
-	 * @param  array    $tab_data  The array of tab data.
-	 * @param  WP_User  $user      The current user object.
-	 */
-	public function add_tab_for_user( $tab_data, $user ) {
-
-		// Get existing tab data for the user.
-		$tabs_data = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
-
-		if ( empty( $tabs_data ) || ! is_array( $tabs_data ) ) {
-			$tabs_data = array();
-		}
-
-		// Generate a unique key for the tab.
-		$tab_key = uniqid( 'uhs_', false );
-
-		/**
-		 * Allow the tab data to be customized as it's being added.
-		 *
-		 * @param  array    $tab_data  The array of tab data.
-		 * @param  WP_User  $user      The user object being updated.
-		 */
-		$tabs_data[ $tab_key ] = apply_filters( 'user_home_screen_add_tab_data', $tab_data, $user );
-
-		$this->update_tabs_for_user( $tabs_data, $user );
-	}
-
-	/**
-	 * Remove a tab from a user's home screen.
-	 *
-	 * @param  string   $tab_key         The key for the tab to remove.
-	 * @param  WP_User  $user            The user object to update.
-	 * @param  bool     $remove_widgets  Whether to also remove widgets for the tab (optional).
-	 */
-	public function remove_tab_for_user( $tab_key, $user, $remove_widgets = false ) {
-
-		$tabs_data = get_user_meta( $user->ID, self::$user_tabs_meta_key, true );
-
-		if ( empty( $tabs_data ) || ! is_array( $tabs_data ) ) {
-			$tabs_data = array();
-		}
-		if ( ! empty( $tabs_data[ $tab_key ] ) ) {
-			unset( $tabs_data[ $tab_key ] );
-		}
-
-		$this->update_tabs_for_user( $tabs_data, $user );
-
-		// Also remove widgets for the tab if set to.
-		if ( $remove_widgets ) {
-
-			$wigets_data = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
-
-			unset( $widgets_data[ $tab_key ] );
-
-			$this->update_widgets_for_user( $widgets_data, $user );
-		}
-	}
-
-	/**
-	 * Update tabs on a user's home screen.
-	 *
-	 * @param  array    $tabs_data  The array of tab data.
-	 * @param  WP_User  $user       The current user object.
-	 */
-	public function update_tabs_for_user( $tabs_data, $user ) {
-
-		/**
-		 * Allow the tabs data to be customized as it's being saved.
-		 *
-		 * @param  array    $tabs_data  The array of tabs data.
-		 * @param  WP_User  $user       The user object being updated.
-		 */
-		$tabs_data = apply_filters( 'user_home_screen_update_tabs_data', $tabs_data, $user );
-
-		update_user_meta( $user->ID, self::$user_tabs_meta_key, $tabs_data );
-	}
-
-	/**
 	 * Output our JS templates.
 	 */
 	public function output_js_templates() {
@@ -1383,463 +943,5 @@ class User_Home_Screen {
 			 */
 			include_once apply_filters( 'user_home_screen_js_templates', $template );
 		}
-	}
-
-	/**
-	 * Add a new widget to a user's home screen.
-	 *
-	 * @param  array    $widget_data  The array of widget data.
-	 * @param  WP_User  $user         The user object to update.
-	 */
-	public function add_widget_for_user( $widget_data, $user ) {
-
-		// Get existing widget data for the user.
-		$widgets_data = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
-
-		if ( empty( $widgets_data ) || ! is_array( $widgets_data ) ) {
-			$widgets_data = array();
-		}
-
-		$widget_id = $widget_data['id'];
-		$tab_id    = $widget_data['tab'];
-
-		if ( empty( $widgets_data[ $tab_id ] ) ) {
-			$widgets_data[ $tab_id ] = array();
-		}
-
-		// Remove the widget ID, since we use this to key the array.
-		unset( $widget_data['id'] );
-
-		/**
-		 * Allow the widget data to be customized as it's being added.
-		 *
-		 * @param  array    $widget_data  The array of widget data.
-		 * @param  WP_User  $user         The user object being updated.
-		 */
-		$widgets_data[ $tab_id ][ $widget_id ] = apply_filters( 'user_home_screen_add_widget_data', $widget_data, $user );
-
-		$this->update_widgets_for_user( $widgets_data, $user );
-	}
-
-	/**
-	 * Remove a widget from a user's home screen.
-	 *
-	 * @param  string   $widget_id  The ID of the widget to remove.
-	 * @param  string   $tab_id     The ID of the tab the widget to remove is on.
-	 * @param  WP_User  $user       The user object to update.
-	 */
-	public function remove_widget_for_user( $widget_id, $tab_id, $user ) {
-
-		$widgets_data = get_user_meta( $user->ID, self::$user_widgets_meta_key, true );
-
-		if ( empty( $widgets_data ) || ! is_array( $widgets_data ) ) {
-			$widgets_data = array();
-		}
-
-		if ( ! empty( $widgets_data[ $tab_id ][ $widget_id ] ) ) {
-			unset( $widgets_data[ $tab_id ][ $widget_id ] );
-		}
-
-		$this->update_widgets_for_user( $widgets_data, $user );
-	}
-
-	/**
-	 * Update widgets for a user.
-	 *
-	 * @param  array    $widgets_data  The array of widgets data.
-	 * @param  WP_User  $user          The user object to update.
-	 */
-	public function update_widgets_for_user( $widgets_data, $user ) {
-
-		/**
-		 * Allow the widget data to be customized as it's being saved.
-		 *
-		 * @param  array    $widget_data  The array of widget data.
-		 * @param  WP_User  $user         The user object being updated.
-		 */
-		$widgets_data = apply_filters( 'user_home_screen_update_widgets_data', $widgets_data, $user );
-
-		update_user_meta( $user->ID, self::$user_widgets_meta_key, $widgets_data );
-	}
-
-	/**
-	 * Validate widget data.
-	 *
-	 * @param   array  $widget_data  The raw widget data.
-	 *
-	 * @return  array                The validated widget data.
-	 */
-	public function validate_widget_data( $widget_data ) {
-
-		switch ( $widget_data['type'] ) {
-
-			case 'post-list':
-
-				$widget_data['args'] = $this->validate_post_list_widget_args( $widget_data['args'] );
-
-				break;
-
-			case 'rss-feed':
-
-				$widget_data['args'] = $this->validate_rss_feed_widget_args( $widget_data['args'] );
-
-				break;
-		}
-
-		return $widget_data;
-	}
-
-	/**
-	 * Validate args for the Post List widget.
-	 *
-	 * @param   array  $args  The unvalidated widget args.
-	 *
-	 * @return  array         The validated widget args.
-	 */
-	public function validate_post_list_widget_args( $args ) {
-
-		// Defaults.
-		$updated_args                   = array();
-		$updated_args['widget_info']    = array();
-		$updated_args['query_args']     = array();
-		$updated_args['template_parts'] = array();
-
-		// Store the array of original args to support editing an existing widget.
-		$updated_args['original_args'] = $args;
-
-		// Title.
-		$updated_args['title'] = ( ! empty( $args['title'] ) ) ? esc_html( $args['title'] ) : '';
-
-		// Post Types.
-		if ( ! empty( $args['post_types'] ) ) {
-			if ( in_array( 'any', $args['post_types'] ) ) {
-				$updated_args['query_args']['post_type']  = 'any';
-				$post_types = esc_html__( 'All', 'user-home-screen' );
-			} else {
-				$updated_args['query_args']['post_type']  = $args['post_types'];
-
-				$post_types = array();
-
-				// Loop over each post type and get a usable post type name.
-				foreach ( $args['post_types'] as $post_type ) {
-					$post_type_object = get_post_type_object( $post_type );
-
-					if ( ! empty( $post_type_object->labels->name ) ) {
-						$post_types[] = $post_type_object->labels->name;
-					}
-				}
-
-				$post_types = implode( ', ', $post_types );
-			}
-
-			// Add widget info.
-			$updated_args['widget_info']['post_types'] = sprintf(
-				'<span class="%s">%s:</span> %s',
-				'uhs-widget-info-label',
-				esc_html__( 'Post Types', 'user-home-screen' ),
-				esc_html( $post_types )
-			);
-		}
-
-		// Categories.
-		if ( ! empty( $args['categories'] ) ) {
-			$term_ids = array();
-
-			// Parse clean term IDs.
-			if ( is_array( $args['categories'] ) ) {
-				foreach ( $args['categories'] as $term_key ) {
-					$term_id    = str_replace( 'term_', '', $term_key );
-					$term_ids[] = (int)$term_id;
-				}
-			} else {
-				$term_id    = str_replace( 'term_', '', $args['categories'] );
-				$term_ids[] = (int)$term_id;
-			}
-
-			// Set clean query arg.
-			$updated_args['query_args']['category__in'] = $term_ids;
-
-			$categories = array();
-
-			// Loop over each term ID and get a usable category name.
-			foreach ( $term_ids as $term_id ) {
-				$term = get_term_by( 'id', $term_id, 'category' );
-				if ( ! empty( $term->name ) ) {
-					$categories[] = esc_html( $term->name );
-				}
-			}
-			$categories = implode( ', ', $categories );
-
-			// Add widget info.
-			$updated_args['widget_info']['categories'] = sprintf(
-				'<span class="%s">%s:</span> %s',
-				'uhs-widget-info-label',
-				esc_html__( 'Categories', 'user-home-screen' ),
-				esc_html( $categories )
-			);
-		}
-
-		// Post Statuses.
-		if ( ! empty( $args['post_statuses'] ) ) {
-			$updated_args['query_args']['post_status'] = $args['post_statuses'];
-
-			$post_stati = array();
-
-			// Loop over each post status and get a usable post status label.
-			foreach ( $args['post_statuses'] as $post_status ) {
-				$post_status_object = get_post_status_object( $post_status );
-
-				if ( ! empty( $post_status_object->label ) ) {
-					$post_stati[] = $post_status_object->label;
-				}
-			}
-
-			$post_stati = implode( ', ', $post_stati );
-
-			// Add widget info.
-			$updated_args['widget_info']['post_statuses'] = sprintf(
-				'<span class="%s">%s:</span> %s',
-				'uhs-widget-info-label',
-				esc_html__( 'Post Statuses', 'user-home-screen' ),
-				esc_html( $post_stati )
-			);
-		}
-
-		// Authors.
-		if ( ! empty( $args['authors'] ) ) {
-			$author_ids = array();
-
-			// Parse clean user IDs.
-			if ( is_array( $args['authors'] ) ) {
-				foreach ( $args['authors'] as $user_key ) {
-					$user_id      = str_replace( 'user_', '', $user_key );
-					$author_ids[] = (int)$user_id;
-				}
-			} else {
-				$user_id      = str_replace( 'user_', '', $args['authors'] );
-				$author_ids[] = (int)$user_id;
-			}
-
-			// Set clean query arg.
-			$updated_args['query_args']['author__in'] = $author_ids;
-
-			$authors = array();
-
-			// Loop over each author and get a username.
-			foreach ( $author_ids as $author_id ) {
-				$user = get_userdata( $author_id );
-
-				if ( ! empty( $user->display_name ) ) {
-					$authors[] = $user->display_name;
-				}
-			}
-
-			$authors = implode( ', ', $authors );
-
-			// Add widget info.
-			$updated_args['widget_info']['authors'] = sprintf(
-				'<span class="%s">%s:</span> %s',
-				'uhs-widget-info-label',
-				esc_html__( 'Authors', 'user-home-screen' ),
-				esc_html( $authors )
-			);
-		}
-
-		// Order by.
-		if ( ! empty( $args['order_by'] ) ) {
-			$updated_args['query_args']['orderby'] = sanitize_text_field( $args['order_by'] );
-
-			$order_by_options = self::get_order_by_options();
-
-			if ( in_array( $args['order_by'], array_keys( $order_by_options ) ) ) {
-				$updated_args['widget_info']['order_by'] = sprintf(
-					'<span class="%s">%s:</span> %s',
-					'uhs-widget-info-label',
-					esc_html__( 'Order By', 'user-home-screen' ),
-					esc_html( $order_by_options[ $args['order_by'] ] )
-				);
-			}
-		}
-
-		// Order.
-		if ( ! empty( $args['order'] ) ) {
-			$updated_args['query_args']['order'] = sanitize_text_field( $args['order'] );
-
-			$order_options = self::get_order_options();
-
-			if ( in_array( $args['order'], array_keys( $order_options ) ) ) {
-				$updated_args['widget_info']['order'] = sprintf(
-					'<span class="%s">%s:</span> %s',
-					'uhs-widget-info-label',
-					esc_html__( 'Order', 'user-home-screen' ),
-					esc_html( $order_options[ $args['order'] ] )
-				);
-			}
-		}
-
-		// Parts.
-		if ( ! empty( $args['template_parts'] ) ) {
-			$updated_args['template_parts'] = $args['template_parts'];
-		} else {
-			$parts = array();
-			$query_args = $updated_args['query_args'];
-
-			// Show the post type if no post type, post_type is 'any',
-			// or multiple post types.
-			if (
-				empty( $query_args['post_type'] ) ||
-				( ! empty( $query_args['post_type'] ) && 'any' === $query_args['post_type'] ) ||
-				! empty( $query_args['post_type'][1] )
-			) {
-				$parts[] = 'post_type';
-			}
-
-			// Show the categories if no category or multiple categories.
-			if (
-				empty( $query_args['category__in'] ) ||
-				! empty( $query_args['category__in'][1] )
-			) {
-				$parts[] = 'category';
-			}
-
-			// Show the publish date if post_status includes publish or schedule.
-			if (
-				! empty( $query_args['post_status'] ) &&
-				is_array( $query_args['post_status'] ) &&
-				( in_array( 'publish', $query_args['post_status'] ) || in_array( 'schedule', $query_args['post_status'] ) )
-			) {
-				$parts[] = 'publish_date';
-			}
-
-			// Show the last modified date if the order by is set to last modified date.
-			if ( ! empty( $query_args['orderby'] ) && 'modified' === $query_args['orderby'] ) {
-				$parts[] = 'modified_date';
-			}
-
-			// Show the post status if no post_status or multiple post statuses.
-			if (
-				empty( $query_args['post_status'] ) ||
-				! empty( $query_args['post_status'][1] )
-			) {
-				$parts[] = 'status';
-			}
-
-			// Always show the author.
-			$parts[] = 'author';
-
-			$updated_args['template_parts'] = $parts;
-		}
-
-		/**
-		 * Allow the args to be customized.
-		 *
-		 * @param  array  $updated_args  The updated args array.
-		 * @param  array  $args          The original args array.
-		 */
-		return apply_filters( 'user_home_screen_post_list_args', $updated_args, $args );
-	}
-
-	/**
-	 * Validate args for the RSS Feed widget.
-	 *
-	 * @param   array  $args  The unvalidated widget args.
-	 *
-	 * @return  array         The validated widget args.
-	 */
-	public function validate_rss_feed_widget_args( $args ) {
-
-		$updated_args                = array();
-		$updated_args['widget_info'] = array();
-
-		// Title.
-		$updated_args['title'] = ( ! empty( $args['title'] ) ) ? esc_html( $args['title'] ) : '';
-
-		// Feed URL.
-		$updated_args['feed_url'] = ( ! empty( $args['feed_url'] ) ) ? esc_url( $args['feed_url'] ) : '';
-
-		// Widget Info.
-		$updated_args['widget_info']['feed_url'] = sprintf(
-			'<span class="%s">%s:</span> <a href="%s" target="_blank">%s</a>',
-			'uhs-widget-info-label',
-			esc_html__( 'Feed URL', 'user-home-screen' ),
-			esc_url( $updated_args['feed_url'] ),
-			esc_html( $updated_args['feed_url'] )
-		);
-
-		/**
-		 * Allow the args to be customized.
-		 *
-		 * @param  array  $updated_args  The updated args array.
-		 * @param  array  $args          The original args array.
-		 */
-		return apply_filters( 'user_home_screen_post_list_args', $updated_args, $args );
-	}
-
-	/**
-	 * Build and return the HTML for a taxonomy term list.
-	 *
-	 * @param   int     $post_id    The post ID to use.
-	 * @param   string  $taxonomy   The taxonomy slug to output terms from.
-	 * @param   string  $label      The label to use.
-	 * @param   string  $separator  The separation string.
-	 * @param   bool    $link       Whether to link the terms.
-	 *
-	 * @return  string              The term list HTML.
-	 */
-	public static function get_taxonomy_term_list( $post_id = 0, $taxonomy = '', $label = '', $separator = ', ', $link = true ) {
-
-		// Taxonomy is required.
-		if ( ! $taxonomy ) {
-			return '';
-		}
-
-		if ( ! $post_id ) {
-			$post_id = get_the_ID();
-		}
-
-		$terms_args = array(
-			'orderby' => 'name',
-			'order'   => 'ASC',
-			'fields'  => 'all',
-		);
-
-		$terms = wp_get_post_terms( $post_id, $taxonomy, $terms_args );
-
-		if ( empty( $terms ) || is_wp_error( $terms ) ) {
-			return '';
-		}
-
-		$output = sprintf(
-			'<div class="%s %s">%s',
-			'entry-tax-term-list',
-			esc_attr( $taxonomy ) . '-tax-term-list',
-			$label
-		);
-
-		$i = 0;
-
-		foreach ( $terms as $term_slug => $term_obj ) {
-
-			if ( $link ) {
-				$output .= sprintf(
-					'<a href="%s" rel="%s %s">%s</a>',
-					get_term_link( $term_obj->term_id ),
-					esc_attr( $term_obj->slug ),
-					esc_attr( $term_obj->taxonomy ),
-					esc_html( $term_obj->name )
-				);
-			} else {
-				$output .= esc_html( $term_obj->name );
-			}
-
-			$i++;
-
-			if ( count( $terms ) > $i ) {
-				$output .= $separator;
-			}
-		}
-		$output .= '</div>';
-
-		return $output;
 	}
 }

@@ -80,7 +80,7 @@ class User_Home_Screen_Ajax {
 		}
 
 		// Add the tab for the user.
-		$this->main->add_tab_for_user( $tab_name, $user );
+		$this->main->data->add_tab_for_user( $tab_name, $user );
 
 		$response          = new stdClass();
 		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
@@ -110,7 +110,7 @@ class User_Home_Screen_Ajax {
 
 		$tab_id = sanitize_text_field( $_POST['tab_id'] );
 
-		$this->main->remove_tab_for_user( $tab_id, $user, true );
+		$this->main->data->remove_tab_for_user( $tab_id, $user, true );
 
 		$response          = new stdClass();
 		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
@@ -177,9 +177,9 @@ class User_Home_Screen_Ajax {
 			'args' => $clean_args,
 		);
 
-		$widget_data = $this->main->validate_widget_data( $widget_data );
+		$widget_data = $this->main->data->validate_widget_data( $widget_data );
 
-		$this->main->add_widget_for_user( $widget_data, $user );
+		$this->main->data->add_widget_for_user( $widget_data, $user );
 
 		$response          = new stdClass();
 		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
@@ -210,7 +210,7 @@ class User_Home_Screen_Ajax {
 		$tab_id    = sanitize_text_field( $_POST['tab_id'] );
 		$widget_id = sanitize_text_field( $_POST['widget_id'] );
 
-		$this->main->remove_widget_for_user( $widget_id, $tab_id, $user );
+		$this->main->data->remove_widget_for_user( $widget_id, $tab_id, $user );
 
 		$response          = new stdClass();
 		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
@@ -252,7 +252,7 @@ class User_Home_Screen_Ajax {
 			$updated_widgets[ $tab_id ][ $widget_id ] = $user_widgets_for_tab[ $widget_id ];
 		}
 
-		$this->main->update_widgets_for_user( $updated_widgets, $user );
+		$this->main->data->update_widgets_for_user( $updated_widgets, $user );
 
 		$response          = new stdClass();
 		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
@@ -291,7 +291,7 @@ class User_Home_Screen_Ajax {
 		$widget_id          = sanitize_text_field( $_POST['widget_id'] );
 		$tab_id             = sanitize_text_field( $_POST['tab_id'] );
 		$page               = (int) $_POST['page'];
-		$user_widgets       = User_Home_Screen::get_user_widgets( $user );
+		$user_widgets       = $this->main->data->get_user_widgets( $user );
 		$include_pagination = ( ! empty( $_POST['include_pagination'] ) ) ? true : false;
 
 		// Bail if the widget doesn't exist for the user.
@@ -344,7 +344,7 @@ class User_Home_Screen_Ajax {
 			wp_die();
 		}
 
-		$user_widgets   = User_Home_Screen::get_user_widgets( $user );
+		$user_widgets   = $this->main->data->get_user_widgets( $user );
 		$widget_id      = sanitize_text_field( $_POST['widget_id'] );
 		$tab_id         = sanitize_text_field( $_POST['tab_id'] );
 		$template_parts = array_map( 'sanitize_text_field', (array) $_POST['template_parts'] );
@@ -359,7 +359,7 @@ class User_Home_Screen_Ajax {
 
 		$user_widgets[ $tab_id ][ $widget_id ]['args']['template_parts'] = $template_parts;
 
-		$this->main->update_widgets_for_user( $user_widgets, $user );
+		$this->main->data->update_widgets_for_user( $user_widgets, $user );
 
 		$response             = new stdClass();
 		$response->message    = esc_html__( 'It appears to have worked', 'user-home-screen' );

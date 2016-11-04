@@ -14,8 +14,12 @@ define( 'USER_HOME_SCREEN_VERSION', '0.8.0' );
 define( 'USER_HOME_SCREEN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'USER_HOME_SCREEN_URL', plugin_dir_url( __FILE__ ) );
 
+// Include general functions.
+require_once USER_HOME_SCREEN_PATH . 'functions.php';
+
 // Include plugin classes.
 require_once USER_HOME_SCREEN_PATH . 'inc/class-user-home-screen.php';
+require_once USER_HOME_SCREEN_PATH . 'inc/class-user-home-screen-data.php';
 require_once USER_HOME_SCREEN_PATH . 'inc/class-user-home-screen-ajax.php';
 
 add_action( 'plugins_loaded', 'user_home_screen_init' );
