@@ -157,6 +157,14 @@
 	display: block;
 }
 
+.uhs-widget-info-inner div {
+	margin-bottom: 10px;
+}
+
+.uhs-widget-info-inner div:last-child {
+	margin-bottom: 0;
+}
+
 /**
  * Post List Widget.
  */
@@ -189,12 +197,8 @@
 	content: '';
 }
 
-.uhs-widget-info-inner div {
-	margin-bottom: 10px;
-}
-
-.uhs-widget-info-inner div:last-child {
-	margin-bottom: 0;
+.uhs-post-list-template-part-selector label > span {
+	margin-left: 3px;
 }
 
 .uhs-post-list-widget-left {

@@ -977,7 +977,7 @@ class User_Home_Screen {
 				$checked    = ( in_array( $part, $widget_args['args']['parts'] ) ) ? 'checked="true"' : '';
 
 				$template_parts_selector .= sprintf(
-					'<div class="%s"><input type="checkbox" data-show-class="%s" %s /><span>%s</span></div>',
+					'<div class="%s"><label><input type="checkbox" data-show-class="%s" %s /><span>%s</span></label></div>',
 					esc_attr( $class ),
 					esc_attr( $show_class ),
 					$checked,
