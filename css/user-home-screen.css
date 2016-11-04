@@ -225,11 +225,20 @@
 .uhs-post-list-widget-post-date,
 .uhs-post-list-widget-post-modified-date {
 	margin-bottom: 10px;
+	display: none;
 }
 
 .uhs-post-list-widget-categories {
-	text-align: right;
 	line-height: 1.4;
+	display: none;
+}
+
+.uhs-post-list-show-post-type .uhs-post-list-widget-post-type,
+.uhs-post-list-show-status .uhs-post-list-widget-post-status,
+.uhs-post-list-show-post-date .uhs-post-list-widget-post-date,
+.uhs-post-list-show-post-modified-date .uhs-post-list-widget-post-modified-date,
+.uhs-post-list-show-categories .uhs-post-list-widget-categories {
+	display: block;
 }
 
 .uhs-post-list-widget-categories li {

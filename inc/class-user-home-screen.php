@@ -983,9 +983,32 @@ class User_Home_Screen {
 				$current_posts_max = $query->found_posts;
 			}
 
+			$classes = array( 'uhs-post-list-widget-posts' );
+
+			if ( in_array( 'author', $parts ) ) {
+				$classes[] = 'uhs-post-list-show-author';
+			}
+			if ( in_array( 'post_type', $parts ) ) {
+				$classes[] = 'uhs-post-list-show-post-type';
+			}
+			if ( in_array( 'status', $parts ) ) {
+				$classes[] = 'uhs-post-list-show-status';
+			}
+			if ( in_array( 'publish_date', $parts ) ) {
+				$classes[] = 'uhs-post-list-show-post-date';
+			}
+			if ( in_array( 'modified_date', $parts ) ) {
+				$classes[] = 'uhs-post-list-show-post-modified-date';
+			}
+			if ( in_array( 'category', $parts ) ) {
+				$classes[] = 'uhs-post-list-show-categories';
+			}
+
+			$classes = implode( ' ', $classes );
+
 			printf(
 				'<div class="%s" data-current-page="%s" data-total-pages="%s" data-current-post-min="%s" data-current-post-max="%s">',
-				'uhs-post-list-widget-posts',
+				esc_attr( $classes ),
 				esc_attr( $page ),
 				esc_attr( $query->max_num_pages ),
 				esc_attr( $current_posts_min ),
@@ -1027,38 +1050,26 @@ class User_Home_Screen {
 									<?php echo esc_html( $post_title ); ?>
 								</a>
 							</h3>
-							<?php if ( in_array( 'author', $parts ) ) : ?>
 							<div class="uhs-post-list-widget-post-author">
 								<?php echo esc_html__( 'By', 'user-home-screen' ) . ' ' . get_the_author(); ?>
 							</div>
-							<?php endif; ?>
 						</div>
 						<div class="uhs-post-list-widget-right">
-							<?php if ( in_array( 'post_type', $parts ) ) : ?>
 							<div class="uhs-post-list-widget-post-type">
 								<?php echo esc_html( $post_type->labels->singular_name ); ?>
 							</div>
-							<?php endif; ?>
-							<?php if ( in_array( 'status', $parts ) ) : ?>
 							<div class="uhs-post-list-widget-post-status">
 								<?php echo esc_html( $post_status->label ); ?>
 							</div>
-							<?php endif; ?>
-							<?php if ( in_array( 'publish_date', $parts ) ) : ?>
 							<div class="uhs-post-list-widget-post-date">
 								<?php echo get_the_date(); ?>
 							</div>
-							<?php endif; ?>
-							<?php if ( in_array( 'modified_date', $parts ) ) : ?>
 							<div class="uhs-post-list-widget-post-modified-date">
 								<?php echo get_the_modified_date(); ?>
 							</div>
-							<?php endif; ?>
-							<?php if ( in_array( 'category', $parts ) ) : ?>
 							<div class="uhs-post-list-widget-categories">
 								<?php echo self::get_taxonomy_term_list( $query->post->ID, 'category', '', ', ', false ); ?>
 							</div>
-							<?php endif; ?>
 						</div>
 					</div>
 					<?php
