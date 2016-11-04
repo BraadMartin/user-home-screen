@@ -52,6 +52,9 @@ class User_Home_Screen {
 		add_action( 'personal_options_update', array( $this, 'save_user_profile_options' ) );
 		add_action( 'edit_user_profile_update', array( $this, 'save_user_profile_options' ) );
 
+		// Output extra content in the widget info section of certain widget types.
+		add_filter( 'user_home_screen_widget_info', array( $this, 'output_widget_info_extras' ), 10, 3 );
+
 		// Ajax handler for adding a tab.
 		add_action( 'wp_ajax_uhs_add_tab', array( $this, 'ajax_add_tab' ) );
 
@@ -67,6 +70,7 @@ class User_Home_Screen {
 		// Ajax handler for updating the widget order.
 		add_action( 'wp_ajax_uhs_update_widgets_order', array( $this, 'ajax_update_widgets_order' ) );
 
+		// Ajax handler for getting the HTML for a "page" of posts for the Post List widget.
 		add_action( 'wp_ajax_uhs_post_list_get_page', array( $this, 'ajax_post_list_widget_get_posts' ) );
 	}
 
@@ -467,6 +471,30 @@ class User_Home_Screen {
 		 * @param  array  $order_options  The default array of selectable order options.
 		 */
 		return apply_filters( 'user_home_screen_selectable_order_options', $order_options );
+	}
+
+	/**
+	 * Return an array of template parts for the Post List widget.
+	 *
+	 * @return  array  The array of template part options.
+	 */
+	public static function get_post_list_template_parts() {
+
+		$template_parts = array(
+			'author'        => __( 'Author', 'user-home-screen' ),
+			'post_type'     => __( 'Post Type', 'user-home-screen' ),
+			'status'        => __( 'Post Status', 'user-home-screen' ),
+			'publish_date'  => __( 'Publish Date', 'user-home-screen' ),
+			'modified_date' => __( 'Modified Date', 'user-home-screen' ),
+			'category'      => __( 'Categories', 'user-home-screen' ),
+		);
+
+		/**
+		 * Allow the selectable template parts to be filtered.
+		 *
+		 * @param  array  $template_parts  The default array of template parts.
+		 */
+		return apply_filters( 'user_home_screen_selectable_post_list_template_parts', $template_parts );
 	}
 
 	/**
@@ -874,21 +902,8 @@ class User_Home_Screen {
 	 */
 	public static function output_widget_info( $widget_id, $widget_args ) {
 
-		$widget_info = '';
-		/**
-		 * Allow the widget info to be customized and custom widget types to be handled.
-		 *
-		 * @param  string  $widget_id    The current widget ID.
-		 * @param  array   $widget_args  The current widget args.
-		 */
-		$widget_info = apply_filters( 'user_home_screen_widget_info', $widget_info, $widget_id, $widget_args );
-
-		// Use custom widget info if specified.
-		if ( ! empty( $widget_info ) ) {
-			return $widget_info;
-		}
-
 		$widget_type_data = self::get_widget_type_data();
+		$widget_info      = '';
 
 		// Add a standard Widget Type field if the widget type has a label.
 		if (
@@ -915,6 +930,18 @@ class User_Home_Screen {
 			}
 		}
 
+		/**
+		 * Allow the widget info to be customized and custom widget types to be handled.
+		 *
+		 * This filter is used internally to add extra functionality for specific widget
+		 * types into the widget info section.
+		 *
+		 * @param  string  $widget_info  The default widget info.
+		 * @param  string  $widget_id    The current widget ID.
+		 * @param  array   $widget_args  The current widget args.
+		 */
+		$widget_info = apply_filters( 'user_home_screen_widget_info', $widget_info, $widget_id, $widget_args );
+
 		ob_start();
 
 		?>
@@ -924,6 +951,46 @@ class User_Home_Screen {
 		<?php
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Output extra content in the widget info section of certain widget types.
+	 *
+	 * @param   string  $widget_info  The default widget info.
+	 * @param   string  $widget_id    The current widget ID.
+	 * @param   array   $widget_args  The current widget args.
+	 *
+	 * @return  string                The updated widget info.
+	 */
+	public function output_widget_info_extras( $widget_info, $widget_id, $widget_args ) {
+
+		if ( 'post-list' === $widget_args['type'] ) {
+
+			$template_parts          = self::get_post_list_template_parts();
+			$template_parts_selector = '<div class="uhs-post-list-template-part-selector">';
+			$template_parts_selector .= '<h3 class="uhs-post-list-template-part-selector-title">' . esc_html__( 'Template Parts', 'user-home-screen' ) . '</h3>';
+
+			foreach ( $template_parts as $part => $name ) {
+
+				$class      = 'uhs-post-list-template-part-selector-for-' . str_replace( '_', '-', $part );
+				$show_class = 'uhs-post-list-show-' . str_replace( '_', '-', $part );
+				$checked    = ( in_array( $part, $widget_args['args']['parts'] ) ) ? 'checked="true"' : '';
+
+				$template_parts_selector .= sprintf(
+					'<div class="%s"><input type="checkbox" data-show-class="%s" %s /><span>%s</span></div>',
+					esc_attr( $class ),
+					esc_attr( $show_class ),
+					esc_html( $checked ),
+					esc_html( $name )
+				);
+			}
+
+			$template_parts_selector .= '</div>';
+
+			$widget_info .= $template_parts_selector;
+		}
+
+		return $widget_info;
 	}
 
 	/**
