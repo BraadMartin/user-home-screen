@@ -40,13 +40,13 @@ var userHomeScreen = ( function( $, data ) {
 		$widgetSaveConfirm = $( '.uhs-widget-save-confirm' );
 		$toggleWidgetInfo  = $( '.uhs-toggle-widget-info' );
 
-		setupEvents();
-
 		showInitialActiveTab();
+
+		setupEvents();
 	};
 
 	/**
-	 * Show initial active tab, either from a query param or from an HTML attribute.
+	 * Show initial active tab.
 	 */
 	var showInitialActiveTab = function() {
 		var tabID = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
