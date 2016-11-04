@@ -51,6 +51,17 @@ var userHomeScreen = ( function( $, data ) {
 	var showInitialActiveTab = function() {
 		var tabID = $navTabs.filter( '.nav-tab-active' ).attr( 'data-tab-id' );
 
+		// If the tabID is undefined then there is a query param that points to a tab
+		// that no longer exists, so fall back to using the first tab as the active tab.
+		if ( undefined === tabID ) {
+			var $navTab = $navTabs.first();
+			tabID       = $navTab.attr( 'data-tab-id' );
+
+			$navTab.addClass( 'nav-tab-active' );
+
+			setQueryParam( 'tab', tabID );
+		}
+
 		if ( tabID === 'add-new' ) {
 			$addWidget.attr( 'disabled', true );
 		} else {
