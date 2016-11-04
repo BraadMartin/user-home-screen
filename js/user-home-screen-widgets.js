@@ -41,6 +41,9 @@ var userHomeScreenWidgets = ( function( $, data ) {
 			// Make an Ajax request to fetch the post list HTML.
 			var request = ajaxFetchPostList( widgetID, tabID, '1', true );
 
+			// Initialize template part selector.
+			initPostListTemplatePartSelector( $widget );
+
 			request.done( function( response ) {
 
 				if ( response.hasOwnProperty( 'posts_html' ) ) {
@@ -69,6 +72,22 @@ var userHomeScreenWidgets = ( function( $, data ) {
 			request.fail( function() {
 				console.log( data.labels.post_list_ajax_fail );
 			});
+		});
+	};
+
+	/**
+	 * Initialize the template part selector on a Post List widget.
+	 *
+	 * @param {object} $widget   - A jQuery object containing the widget.
+	 */
+	var initPostListTemplatePartSelector = function( $widget ) {
+
+		var $selector  = $widget.find( '.uhs-post-list-template-part-selector' );
+		var $postsWrap = $widget.find( '.uhs-post-list-widget-posts-wrap' );
+
+		$selector.find( 'input[type="checkbox"]' ).on( 'click', function() {
+			var showClass = $( this ).attr( 'data-show-class' );
+			$postsWrap.toggleClass( showClass );
 		});
 	};
 

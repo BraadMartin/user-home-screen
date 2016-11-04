@@ -871,7 +871,7 @@ class User_Home_Screen {
 			<?php
 				switch ( $widget_args['type'] ) {
 					case 'post-list':
-						echo self::render_post_list_widget_placeholder();
+						echo self::render_post_list_widget_placeholder( $widget_args['args'] );
 						break;
 					case 'rss-feed':
 						echo self::render_rss_feed_widget_placeholder( $widget_args['args']['feed_url'] );
@@ -980,7 +980,7 @@ class User_Home_Screen {
 					'<div class="%s"><input type="checkbox" data-show-class="%s" %s /><span>%s</span></div>',
 					esc_attr( $class ),
 					esc_attr( $show_class ),
-					esc_html( $checked ),
+					$checked,
 					esc_html( $name )
 				);
 			}
@@ -996,15 +996,43 @@ class User_Home_Screen {
 	/**
 	 * Return the HTML placeholder for a Post List widget.
 	 *
-	 * @return  string  The widget HTML.
+	 * @param   array  $args  The widget args.
+	 *
+	 * @return  string        The widget HTML.
 	 */
-	public static function render_post_list_widget_placeholder() {
+	public static function render_post_list_widget_placeholder( $args ) {
+
+		$parts   = ( ! empty( $args['parts'] ) ) ? $args['parts'] : array();
+		$classes = array();
+
+		if ( in_array( 'author', $parts ) ) {
+			$classes[] = 'uhs-post-list-show-author';
+		}
+		if ( in_array( 'post_type', $parts ) ) {
+			$classes[] = 'uhs-post-list-show-post-type';
+		}
+		if ( in_array( 'status', $parts ) ) {
+			$classes[] = 'uhs-post-list-show-status';
+		}
+		if ( in_array( 'publish_date', $parts ) ) {
+			$classes[] = 'uhs-post-list-show-publish-date';
+		}
+		if ( in_array( 'modified_date', $parts ) ) {
+			$classes[] = 'uhs-post-list-show-modified-date';
+		}
+		if ( in_array( 'category', $parts ) ) {
+			$classes[] = 'uhs-post-list-show-category';
+		}
+
+		$classes = implode( ' ', $classes );
 
 		ob_start();
 
 		?>
-		<div class="uhs-post-list-widget-posts">
-			<span class="uhs-spinner spinner"></span>
+		<div class="uhs-post-list-widget-posts-wrap <?php echo esc_attr( $classes ); ?>">
+			<div class="uhs-post-list-widget-posts">
+				<span class="uhs-spinner spinner"></span>
+			</div>
 		</div>
 		<?php
 
@@ -1029,8 +1057,6 @@ class User_Home_Screen {
 			return $html;
 		}
 
-		$parts = ( ! empty( $args['parts'] ) ) ? $args['parts'] : array();
-
 		// Make the query.
 		$query = new WP_Query( $args['query_args'] );
 
@@ -1050,32 +1076,9 @@ class User_Home_Screen {
 				$current_posts_max = $query->found_posts;
 			}
 
-			$classes = array( 'uhs-post-list-widget-posts' );
-
-			if ( in_array( 'author', $parts ) ) {
-				$classes[] = 'uhs-post-list-show-author';
-			}
-			if ( in_array( 'post_type', $parts ) ) {
-				$classes[] = 'uhs-post-list-show-post-type';
-			}
-			if ( in_array( 'status', $parts ) ) {
-				$classes[] = 'uhs-post-list-show-status';
-			}
-			if ( in_array( 'publish_date', $parts ) ) {
-				$classes[] = 'uhs-post-list-show-post-date';
-			}
-			if ( in_array( 'modified_date', $parts ) ) {
-				$classes[] = 'uhs-post-list-show-post-modified-date';
-			}
-			if ( in_array( 'category', $parts ) ) {
-				$classes[] = 'uhs-post-list-show-categories';
-			}
-
-			$classes = implode( ' ', $classes );
-
 			printf(
 				'<div class="%s" data-current-page="%s" data-total-pages="%s" data-current-post-min="%s" data-current-post-max="%s">',
-				esc_attr( $classes ),
+				'uhs-post-list-widget-posts',
 				esc_attr( $page ),
 				esc_attr( $query->max_num_pages ),
 				esc_attr( $current_posts_min ),
@@ -1117,7 +1120,7 @@ class User_Home_Screen {
 									<?php echo esc_html( $post_title ); ?>
 								</a>
 							</h3>
-							<div class="uhs-post-list-widget-post-author">
+							<div class="uhs-post-list-widget-author">
 								<?php echo esc_html__( 'By', 'user-home-screen' ) . ' ' . get_the_author(); ?>
 							</div>
 						</div>
@@ -1125,16 +1128,16 @@ class User_Home_Screen {
 							<div class="uhs-post-list-widget-post-type">
 								<?php echo esc_html( $post_type->labels->singular_name ); ?>
 							</div>
-							<div class="uhs-post-list-widget-post-status">
+							<div class="uhs-post-list-widget-status">
 								<?php echo esc_html( $post_status->label ); ?>
 							</div>
-							<div class="uhs-post-list-widget-post-date">
+							<div class="uhs-post-list-widget-publish-date">
 								<?php echo get_the_date(); ?>
 							</div>
-							<div class="uhs-post-list-widget-post-modified-date">
+							<div class="uhs-post-list-widget-modified-date">
 								<?php echo get_the_modified_date(); ?>
 							</div>
-							<div class="uhs-post-list-widget-categories">
+							<div class="uhs-post-list-widget-category">
 								<?php echo self::get_taxonomy_term_list( $query->post->ID, 'category', '', ', ', false ); ?>
 							</div>
 						</div>

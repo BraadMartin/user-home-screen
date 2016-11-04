@@ -212,6 +212,10 @@
 	text-decoration: none;
 }
 
+.uhs-post-list-widget-author {
+	display: none;
+}
+
 .uhs-post-list-widget-right {
 	width: 118px;
 	float: right;
@@ -221,23 +225,24 @@
 }
 
 .uhs-post-list-widget-post-type,
-.uhs-post-list-widget-post-status,
-.uhs-post-list-widget-post-date,
-.uhs-post-list-widget-post-modified-date {
+.uhs-post-list-widget-status,
+.uhs-post-list-widget-publish-date,
+.uhs-post-list-widget-modified-date {
 	margin-bottom: 10px;
 	display: none;
 }
 
-.uhs-post-list-widget-categories {
+.uhs-post-list-widget-category {
 	line-height: 1.4;
 	display: none;
 }
 
 .uhs-post-list-show-post-type .uhs-post-list-widget-post-type,
-.uhs-post-list-show-status .uhs-post-list-widget-post-status,
-.uhs-post-list-show-post-date .uhs-post-list-widget-post-date,
-.uhs-post-list-show-post-modified-date .uhs-post-list-widget-post-modified-date,
-.uhs-post-list-show-categories .uhs-post-list-widget-categories {
+.uhs-post-list-show-status .uhs-post-list-widget-status,
+.uhs-post-list-show-publish-date .uhs-post-list-widget-publish-date,
+.uhs-post-list-show-modified-date .uhs-post-list-widget-modified-date,
+.uhs-post-list-show-category .uhs-post-list-widget-category,
+.uhs-post-list-show-author .uhs-post-list-widget-author {
 	display: block;
 }
 
