@@ -1002,26 +1002,14 @@ class User_Home_Screen {
 	 */
 	public static function render_post_list_widget_placeholder( $args ) {
 
-		$parts   = ( ! empty( $args['parts'] ) ) ? $args['parts'] : array();
-		$classes = array();
+		$parts          = ( ! empty( $args['parts'] ) ) ? $args['parts'] : array();
+		$classes        = array();
+		$template_parts = self::get_post_list_template_parts();
 
-		if ( in_array( 'author', $parts ) ) {
-			$classes[] = 'uhs-post-list-show-author';
-		}
-		if ( in_array( 'post_type', $parts ) ) {
-			$classes[] = 'uhs-post-list-show-post-type';
-		}
-		if ( in_array( 'status', $parts ) ) {
-			$classes[] = 'uhs-post-list-show-status';
-		}
-		if ( in_array( 'publish_date', $parts ) ) {
-			$classes[] = 'uhs-post-list-show-publish-date';
-		}
-		if ( in_array( 'modified_date', $parts ) ) {
-			$classes[] = 'uhs-post-list-show-modified-date';
-		}
-		if ( in_array( 'category', $parts ) ) {
-			$classes[] = 'uhs-post-list-show-category';
+		foreach ( $template_parts as $template_part => $template_part_name ) {
+			if ( in_array( $template_part, $parts ) ) {
+				$classes[] = 'uhs-post-list-show-' . str_replace( '_', '-', $template_part );
+			}
 		}
 
 		$classes = implode( ' ', $classes );
