@@ -218,7 +218,10 @@ var userHomeScreenWidgets = ( function( $, data ) {
 		$pagination.find( '.uhs-post-list-widget-post-x-x' ).text( currentPostMin + ' - ' + currentPostMax );
 
 		// Maybe show/hide next/previous links.
-		if ( page === 1 ) {
+		if ( page === '1' && totalPages === '1' ) {
+			$pagination.find( '.uhs-post-list-widget-previous' ).removeClass( 'uhs-visible' );
+			$pagination.find( '.uhs-post-list-widget-next' ).removeClass( 'uhs-visible' );
+		} else if ( page === '1' ) {
 			$pagination.find( '.uhs-post-list-widget-previous' ).removeClass( 'uhs-visible' );
 			$pagination.find( '.uhs-post-list-widget-next' ).addClass( 'uhs-visible' );
 		} else if ( page === totalPages ) {
