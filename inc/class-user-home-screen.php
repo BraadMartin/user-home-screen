@@ -331,6 +331,11 @@ class User_Home_Screen {
 					// Grab a "tab" query param from the URL if present.
 					$active_tab = ( ! empty( $_GET['tab'] ) ) ? $_GET['tab'] : '';
 
+					// If the active tab is the add-new tab, set the active tab to the first tab.
+					if ( 'add-new' === $active_tab && ! empty( $user_nav_tabs ) ) {
+						$active_tab = reset( $user_nav_tabs );
+					}
+
 					foreach ( $user_nav_tabs as $tab_key => $tab_name ) {
 
 						// If an active tab is set in the URL use it, otherwise use the first tab from
