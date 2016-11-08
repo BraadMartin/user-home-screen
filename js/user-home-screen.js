@@ -250,9 +250,7 @@ var userHomeScreen = ( function( $, data ) {
 				message: data.labels.refreshing_home_screen,
 			}) );
 
-			setTimeout( function() {
-				location.reload();
-			}, 400 );
+			location.reload();
 		});
 
 		request.fail( function() {
@@ -301,9 +299,7 @@ var userHomeScreen = ( function( $, data ) {
 					message: data.labels.refreshing_home_screen,
 				}) );
 
-				setTimeout( function() {
-					location.reload();
-				}, 400 );
+				location.reload();
 			});
 
 			request.fail( function() {
@@ -419,9 +415,7 @@ var userHomeScreen = ( function( $, data ) {
 					message: data.labels.refreshing_home_screen,
 				}) );
 
-				setTimeout( function() {
-					location.reload();
-				}, 400 );
+				location.reload();
 			});
 
 			request.fail( function() {
@@ -475,9 +469,7 @@ var userHomeScreen = ( function( $, data ) {
 					message: data.labels.refreshing_home_screen,
 				}) );
 
-				setTimeout( function() {
-					location.reload();
-				}, 400 );
+				location.reload();
 			});
 
 			request.fail( function() {
