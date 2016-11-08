@@ -16,18 +16,23 @@ function user_home_screen_get_js_data() {
 
 	// Define labels.
 	$data['labels'] = array(
-		'add_widget'            => __( 'Add Widget', 'user-home-screen' ),
-		'remove_widget'         => __( 'Remove Widget', 'user-home-screen' ),
-		'remove_widget_confirm' => __( 'Are you sure you want to remove the selected widget?', 'user-home-screen' ),
-		'edit_widget'           => __( 'Edit Widget', 'user-home-screen' ),
-		'select_widget_type'    => __( 'Select widget type', 'user-home-screen' ),
-		'select_default'        => __( 'Select', 'user-home-screen' ),
-		'add_tab'               => __( 'Add Tab', 'user-home-screen' ),
-		'remove_tab'            => __( 'Remove Tab', 'user-home-screen' ),
-		'remove_tab_confirm'    => __( 'Are you sure you want to remove the selected tab? Widgets added to this tab will also be removed.', 'user-home-screen' ),
-		'tab_name'              => __( 'Tab Name', 'user-home-screen' ),
-		'no_tabs_notice'        => __( 'Please add a tab first, then you can add widgets', 'user-home-screen' ),
-		'post_list_ajax_fail'   => __( 'Sorry, it appears the Ajax request to fetch posts has failed', 'user-home-screen' ),
+		'add_widget'             => __( 'Add Widget', 'user-home-screen' ),
+		'add_widget_message'     => __( 'You just added a widget!', 'user-home-screen' ),
+		'remove_widget'          => __( 'Remove Widget', 'user-home-screen' ),
+		'remove_widget_confirm'  => __( 'Are you sure you want to remove the selected widget?', 'user-home-screen' ),
+		'remove_widget_message'  => __( 'You just removed a widget.', 'user-home-screen' ),
+		'edit_widget'            => __( 'Edit Widget', 'user-home-screen' ),
+		'select_widget_type'     => __( 'Select widget type', 'user-home-screen' ),
+		'select_default'         => __( 'Select', 'user-home-screen' ),
+		'add_tab'                => __( 'Add Tab', 'user-home-screen' ),
+		'add_tab_message'        => __( 'You just added a tab!', 'user-home-screen' ),
+		'remove_tab'             => __( 'Remove Tab', 'user-home-screen' ),
+		'remove_tab_confirm'     => __( 'Are you sure you want to remove the selected tab? Widgets added to this tab will also be removed.', 'user-home-screen' ),
+		'remove_tab_message'     => __( 'You just removed a tab.', 'user-home-screen' ),
+		'tab_name'               => __( 'Tab Name', 'user-home-screen' ),
+		'no_tabs_notice'         => __( 'Please add a tab first, then you can add widgets', 'user-home-screen' ),
+		'post_list_ajax_fail'    => __( 'Sorry, it appears the Ajax request to fetch posts has failed', 'user-home-screen' ),
+		'refreshing_home_screen' => __( 'Refreshing your home screen...', 'user-home-screen' ),
 	);
 
 	// Add widget type data.

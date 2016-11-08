@@ -1,4 +1,4 @@
-	/**
+/**
  * User Home Screen JS.
  */
 
@@ -113,6 +113,7 @@ var userHomeScreen = ( function( $, data ) {
 			openRemoveWidgetModal( $widget, $tab );
 		});
 
+		// Expand widget info.
 		$toggleWidgetInfo.on( 'click', function() {
 			var $clicked = $( this );
 			var $widget  = $clicked.closest( '.uhs-widget' );
@@ -171,9 +172,8 @@ var userHomeScreen = ( function( $, data ) {
 	 */
 	var openAddTabModal = function() {
 
-		var editTab   = wp.template( 'uhs-tab-edit' );
-		var fieldText = wp.template( 'uhs-field-text' );
-
+		var editTab    = wp.template( 'uhs-tab-edit' );
+		var fieldText  = wp.template( 'uhs-field-text' );
 		var addTabData = {
 			label:   data.labels.tab_name,
 			classes: 'uhs-add-tab-name',
@@ -232,6 +232,7 @@ var userHomeScreen = ( function( $, data ) {
 	var ajaxAddTab = function( $modal, tabData ) {
 
 		var $spinner = $modal.find( '#uhs-save-tab-spinner' );
+		var message  = wp.template( 'uhs-message' );
 		var ajaxData = {
 			'action':   'uhs_add_tab',
 			'nonce':    data.nonce,
@@ -244,7 +245,10 @@ var userHomeScreen = ( function( $, data ) {
 
 		request.done( function( response ) {
 			$modal.empty();
-			$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
+			$modal.append( message({
+				label: data.labels.add_tab_message,
+				message: data.labels.refreshing_home_screen,
+			}) );
 
 			setTimeout( function() {
 				location.reload();
@@ -264,6 +268,7 @@ var userHomeScreen = ( function( $, data ) {
 	var openRemoveTabModal = function( tabID ) {
 
 		var confirm = wp.template( 'uhs-confirm' );
+		var message = wp.template( 'uhs-message' );
 
 		$.featherlight(
 			confirm({
@@ -291,7 +296,10 @@ var userHomeScreen = ( function( $, data ) {
 
 			request.done( function( response ) {
 				$modal.empty();
-				$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
+				$modal.append( message({
+					label: data.labels.remove_tab_message,
+					message: data.labels.refreshing_home_screen,
+				}) );
 
 				setTimeout( function() {
 					location.reload();
@@ -311,6 +319,7 @@ var userHomeScreen = ( function( $, data ) {
 
 		var editWidget  = wp.template( 'uhs-widget-edit' );
 		var fieldSelect = wp.template( 'uhs-field-select' );
+		var message     = wp.template( 'uhs-message' );
 
 		// Set up the object containing the widget type data for the type select.
 		var widgetTypes = {
@@ -405,7 +414,10 @@ var userHomeScreen = ( function( $, data ) {
 
 			request.done( function( response ) {
 				$modal.empty();
-				$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
+				$modal.append( message({
+					label: data.labels.add_widget_message,
+					message: data.labels.refreshing_home_screen,
+				}) );
 
 				setTimeout( function() {
 					location.reload();
@@ -427,6 +439,7 @@ var userHomeScreen = ( function( $, data ) {
 	var openRemoveWidgetModal = function( $widget, $tab ) {
 
 		var confirm = wp.template( 'uhs-confirm' );
+		var message = wp.template( 'uhs-message' );
 
 		$.featherlight(
 			confirm({
@@ -457,7 +470,10 @@ var userHomeScreen = ( function( $, data ) {
 
 			request.done( function( response ) {
 				$modal.empty();
-				$modal.append( '<h1 class="uhs-thank-you">Thank you!</h1>' );
+				$modal.append( message({
+					label: data.labels.remove_widget_message,
+					message: data.labels.refreshing_home_screen,
+				}) );
 
 				setTimeout( function() {
 					location.reload();

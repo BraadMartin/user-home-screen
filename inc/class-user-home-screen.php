@@ -927,6 +927,7 @@ class User_Home_Screen {
 			USER_HOME_SCREEN_PATH . 'templates/field-select.php',
 			USER_HOME_SCREEN_PATH . 'templates/field-select-multiple.php',
 			USER_HOME_SCREEN_PATH . 'templates/confirm.php',
+			USER_HOME_SCREEN_PATH . 'templates/message.php',
 		);
 
 		// Loop over each template and include it.

@@ -137,7 +137,7 @@ class User_Home_Screen_Data {
 		// Also remove widgets for the tab if set to.
 		if ( $remove_widgets ) {
 
-			$wigets_data = get_user_meta( $user->ID, User_Home_Screen::$user_widgets_meta_key, true );
+			$widgets_data = get_user_meta( $user->ID, User_Home_Screen::$user_widgets_meta_key, true );
 
 			unset( $widgets_data[ $tab_key ] );
 

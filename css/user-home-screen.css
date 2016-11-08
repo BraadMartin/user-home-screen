@@ -180,6 +180,11 @@
 	visibility: visible;
 }
 
+.uhs-post-list-template-part-selector-title {
+	margin: 13px 0 8px;
+	font-size: 16px;
+}
+
 .uhs-post-list-widget-post {
 	text-align: left;
 	position: relative;
@@ -423,15 +428,26 @@
 }
 
 /**
- * Add/Edit Modal.
+ * Modals.
  */
 .uhs-modal .featherlight-content {
 	width: 600px;
 	max-width: 90%;
 }
 
+.uhs-modal.featherlight .featherlight-close-icon {
+	line-height: 36px;
+	width: 36px;
+	font-size: 20px;
+}
+
+.uhs-modal.featherlight .featherlight-close-icon:hover {
+	background-color: #eee
+}
+
 .uhs-modal-label {
-	margin: 20px 0 40px;
+	margin: 20px 0;
+	line-height: 1.2;
 }
 
 #uhs-modal-widget-fields {
@@ -454,10 +470,21 @@
 	visibility: hidden;
 }
 
-.uhs-thank-you {
+.uhs-modal .uhs-message {
 	text-align: center;
-	line-height: 1;
-	padding: 10px 0 20px;
+}
+
+.uhs-modal .uhs-message .uhs-modal-label {
+	margin-bottom: 30px;
+}
+
+.uhs-modal .uhs-message p {
+	margin: 20px 0 20px;
+	font-size: 16px;
+}
+
+.uhs-modal .uhs-message .uhs-modal-label ~ p {
+	margin-top: 0;
 }
 
 /**
@@ -471,6 +498,7 @@
 
 .uhs-field {
 	margin-bottom: 15px;
+	min-height: 35px;
 }
 
 #uhs-modal-widget-fields input.widefat {
@@ -547,7 +575,7 @@
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
 	margin-right: 3px;
-	line-height: 18px;
+	line-height: 14px;
 	font-size: 20px;
 	vertical-align: text-top;
 	font-weight: 400;
