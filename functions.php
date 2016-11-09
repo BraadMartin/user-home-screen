@@ -151,7 +151,23 @@ function user_home_screen_get_post_types() {
 
 	// Transform into a simple array of post_type => Display Name.
 	foreach ( $full_post_types as $post_type => $config ) {
-		$post_types[ $post_type ] = $config->labels->name;
+
+		// Ensure the current user has the edit_* capability for each post type they can select.
+		$post_type_object = get_post_type_object( $post_type );
+
+		$cap = 'edit_posts';
+		/**
+		 * Allow the capability to be customized.
+		 *
+		 * @param  string        $cap               The default capability to check.
+		 * @param  string        $post_type         The current post type.
+		 * @param  WP_Post_Type  $post_type_object  The current post type object.
+		 */
+		$cap = apply_filters( 'user_home_screen_get_post_types_user_capability', $cap, $post_type, $post_type_object );
+
+		if ( ! empty( $post_type_object->cap->{$cap} ) && current_user_can( $post_type_object->cap->{$cap} ) ) {
+			$post_types[ $post_type ] = $config->labels->name;
+		}
 	}
 
 	/**
