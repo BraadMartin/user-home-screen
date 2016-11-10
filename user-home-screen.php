@@ -30,6 +30,14 @@ function user_home_screen_init() {
 
 	// Only if we're serving an admin request.
 	if ( is_admin() ) {
+
+		// Load translation files.
+		load_plugin_textdomain(
+			'user-home-screen',
+			false,
+			USER_HOME_SCREEN_PATH . 'languages/'
+		);
+
 		$user_home_screen = new User_Home_Screen();
 		$user_home_screen->init();
 	}

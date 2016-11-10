@@ -269,7 +269,7 @@ class User_Home_Screen {
 
 		?>
 		<tr class="uhs-user-profile-field">
-			<th scope="row"><?php esc_html_e( $redirect_dashboard_label ); ?></th>
+			<th scope="row"><?php echo esc_html( $redirect_dashboard_label ); ?></th>
 			<td>
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php echo esc_html( $redirect_dashboard_label ); ?></span></legend>
@@ -313,7 +313,7 @@ class User_Home_Screen {
 		<div id="uhs-wrap" class="wrap" data-active-tab="main">
 			<div class="uhs-inner-wrap">
 				<h1><?php echo esc_html( $page_title ); ?></h1>
-				<a class="button button-primary uhs-add-widget"><?php esc_html_e( $add_widget_text ); ?></a>
+				<a class="button button-primary uhs-add-widget"><?php echo esc_html( $add_widget_text ); ?></a>
 				<span class="uhs-widget-spinner uhs-spinner spinner"></span>
 				<span class="uhs-widget-save-confirm"><?php esc_html_e( 'Widgets Saved', 'user-home-screen' ); ?></span>
 				<h2 class="nav-tab-wrapper">
