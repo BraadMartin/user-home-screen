@@ -2,9 +2,9 @@
 /**
  * Plugin Name: User Home Screen
  * Version:     0.8.0
- * Description: Allows you to build a personalized dashboard with only the things you care about.
- * Author:      Braad Martin
- * Author URI:  http://www.braadmartin.com
+ * Description: A central admin dashboard that gives users an at-a-glance view into the content and data they care about most.
+ * Author:      Braad Martin, NerdWallet
+ * Author URI:  https://www.nerdwallet.com
  * Text Domain: user-home-screen
  *
  * @package User Home Screen
@@ -37,6 +37,9 @@ function user_home_screen_init() {
 			false,
 			USER_HOME_SCREEN_PATH . 'languages/'
 		);
+
+		// Make the instance of this plugin's class accessible.
+		global $user_home_screen;
 
 		$user_home_screen = new User_Home_Screen();
 		$user_home_screen->init();

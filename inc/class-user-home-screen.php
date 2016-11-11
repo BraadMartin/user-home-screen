@@ -37,6 +37,13 @@ class User_Home_Screen {
 	public $ajax = null;
 
 	/**
+	 * The widget type data.
+	 *
+	 * @var  array
+	 */
+	private $widget_types = array();
+
+	/**
 	 * The constructor.
 	 */
 	public function __construct() {
@@ -47,6 +54,9 @@ class User_Home_Screen {
 	 * Set up hooks and initialize other plugin classes.
 	 */
 	public function init() {
+
+		// Register our core widget types.
+		add_action( 'load-toplevel_page_user-home-screen', array( $this, 'register_widget_types' ), 0 );
 
 		// Enqueue our JS and CSS.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts_and_styles' ) );
@@ -63,6 +73,7 @@ class User_Home_Screen {
 		// Output extra content in the widget info section of certain widget types.
 		add_filter( 'user_home_screen_widget_info', array( $this, 'output_widget_info_extras' ), 10, 3 );
 
+		// Initialize data class.
 		$this->data = new User_Home_Screen_Data( $this );
 		$this->data->init();
 
@@ -71,6 +82,121 @@ class User_Home_Screen {
 			$this->ajax = new User_Home_Screen_Ajax( $this );
 			$this->ajax->init();
 		}
+	}
+
+	/**
+	 * Register our core widget types.
+	 */
+	public function register_widget_types() {
+
+		$post_types       = user_home_screen_get_post_types();
+		$categories       = user_home_screen_get_categories();
+		$post_statuses    = user_home_screen_get_post_statuses();
+		$authors          = user_home_screen_get_authors();
+		$order_by_options = user_home_screen_get_order_by_options();
+		$order_options    = user_home_screen_get_order_options();
+
+		$core_widget_types = array(
+			'post-list' => array(
+				'label'  => __( 'Post List', 'user-home-screen' ),
+				'fields' => array(
+					array(
+						'key'   => 'title',
+						'label' => __( 'Widget Title', 'user-home-screen' ),
+						'type'  => 'text',
+					),
+					array(
+						'key'         => 'post_types',
+						'label'       => __( 'Post Types', 'user-home-screen' ),
+						'type'        => 'select-multiple',
+						'placeholder' => __( 'Select a Post Type', 'user-home-screen' ),
+						'values'      => $post_types,
+					),
+					array(
+						'key'         => 'categories',
+						'label'       => __( 'Categories', 'user-home-screen' ),
+						'type'        => 'select-multiple',
+						'placeholder' => __( 'Select a Category', 'user-home-screen' ),
+						'values'      => $categories,
+					),
+					array(
+						'key'         => 'post_statuses',
+						'label'       => __( 'Post Statuses', 'user-home-screen' ),
+						'type'        => 'select-multiple',
+						'placeholder' => __( 'Select a Post Status', 'user-home-screen' ),
+						'values'      => $post_statuses,
+					),
+					array(
+						'key'         => 'authors',
+						'label'       => __( 'Authors', 'user-home-screen' ),
+						'type'        => 'select-multiple',
+						'placeholder' => __( 'Select an Author', 'user-home-screen' ),
+						'values'      => $authors,
+					),
+					array(
+						'key'    => 'order_by',
+						'label'  => __( 'Order By', 'user-home-screen' ),
+						'type'   => 'select',
+						'values' => $order_by_options,
+					),
+					array(
+						'key'    => 'order',
+						'label'  => __( 'Order', 'user-home-screen' ),
+						'type'   => 'select',
+						'values' => $order_options,
+					),
+				),
+			),
+			'rss-feed' => array(
+				'label' => __( 'RSS Feed', 'user-home-screen' ),
+				'fields' => array(
+					array(
+						'key'   => 'title',
+						'label' => __( 'Widget Title', 'user-home-screen' ),
+						'type'  => 'text',
+					),
+					array(
+						'key'   => 'feed_url',
+						'label' => __( 'Feed URL', 'user-home-screen' ),
+						'type'  => 'text',
+					),
+				),
+			),
+		);
+
+		// Update our widget types class property and allow widget types registered with the
+		// user_home_screen_register_widget_type() function to override our core widget types.
+		$this->widget_types = array_merge( $core_widget_types, $this->widget_types );
+	}
+
+	/**
+	 * Return the registered widget types.
+	 *
+	 * @return  array  The registered widget types.
+	 */
+	public function get_widget_types() {
+
+		/**
+		 * Allow the widget types data to be customized as it's being retrieved.
+		 *
+		 * @param  array  $widget_types  The default array of widget types data.
+		 */
+		return apply_filters( 'user_home_screen_get_widget_types', $this->widget_types );
+	}
+
+	/**
+	 * Update the registered widget types.
+	 *
+	 * @param  array  $widget_types  The updated array of widget types.
+	 */
+	public function update_widget_types( $widget_types ) {
+
+		/**
+		 * Allow the widget types data to be customized as it's being updated.
+		 *
+		 * @param  array  $widget_types  The updated array of widget types data.
+		 */
+		$this->widget_types = (array) apply_filters( 'user_home_screen_updated_widget_types', $widget_types );
 	}
 
 	/**
@@ -541,7 +667,7 @@ class User_Home_Screen {
 	 */
 	public static function output_widget_info( $widget_id, $widget_args ) {
 
-		$widget_type_data = user_home_screen_get_widget_type_data();
+		$widget_type_data = user_home_screen_get_widget_types();
 		$widget_info      = '';
 
 		// Add a standard Widget Type field if the widget type has a label.

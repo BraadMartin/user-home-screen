@@ -242,17 +242,16 @@ class User_Home_Screen_Ajax {
 		$widget_order         = ( is_array( $_POST['widget_order'] ) ) ? $_POST['widget_order'] : array();
 		$user_widgets         = get_user_meta( $user->ID, User_Home_Screen::$user_widgets_meta_key, true );
 		$user_widgets_for_tab = $user_widgets[ $tab_id ];
-		$updated_widgets      = array();
 
 		// Clear widgets under the tab key that we're updating the order on.
 		unset( $user_widgets[ $tab_id ] );
 
 		// Add the widgets for the tab back in the new order.
 		foreach ( $widget_order as $widget_id ) {
-			$updated_widgets[ $tab_id ][ $widget_id ] = $user_widgets_for_tab[ $widget_id ];
+			$user_widgets[ $tab_id ][ $widget_id ] = $user_widgets_for_tab[ $widget_id ];
 		}
 
-		$this->main->data->update_widgets_for_user( $updated_widgets, $user );
+		$this->main->data->update_widgets_for_user( $user_widgets, $user );
 
 		$response          = new stdClass();
 		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );

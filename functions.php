@@ -36,7 +36,7 @@ function user_home_screen_get_js_data() {
 	);
 
 	// Add widget type data.
-	$data['widget_types'] = user_home_screen_get_widget_type_data();
+	$data['widget_types'] = user_home_screen_get_widget_types();
 
 	// Add a nonce.
 	$data['nonce'] = wp_create_nonce( 'user-home-screen' );
@@ -50,93 +50,53 @@ function user_home_screen_get_js_data() {
 }
 
 /**
+ * Register a widget type.
+ *
+ * @param  string  $widget_type_slug  The widget type slug.
+ * @param  array   $widget_type_args  The array of widget type args.
+ */
+function user_home_screen_register_widget_type( $widget_type_slug, $widget_type_args ) {
+
+	// Bail if we're not in the admin.
+	if ( ! is_admin() ) {
+		return;
+	}
+
+	global $user_home_screen;
+
+	// Bail if our main plugin class is not yet set up.
+	if ( empty( $user_home_screen ) ) {
+		return;
+	}
+
+	$widget_types = (array) $user_home_screen->get_widget_types();
+
+	// Add new or overwrite existing widget type args by slug.
+	$widget_types[ $widget_type_slug ] = (array) $widget_type_args;
+
+	$user_home_screen->update_widget_types( $widget_types );
+}
+
+/**
  * Return the array of widget type data.
  *
  * @return  array  The array of widget type data.
  */
-function user_home_screen_get_widget_type_data() {
+function user_home_screen_get_widget_types() {
 
-	$post_types       = user_home_screen_get_post_types();
-	$categories       = user_home_screen_get_categories();
-	$post_statuses    = user_home_screen_get_post_statuses();
-	$authors          = user_home_screen_get_authors();
-	$order_by_options = user_home_screen_get_order_by_options();
-	$order_options    = user_home_screen_get_order_options();
+	// Bail if we're not in the admin.
+	if ( ! is_admin() ) {
+		return array();
+	}
 
-	$widget_types = array(
-		'post-list' => array(
-			'label'  => __( 'Post List', 'user-home-screen' ),
-			'fields' => array(
-				array(
-					'key'   => 'title',
-					'label' => __( 'Widget Title', 'user-home-screen' ),
-					'type'  => 'text',
-				),
-				array(
-					'key'         => 'post_types',
-					'label'       => __( 'Post Types', 'user-home-screen' ),
-					'type'        => 'select-multiple',
-					'placeholder' => __( 'Select a Post Type', 'user-home-screen' ),
-					'values'      => $post_types,
-				),
-				array(
-					'key'         => 'categories',
-					'label'       => __( 'Categories', 'user-home-screen' ),
-					'type'        => 'select-multiple',
-					'placeholder' => __( 'Select a Category', 'user-home-screen' ),
-					'values'      => $categories,
-				),
-				array(
-					'key'         => 'post_statuses',
-					'label'       => __( 'Post Statuses', 'user-home-screen' ),
-					'type'        => 'select-multiple',
-					'placeholder' => __( 'Select a Post Status', 'user-home-screen' ),
-					'values'      => $post_statuses,
-				),
-				array(
-					'key'         => 'authors',
-					'label'       => __( 'Authors', 'user-home-screen' ),
-					'type'        => 'select-multiple',
-					'placeholder' => __( 'Select an Author', 'user-home-screen' ),
-					'values'      => $authors,
-				),
-				array(
-					'key'    => 'order_by',
-					'label'  => __( 'Order By', 'user-home-screen' ),
-					'type'   => 'select',
-					'values' => $order_by_options,
-				),
-				array(
-					'key'    => 'order',
-					'label'  => __( 'Order', 'user-home-screen' ),
-					'type'   => 'select',
-					'values' => $order_options,
-				),
-			),
-		),
-		'rss-feed' => array(
-			'label' => __( 'RSS Feed', 'user-home-screen' ),
-			'fields' => array(
-				array(
-					'key'   => 'title',
-					'label' => __( 'Widget Title', 'user-home-screen' ),
-					'type'  => 'text',
-				),
-				array(
-					'key'   => 'feed_url',
-					'label' => __( 'Feed URL', 'user-home-screen' ),
-					'type'  => 'text',
-				),
-			),
-		),
-	);
+	global $user_home_screen;
 
-	/**
-	 * Allow the widget types data to be customized.
-	 *
-	 * @param  array  $widget_types  The default array of widget types data.
-	 */
-	return apply_filters( 'user_home_screen_widget_types', $widget_types );
+	// Bail if our main plugin class is not yet set up.
+	if ( empty( $user_home_screen ) ) {
+		return array();
+	}
+
+	return $user_home_screen->get_widget_types();
 }
 
 /**
