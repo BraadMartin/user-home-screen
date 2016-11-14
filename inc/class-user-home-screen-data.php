@@ -538,7 +538,7 @@ class User_Home_Screen_Data {
 		 * @param  array  $updated_args  The updated args array.
 		 * @param  array  $args          The original args array.
 		 */
-		return apply_filters( 'user_home_screen_post_list_args', $updated_args, $args );
+		return apply_filters( 'user_home_screen_validate_post_list_args', $updated_args, $args );
 	}
 
 	/**
@@ -574,6 +574,6 @@ class User_Home_Screen_Data {
 		 * @param  array  $updated_args  The updated args array.
 		 * @param  array  $args          The original args array.
 		 */
-		return apply_filters( 'user_home_screen_post_list_args', $updated_args, $args );
+		return apply_filters( 'user_home_screen_validate_rss_feed_args', $updated_args, $args );
 	}
 }
