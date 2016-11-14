@@ -283,7 +283,12 @@ class User_Home_Screen_Data {
 				break;
 		}
 
-		return $widget_data;
+		/**
+		 * Allow outside code to validate custom widget types or modify the core widget types.
+		 *
+		 * @param  array  $widget_data  The array of widget data.
+		 */
+		return apply_filters( 'user_home_screen_validate_widget_data', $widget_data );
 	}
 
 	/**
