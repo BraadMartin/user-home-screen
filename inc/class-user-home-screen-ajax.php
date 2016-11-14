@@ -306,7 +306,7 @@ class User_Home_Screen_Ajax {
 		// Modify the query args to include the new page.
 		$args['args']['query_args']['paged'] = $page;
 
-		$html = User_Home_Screen::render_post_list_widget( $widget_id, $args['args'], $include_pagination );
+		$html = user_home_screen_render_post_list_widget( $widget_id, $args['args'], $include_pagination );
 
 		$response             = new stdClass();
 		$response->message    = esc_html__( 'It appears to have worked', 'user-home-screen' );
