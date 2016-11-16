@@ -130,6 +130,11 @@
 	background-color: #e2e2e2;
 }
 
+.uhs-toggle-widget-info:focus,
+.uhs-remove-widget:focus {
+	outline-offset: -2px;
+}
+
 .uhs-remove-widget {
 	position: absolute;
 	right: 10px;
