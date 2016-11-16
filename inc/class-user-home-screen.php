@@ -436,7 +436,7 @@ class User_Home_Screen {
 		ob_start();
 
 		?>
-		<div id="uhs-wrap" class="wrap" data-active-tab="main">
+		<div id="uhs-wrap" class="wrap">
 			<div class="uhs-inner-wrap">
 				<h1><?php echo esc_html( $page_title ); ?></h1>
 				<a class="button button-primary uhs-add-widget"><?php echo esc_html( $add_widget_text ); ?></a>

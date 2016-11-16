@@ -31,6 +31,13 @@ function user_home_screen_init() {
 	// Only if we're serving an admin request.
 	if ( is_admin() ) {
 
+		$cap = user_home_screen_user_capability();
+
+		// Only if the current user has the required capability.
+		if ( ! current_user_can( $cap ) ) {
+			return;
+		}
+
 		// Load translation files.
 		load_plugin_textdomain(
 			'user-home-screen',

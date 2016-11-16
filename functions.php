@@ -4,6 +4,23 @@
  */
 
 /**
+ * Return the user capability that users must have before they can
+ * access their User Home Screen.
+ *
+ * @return  string  The capability users must have to access their Home screen.
+ */
+function user_home_screen_user_capability() {
+
+	$cap = 'read';
+	/**
+	 * Allow outside code to customize the user capability.
+	 *
+	 * @param  string  $cap  The default user capability.
+	 */
+	return apply_filters( 'user_home_screen_user_capability', $cap );
+}
+
+/**
  * Build and return the array of data we'll pass to our JS.
  *
  * @todo    Add more specific ajax fail labels for non-Post List widget contexts.
