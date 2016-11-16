@@ -1,10 +1,10 @@
-# Copyright (C) 2016 Braad Martin
+# Copyright (C) 2016 Braad Martin, NerdWallet
 # This file is distributed under the same license as the User Home Screen package.
 msgid ""
 msgstr ""
-"Project-Id-Version: User Home Screen 0.8.0\n"
+"Project-Id-Version: User Home Screen 0.8.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/user-home-screen\n"
-"POT-Creation-Date: 2016-11-10 19:21:33+00:00\n"
+"POT-Creation-Date: 2016-11-16 23:30:43+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -24,170 +24,163 @@ msgstr ""
 "X-Poedit-Bookmarks: \n"
 "X-Textdomain-Support: yes\n"
 
-#: functions.php:19
+#: functions.php:36
 msgid "Add Widget"
 msgstr ""
 
-#: functions.php:20
+#: functions.php:37
 msgid "You just added a widget!"
 msgstr ""
 
-#: functions.php:21
+#: functions.php:38
 msgid "Remove Widget"
 msgstr ""
 
-#: functions.php:22
+#: functions.php:39
 msgid "Are you sure you want to remove the selected widget?"
 msgstr ""
 
-#: functions.php:23
+#: functions.php:40
 msgid "You just removed a widget."
 msgstr ""
 
-#: functions.php:24
+#: functions.php:41
 msgid "Edit Widget"
 msgstr ""
 
-#: functions.php:25
+#: functions.php:42
 msgid "Select widget type"
 msgstr ""
 
-#: functions.php:26
+#: functions.php:43
 msgid "Select"
 msgstr ""
 
-#: functions.php:27
+#: functions.php:44
 msgid "Add Tab"
 msgstr ""
 
-#: functions.php:28
+#: functions.php:45
 msgid "You just added a tab!"
 msgstr ""
 
-#: functions.php:29
+#: functions.php:46
 msgid "Remove Tab"
 msgstr ""
 
-#: functions.php:30
+#: functions.php:47
 msgid ""
 "Are you sure you want to remove the selected tab? Widgets added to this tab "
 "will also be removed."
 msgstr ""
 
-#: functions.php:31
+#: functions.php:48
 msgid "You just removed a tab."
 msgstr ""
 
-#: functions.php:32
+#: functions.php:49
 msgid "Tab Name"
 msgstr ""
 
-#: functions.php:33
+#: functions.php:50
 msgid "Please add a tab first, then you can add widgets"
 msgstr ""
 
-#: functions.php:34
+#: functions.php:51
 msgid "Sorry, it appears the Ajax request to fetch posts has failed"
 msgstr ""
 
-#: functions.php:35
+#: functions.php:52
 msgid "Refreshing your home screen..."
 msgstr ""
 
-#: functions.php:68
-msgid "Post List"
-msgstr ""
-
-#: functions.php:72 functions.php:122
-msgid "Widget Title"
-msgstr ""
-
-#: functions.php:77 inc/class-user-home-screen-data.php:336
-msgid "Post Types"
-msgstr ""
-
-#: functions.php:79
-msgid "Select a Post Type"
-msgstr ""
-
-#: functions.php:84 functions.php:316 inc/class-user-home-screen-data.php:374
-msgid "Categories"
-msgstr ""
-
-#: functions.php:86
-msgid "Select a Category"
-msgstr ""
-
-#: functions.php:91 inc/class-user-home-screen-data.php:400
-msgid "Post Statuses"
-msgstr ""
-
-#: functions.php:93
-msgid "Select a Post Status"
-msgstr ""
-
-#: functions.php:98 inc/class-user-home-screen-data.php:440
-msgid "Authors"
-msgstr ""
-
-#: functions.php:100
-msgid "Select an Author"
-msgstr ""
-
-#: functions.php:105 inc/class-user-home-screen-data.php:455
-msgid "Order By"
-msgstr ""
-
-#: functions.php:111 inc/class-user-home-screen-data.php:471
-msgid "Order"
-msgstr ""
-
-#: functions.php:118
-msgid "RSS Feed"
-msgstr ""
-
-#: functions.php:127 inc/class-user-home-screen-data.php:561
-msgid "Feed URL"
-msgstr ""
-
-#: functions.php:150
+#: functions.php:127
 msgid "Any"
 msgstr ""
 
-#: functions.php:268 functions.php:314
+#: functions.php:245 functions.php:291
 msgid "Publish Date"
 msgstr ""
 
-#: functions.php:269
+#: functions.php:246
 msgid "Last Modified Date"
 msgstr ""
 
-#: functions.php:270 functions.php:311
+#: functions.php:247 functions.php:288
 msgid "Author"
 msgstr ""
 
-#: functions.php:271
+#: functions.php:248
 msgid "Title"
 msgstr ""
 
-#: functions.php:272 functions.php:312
+#: functions.php:249 functions.php:289
 msgid "Post Type"
 msgstr ""
 
-#: functions.php:291
+#: functions.php:268
 msgid "Descending"
 msgstr ""
 
-#: functions.php:292
+#: functions.php:269
 msgid "Ascending"
 msgstr ""
 
-#: functions.php:313
+#: functions.php:290
 msgid "Post Status"
 msgstr ""
 
-#: functions.php:315
+#: functions.php:292
 msgid "Modified Date"
+msgstr ""
+
+#: functions.php:293 inc/class-user-home-screen-data.php:379
+#: inc/class-user-home-screen.php:117
+msgid "Categories"
+msgstr ""
+
+#: functions.php:464
+msgid "Widget Type"
+msgstr ""
+
+#: functions.php:518
+msgid "Template Parts"
+msgstr ""
+
+#: functions.php:540
+msgid "Save Template Parts"
+msgstr ""
+
+#: functions.php:542
+msgid "Widget Saved"
+msgstr ""
+
+#: functions.php:659
+msgid "Untitled"
+msgstr ""
+
+#: functions.php:670
+msgid "By"
+msgstr ""
+
+#: functions.php:707
+msgid "No Posts Found..."
+msgstr ""
+
+#: functions.php:753 functions.php:811
+msgid "Previous"
+msgstr ""
+
+#: functions.php:762
+msgid "of"
+msgstr ""
+
+#: functions.php:769 functions.php:823
+msgid "Next"
+msgstr ""
+
+#: functions.php:817
+msgid "Page"
 msgstr ""
 
 #: inc/class-user-home-screen-ajax.php:66
@@ -195,8 +188,8 @@ msgstr ""
 #: inc/class-user-home-screen-ajax.php:136
 #: inc/class-user-home-screen-ajax.php:205
 #: inc/class-user-home-screen-ajax.php:236
-#: inc/class-user-home-screen-ajax.php:278
-#: inc/class-user-home-screen-ajax.php:334
+#: inc/class-user-home-screen-ajax.php:277
+#: inc/class-user-home-screen-ajax.php:333
 msgid "Sorry, you are missing a user."
 msgstr ""
 
@@ -204,9 +197,9 @@ msgstr ""
 #: inc/class-user-home-screen-ajax.php:116
 #: inc/class-user-home-screen-ajax.php:185
 #: inc/class-user-home-screen-ajax.php:216
-#: inc/class-user-home-screen-ajax.php:258
-#: inc/class-user-home-screen-ajax.php:313
-#: inc/class-user-home-screen-ajax.php:365
+#: inc/class-user-home-screen-ajax.php:257
+#: inc/class-user-home-screen-ajax.php:312
+#: inc/class-user-home-screen-ajax.php:364
 msgid "It appears to have worked"
 msgstr ""
 
@@ -214,24 +207,76 @@ msgstr ""
 msgid "Sorry, you are missing a widget_type or widget_data."
 msgstr ""
 
-#: inc/class-user-home-screen-ajax.php:286
+#: inc/class-user-home-screen-ajax.php:285
 msgid "Sorry, you are missing a widget ID, tab ID, or a page."
 msgstr ""
 
-#: inc/class-user-home-screen-ajax.php:300
-#: inc/class-user-home-screen-ajax.php:355
+#: inc/class-user-home-screen-ajax.php:299
+#: inc/class-user-home-screen-ajax.php:354
 msgid "Sorry, the requested widget doesn't appear to exist."
 msgstr ""
 
-#: inc/class-user-home-screen-ajax.php:342
+#: inc/class-user-home-screen-ajax.php:341
 msgid "Sorry, you are missing a widget ID, tab ID, or a template parts array."
 msgstr ""
 
-#: inc/class-user-home-screen-data.php:314
+#: inc/class-user-home-screen-data.php:319
 msgid "All"
 msgstr ""
 
-#: inc/class-user-home-screen.php:206
+#: inc/class-user-home-screen-data.php:341 inc/class-user-home-screen.php:110
+msgid "Post Types"
+msgstr ""
+
+#: inc/class-user-home-screen-data.php:405 inc/class-user-home-screen.php:124
+msgid "Post Statuses"
+msgstr ""
+
+#: inc/class-user-home-screen-data.php:445 inc/class-user-home-screen.php:131
+msgid "Authors"
+msgstr ""
+
+#: inc/class-user-home-screen-data.php:460 inc/class-user-home-screen.php:138
+msgid "Order By"
+msgstr ""
+
+#: inc/class-user-home-screen-data.php:476 inc/class-user-home-screen.php:144
+msgid "Order"
+msgstr ""
+
+#: inc/class-user-home-screen-data.php:566 inc/class-user-home-screen.php:160
+msgid "Feed URL"
+msgstr ""
+
+#: inc/class-user-home-screen.php:101
+msgid "Post List"
+msgstr ""
+
+#: inc/class-user-home-screen.php:105 inc/class-user-home-screen.php:155
+msgid "Widget Title"
+msgstr ""
+
+#: inc/class-user-home-screen.php:112
+msgid "Select a Post Type"
+msgstr ""
+
+#: inc/class-user-home-screen.php:119
+msgid "Select a Category"
+msgstr ""
+
+#: inc/class-user-home-screen.php:126
+msgid "Select a Post Status"
+msgstr ""
+
+#: inc/class-user-home-screen.php:133
+msgid "Select an Author"
+msgstr ""
+
+#: inc/class-user-home-screen.php:151
+msgid "RSS Feed"
+msgstr ""
+
+#: inc/class-user-home-screen.php:332
 msgid "User Home"
 msgstr ""
 
@@ -239,86 +284,42 @@ msgstr ""
 msgid "User Home Screen"
 msgstr ""
 
-#: inc/class-user-home-screen.php:267
+#: inc/class-user-home-screen.php:393
 msgid "Redirect Dashboard?"
 msgstr ""
 
-#: inc/class-user-home-screen.php:268
+#: inc/class-user-home-screen.php:394
 msgid "Redirect the default WordPress dashboard to your User Home Screen"
 msgstr ""
 
-#: inc/class-user-home-screen.php:299
+#: inc/class-user-home-screen.php:425
 msgid "Welcome"
 msgstr ""
 
-#: inc/class-user-home-screen.php:318
+#: inc/class-user-home-screen.php:444
 msgid "Widgets Saved"
 msgstr ""
 
-#: inc/class-user-home-screen.php:376
+#: inc/class-user-home-screen.php:502
 msgid "Click here to set up your first tab"
 msgstr ""
 
-#: inc/class-user-home-screen.php:447
+#: inc/class-user-home-screen.php:573
 msgid ""
 "Looks like you haven't yet added widgets to this tab. Click the \"Add "
 "Widget\" button on the top right of your screen to get started."
 msgstr ""
 
-#: inc/class-user-home-screen.php:556
-msgid "Widget Type"
-msgstr ""
-
-#: inc/class-user-home-screen.php:610
-msgid "Template Parts"
-msgstr ""
-
-#: inc/class-user-home-screen.php:632
-msgid "Save Template Parts"
-msgstr ""
-
-#: inc/class-user-home-screen.php:634
-msgid "Widget Saved"
-msgstr ""
-
-#: inc/class-user-home-screen.php:751
-msgid "Untitled"
-msgstr ""
-
-#: inc/class-user-home-screen.php:762
-msgid "By"
-msgstr ""
-
-#: inc/class-user-home-screen.php:798
-msgid "No Posts Found..."
-msgstr ""
-
-#: inc/class-user-home-screen.php:844 inc/class-user-home-screen.php:902
-msgid "Previous"
-msgstr ""
-
-#: inc/class-user-home-screen.php:853
-msgid "of"
-msgstr ""
-
-#: inc/class-user-home-screen.php:860 inc/class-user-home-screen.php:914
-msgid "Next"
-msgstr ""
-
-#: inc/class-user-home-screen.php:908
-msgid "Page"
-msgstr ""
-
 #. Description of the plugin/theme
 msgid ""
-"Allows you to build a personalized dashboard with only the things you care "
-"about."
+"A central admin dashboard that gives users an at-a-glance view into the "
+"content and data they care about most."
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "Braad Martin"
+msgid "Braad Martin, NerdWallet"
 msgstr ""
 
 #. Author URI of the plugin/theme
-msgid "http://www.braadmartin.com"
+msgid "https://www.nerdwallet.com"
 msgstr ""

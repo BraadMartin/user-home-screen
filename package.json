@@ -1,6 +1,6 @@
 {
   "name": "user-home-screen",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "main": "Gruntfile.js",
   "author": "Braad Martin",
   "devDependencies": {

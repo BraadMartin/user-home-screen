@@ -4,7 +4,7 @@ Donate link: https://www.nerdwallet.com
 Tags: user, home, screen, dashboard, widgets
 Requires at least: 4.5
 Tested up to: 4.7
-Stable tag: 0.8.0
+Stable tag: 0.8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,10 +44,16 @@ Yes. This plugin has it's own way of registering and supporting custom widgets. 
 
 == Changelog ==
 
+= 0.8.1 =
+* Stability fixes and UI polish.
+
 = 0.8.0 =
 * Initial release.
 
 == Upgrade Notice ==
+
+= 0.8.1 =
+* Stability fixes and UI polish.
 
 = 0.8.0 =
 * Initial release.
