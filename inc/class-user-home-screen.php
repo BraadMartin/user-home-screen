@@ -71,7 +71,7 @@ class User_Home_Screen {
 		add_action( 'personal_options', array( $this, 'output_user_profile_fields' ) );
 
 		// Output extra content in the widget info section of certain widget types.
-		add_filter( 'user_home_screen_widget_info', 'user_home_screen_include_widget_info_extras', 10, 3 );
+		add_filter( 'user_home_screen_render_widget_info', 'user_home_screen_include_widget_info_extras', 10, 3 );
 
 		// Initialize data class.
 		$this->data = new User_Home_Screen_Data( $this );
