@@ -196,7 +196,7 @@ class User_Home_Screen {
 		 *
 		 * @param  array  $widget_types  The updated array of widget types data.
 		 */
-		$this->widget_types = (array) apply_filters( 'user_home_screen_updated_widget_types', $widget_types );
+		$this->widget_types = (array) apply_filters( 'user_home_screen_update_widget_types', $widget_types );
 	}
 
 	/**
@@ -513,15 +513,15 @@ class User_Home_Screen {
 
 		$screen_html = ob_get_clean();
 		/**
-		 * Allow the HTML for the User Home Screen to be customized.
+		 * Allow the HTML for User Home Screen to be customized.
 		 *
-		 * @param  string  $screen_html  The HTML for the User Home Screen.
+		 * @param  string  $screen_html  The HTML for User Home Screen.
 		 */
 		echo apply_filters( 'user_home_screen_html', $screen_html );
 	}
 
 	/**
-	 * Output all of the user's widgets for each of the user's tabs.
+	 * Output each of the user's widgets for each of the user's tabs.
 	 *
 	 * @param   WP_User  $user          The current user object.
 	 * @param   array    $user_tabs     The current user's tabs.
