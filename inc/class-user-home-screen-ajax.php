@@ -316,8 +316,10 @@ class User_Home_Screen_Ajax {
 			];
 			$regen_args = $this->main->data->validate_widget_data( $regen_args_input );
 
-			// Override the saved query args.
-			$args['args']['query_args'] = $regen_args['args']['query_args'];
+			// Override the saved query args if we ended up with fresh args.
+			if ( ! empty( $regen_args['args']['query_args'] ) ) {
+				$args['args']['query_args'] = $regen_args['args']['query_args'];
+			}
 		}
 
 		// Modify the query args to include the new page.
