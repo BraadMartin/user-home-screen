@@ -4,7 +4,7 @@ Donate link: https://www.nerdwallet.com
 Tags: user, home, screen, dashboard, widgets
 Requires at least: 4.5
 Tested up to: 4.7
-Stable tag: 0.8.1
+Stable tag: 0.8.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,9 @@ Yes. This plugin has it's own way of registering and supporting custom widgets. 
 
 == Changelog ==
 
+= 0.8.2 =
+* Switch to forcing query_args to regenerate at render time on Post List widgets
+
 = 0.8.1 =
 * Stability fixes and UI polish.
 
@@ -51,6 +54,9 @@ Yes. This plugin has it's own way of registering and supporting custom widgets. 
 * Initial release.
 
 == Upgrade Notice ==
+
+= 0.8.2 =
+* Switch to forcing query_args to regenerate at render time on Post List widgets
 
 = 0.8.1 =
 * Stability fixes and UI polish.
