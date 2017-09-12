@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: User Home Screen
- * Version:     0.8.1
+ * Version:     0.8.2
  * Description: A central admin dashboard that gives users an at-a-glance view into the content and data they care about most.
  * Author:      Braad Martin, NerdWallet
  * Author URI:  https://www.nerdwallet.com
@@ -10,7 +10,7 @@
  * @package User Home Screen
  */
 
-define( 'USER_HOME_SCREEN_VERSION', '0.8.1' );
+define( 'USER_HOME_SCREEN_VERSION', '0.8.2' );
 define( 'USER_HOME_SCREEN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'USER_HOME_SCREEN_URL', plugin_dir_url( __FILE__ ) );
 

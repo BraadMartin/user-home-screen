@@ -303,6 +303,25 @@ class User_Home_Screen_Ajax {
 
 		$args = $user_widgets[ $tab_id ][ $widget_id ];
 
+		// Force the query_args to get regenerated at render time to resolve
+		// any issues with the saved query_args in the DB being out of sync.
+		if ( ! empty( $args['args']['original_args'] ) ) {
+
+			// This is a rebuild of the original input args.
+			$regen_args_input = [
+				'id'   => $widget_id,
+				'tab'  => $tab_id,
+				'type' => 'post-list',
+				'args' => $args['args']['original_args'],
+			];
+			$regen_args = $this->main->data->validate_widget_data( $regen_args_input );
+
+			// Override the saved query args if we ended up with fresh args.
+			if ( ! empty( $regen_args['args']['query_args'] ) ) {
+				$args['args']['query_args'] = $regen_args['args']['query_args'];
+			}
+		}
+
 		// Modify the query args to include the new page.
 		$args['args']['query_args']['paged'] = $page;
 
@@ -360,8 +379,8 @@ class User_Home_Screen_Ajax {
 
 		$this->main->data->update_widgets_for_user( $user_widgets, $user );
 
-		$response             = new stdClass();
-		$response->message    = esc_html__( 'It appears to have worked', 'user-home-screen' );
+		$response          = new stdClass();
+		$response->message = esc_html__( 'It appears to have worked', 'user-home-screen' );
 
 		wp_send_json( $response );
 
